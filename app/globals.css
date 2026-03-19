@@ -1,26 +1,74 @@
 @import "tailwindcss";
 
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --primary: 234, 42, 51;
+  --bg-dark: 24, 17, 17;
+  --accent-dark: 56, 41, 41;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer components {
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+
+  .glass {
+    background: rgba(56, 41, 41, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(234, 42, 51, 0.1);
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  .btn-primary {
+    @apply text-white px-5 py-2.5 rounded-full font-bold text-sm
+           transition-all duration-300 hover:scale-105 shadow-lg;
+    background: rgb(var(--primary));
+  }
+
+  .btn-primary:hover {
+    background: rgba(234, 42, 51, 0.9);
+    box-shadow: 0 0 20px rgba(234, 42, 51, 0.4);
+  }
+
+
+  .btn-glass {
+    @apply text-white px-5 py-2.5 rounded-full 
+           transition-all duration-300 hover:bg-white/10;
+  }
+
+
+  .container-main {
+    @apply max-w-7xl mx-auto px-6;
+  }
+
+  .card {
+    @apply rounded-xl p-6 transition-all duration-300;
+    background: rgba(56, 41, 41, 0.4);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(234, 42, 51, 0.1);
+  }
+
+  .card:hover {
+    background: rgba(56, 41, 41, 0.6);
+  }
+
+
+  .text-gradient {
+    background: linear-gradient(to right, #ff4d4d, #ea2a33);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+
+  .glow {
+    box-shadow: 0 0 20px rgba(234, 42, 51, 0.4);
+  }
+
+ 
+  .avatar {
+    @apply w-10 h-10 rounded-full flex items-center justify-center 
+           border-2 border-red-500/30 bg-red-500/10 font-bold;
+  }
+  .text-primary{
+    color: rgb(234, 42, 51);
+  }
+
 }
