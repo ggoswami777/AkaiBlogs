@@ -1,15 +1,12 @@
 @import "tailwindcss";
 
-
 :root {
-  --primary: 234, 42, 51;
-  --bg-dark: 24, 17, 17;
-  --accent-dark: 56, 41, 41;
+  --primary: 234 42 51;
+  --bg-dark: 24 17 17;
+  --accent-dark: 56 41 41;
 }
 
 @layer components {
-
-
   .glass {
     background: rgba(56, 41, 41, 0.4);
     backdrop-filter: blur(16px);
@@ -70,5 +67,4 @@
   .text-primary{
     color: rgb(234, 42, 51);
   }
-
 }
