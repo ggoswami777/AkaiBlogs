@@ -40,7 +40,7 @@ const Page = () => {
         </p>
         <div className='flex flex-col sm:flex-row gap-2 mt-10 items-center justify-center'>
           <button className='text-lg btn-primary btn-primary:hover px-10 py-4'>Begin Your Journey</button>
-          <button className='text-lg btn-glass px-10 py-4'>View the Archive</button>
+          <button className='text-lg btn-glass px-10 py-4 bg-white/20'>View the Archive</button>
         </div>
       </div>
 
