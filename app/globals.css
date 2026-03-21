@@ -1,70 +1,43 @@
 @import "tailwindcss";
 
-:root {
-  --primary: 234 42 51;
-  --bg-dark: 24 17 17;
-  --accent-dark: 56 41 41;
+@theme {
+  --color-primary: #ea2a33;
+  --color-background-light: #f8f6f6;
+  --color-background-dark: #181111;
+  --color-accent-dark: #382929;
+  --font-display: "Inter", sans-serif;
+  --radius-DEFAULT: 1rem;
+  --radius-lg: 2rem;
+  --radius-xl: 3rem;
+  --radius-full: 9999px;
 }
 
-@layer components {
-  .glass {
-    background: rgba(56, 41, 41, 0.4);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(234, 42, 51, 0.1);
-  }
 
-  .btn-primary {
-    @apply text-white px-5 py-2.5 rounded-full font-bold text-sm
-           transition-all duration-300 hover:scale-105 shadow-lg;
-    background: rgb(var(--primary));
-  }
-
-  .btn-primary:hover {
-    background: rgba(234, 42, 51, 0.9);
-    box-shadow: 0 0 20px rgba(234, 42, 51, 0.4);
-  }
-
-
-  .btn-glass {
-    @apply text-white px-5 py-2.5 rounded-full 
-           transition-all duration-300 hover:bg-white/10;
-  }
-
-
-  .container-main {
-    @apply max-w-7xl mx-auto px-6;
-  }
-
-  .card {
-    @apply rounded-xl p-6 transition-all duration-300;
-    background: rgba(56, 41, 41, 0.4);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(234, 42, 51, 0.1);
-  }
-
-  .card:hover {
-    background: rgba(56, 41, 41, 0.6);
-  }
-
-
-  .text-gradient {
-    background: linear-gradient(to right, #ff4d4d, #ea2a33);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-
-  .glow {
-    box-shadow: 0 0 20px rgba(234, 42, 51, 0.4);
-  }
-
- 
-  .avatar {
-    @apply w-10 h-10 rounded-full flex items-center justify-center 
-           border-2 border-red-500/30 bg-red-500/10 font-bold;
-  }
-  .text-primary{
-    color: rgb(234, 42, 51);
-  }
+@utility glass-panel {
+  background: rgba(56, 41, 41, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(234, 42, 51, 0.1);
 }
+
+@utility btn-primary {
+  @apply bg-[#ea2a33] hover:bg-[#ea2a33]/90 text-white px-6 py-2.5 rounded-full text-sm font-bold 
+         transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-[#ea2a33]/20;
+}
+
+@utility btn-glass {
+  @apply glass-panel text-white hover:bg-white/10 px-10 py-4 rounded-full text-lg font-extrabold transition-all;
+}
+
+@utility container-main {
+  @apply max-w-7xl mx-auto px-6;
+}
+
+@utility avatar {
+  @apply w-10 h-10 rounded-full flex items-center justify-center 
+         border-2 border-[#ea2a33]/30 bg-[#ea2a33]/10 font-bold overflow-hidden;
+}
+
+@utility text-primary-old {
+  color: #ea2a33;
+}
