@@ -1,7 +1,7 @@
 import React from "react";
-import HomePageGlassCard from "../components/ui/HomePageGlassCard";
-import HomeBlogCard from "../components/ui/HomeBlogCard";
-import { HomePageGlassCardTypeArray, HomeBlogCardTypeArray } from "../tempData/tempDataType";
+import HomePageGlassCard from "@/components/ui/HomePageGlassCard";
+import HomeBlogCard from "@/components/ui/HomeBlogCard";
+import { HomePageGlassCardTypeArray, HomeBlogCardTypeArray } from "@/lib/types";
 import { ArrowRight, Book, GroupIcon, LucideSwords, Shield, Sword } from "lucide-react";
 
 const temporaryData: HomePageGlassCardTypeArray = [

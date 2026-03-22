@@ -1,6 +1,5 @@
 import React from 'react'
-import SearchBar from './ui/SearchBar'
-import Login from '../login/page'
+import SearchBar from "@/components/ui/SearchBar"
 import Link from 'next/link'
 
 const Header = () => {

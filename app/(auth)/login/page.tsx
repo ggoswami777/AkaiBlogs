@@ -1,7 +1,6 @@
 'use client'
 
 import Link from "next/link";
-import "../globals.css";
 import { useState } from "react";
 
 const Login = () => {
@@ -22,11 +21,11 @@ const Login = () => {
       <div className="relative w-[90%] max-w-sm sm:max-w-lg m-auto z-10">
         <div className="bg-background-dark/80 backdrop-blur-xl border border-primary/10 rounded-xl p-6 shadow-2xl">
           <div className="flex h-10 items-center justify-center rounded-full bg-primary/10 p-1 mb-8">
-            <label className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-full px-2 has-[:checked]:bg-primary has-[:checked]:text-white text-slate-400 text-sm font-semibold transition-all">
+            <label className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-full px-2 has-checked:bg-primary has-checked:text-white text-slate-400 text-sm font-semibold transition-all">
               <span className="truncate">Login</span>
               <input checked={mode==="login"} onChange={()=>{setMode("login")}} className="hidden" name="auth_mode" type="radio" value="Login" />
             </label>
-            <label className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-full px-2 has-[:checked]:bg-primary has-[:checked]:text-white text-slate-400 text-sm font-semibold transition-all">
+            <label className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-full px-2 has-checked:bg-primary has-checked:text-white text-slate-400 text-sm font-semibold transition-all">
               <span className="truncate">Sign Up</span>
               <input checked={mode==="signup"} onChange={()=>{setMode("signup")}} className="hidden" name="auth_mode" type="radio" value="Sign Up" />
             </label>
