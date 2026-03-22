@@ -3,6 +3,7 @@ import HomePageGlassCard from "@/components/ui/HomePageGlassCard";
 import HomeBlogCard from "@/components/ui/HomeBlogCard";
 import { HomePageGlassCardTypeArray, HomeBlogCardTypeArray } from "@/lib/types";
 import { ArrowRight, Book, GroupIcon, LucideSwords, Shield, Sword } from "lucide-react";
+import Link from "next/link";
 
 const temporaryData: HomePageGlassCardTypeArray = [
   { id: 1, title: "Active Ronin", data: "12.5k", icon: <GroupIcon/> },
@@ -61,9 +62,12 @@ const Page = () => {
             A Japanese-themed social blogging sanctuary for the modern ronin. Forge your legacy, share your path, and find your clan.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <button className="bg-primary hover:bg-primary/90 text-white px-10 py-4 rounded-full text-lg font-extrabold transition-all transform hover:translate-y-[-2px] shadow-xl shadow-primary/40">
+            <Link href="/login">
+              <button className="bg-primary hover:bg-primary/90 text-white px-10 py-4 rounded-full text-lg font-extrabold transition-all transform hover:translate-y-[-2px] shadow-xl shadow-primary/40">
               Begin Your Journey
             </button>
+            </Link>
+            
             <button className="glass-panel text-white hover:bg-white/10 px-10 py-4 rounded-full text-lg font-extrabold transition-all">
               View the Archive
             </button>
