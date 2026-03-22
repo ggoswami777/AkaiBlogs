@@ -1,5 +1,7 @@
 import React from 'react'
 import SearchBar from './ui/SearchBar'
+import Login from '../login/page'
+import Link from 'next/link'
 
 const Header = () => {
   return (
@@ -23,9 +25,11 @@ const Header = () => {
         </div>
         <div className="flex items-center gap-6">
           <SearchBar />
-          <button className="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20">
-            Join Collective
-          </button>
+          <Link href='/login'>
+            <button className="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20">
+              Join Collective
+            </button>
+          </Link>
           <div className="size-10 rounded-full border-2 border-primary/30 overflow-hidden">
             <img
               alt="Profile"

@@ -1,7 +1,7 @@
 import React from "react";
-import HomePageGlassCard from "./components/ui/HomePageGlassCard";
-import HomeBlogCard from "./components/ui/HomeBlogCard";
-import { HomePageGlassCardTypeArray, HomeBlogCardTypeArray } from "./tempData/tempDataType";
+import HomePageGlassCard from "../components/ui/HomePageGlassCard";
+import HomeBlogCard from "../components/ui/HomeBlogCard";
+import { HomePageGlassCardTypeArray, HomeBlogCardTypeArray } from "../tempData/tempDataType";
 import { ArrowRight, Book, GroupIcon, LucideSwords, Shield, Sword } from "lucide-react";
 
 const temporaryData: HomePageGlassCardTypeArray = [
@@ -84,7 +84,7 @@ const Page = () => {
       <section className="max-w-7xl mx-auto px-6 py-24">
         <div className="flex items-end justify-between mb-12">
           <div className="space-y-2">
-            <h2 className="text-primary font-bold uppercase tracking-widest text-sm">Editor's Selection</h2>
+            <h2 className="text-primary font-bold uppercase tracking-widest text-sm">Editor&apos;s Selection</h2>
             <h3 className="text-4xl font-black text-white">Featured Scrolls</h3>
           </div>
           <a className="text-primary font-bold flex items-center gap-1 w-auto hover:underline" href="#">
@@ -107,7 +107,7 @@ const Page = () => {
           <div className="relative z-10 max-w-2xl mx-auto space-y-8">
             <h2 className="text-5xl md:text-6xl font-black text-white tracking-tighter italic">Join the Collective</h2>
             <p className="text-xl text-slate-400 font-medium">
-              Don't walk the path alone. Connect with thousands of storytellers, martial artists, and thinkers in the Zolo community.
+              Don&apos;t walk the path alone. Connect with thousands of storytellers, martial artists, and thinkers in the Zolo community.
             </p>
             <div className="pt-6">
               <button className="bg-primary hover:bg-primary/90 text-white px-12 py-5 rounded-full text-xl font-black transition-all transform hover:scale-105 shadow-2xl shadow-primary/30">
