@@ -13,8 +13,23 @@ datasource db {
 }
 model User {
   id        String   @id @default(uuid())
+  username  String   @unique
   email     String   @unique
-  otp       String?
-  otpExpiry DateTime?
+  password  String
+  blogsPostedId       String[]
+  followingCount Int @default(0)
+  followersCount Int @default(0)
+  followersIds String[]
+  followingIds String[]
   createdAt DateTime @default(now())
+}
+model OTPVerification {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username String @unique
+  password String
+  otp       String
+  otpExpiry DateTime
+  createdAt DateTime @default(now())
+  isVerified Boolean @default(false)
 }

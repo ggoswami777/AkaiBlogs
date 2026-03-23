@@ -1,11 +1,41 @@
-'use client'
+"use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 const Login = () => {
-  const [mode,setMode] = useState("login");
+  // variables
+  const [mode, setMode] = useState("login");
+  const [isGenerateOtpClicked, setIsGeneratedOtpClicked] = useState(false);
+  const [isGeneratingOtp,setIsGeneratingOtp]=useState(false);
+  // use effects
+  useEffect(() => {
+    setIsGeneratedOtpClicked(false);
+  }, [mode, setMode]);
+  // FUNCTIONS
+  const handleGenerateOtp = async () => {
+    setIsGeneratingOtp(true);
 
+    try {
+      const response = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        body: JSON.stringify({ email: "test@example.com" }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        console.log("OTP SENT:", data.otp);
+        setIsGeneratedOtpClicked(true);
+      } else {
+        alert(data.error || "Failed to send OTP");
+      }
+    } catch (error) {
+      console.error("Error generating OTP:", error);
+    } finally {
+      setIsGeneratingOtp(false);
+    }
+  };
+  // return code
   return (
     <section className="relative flex items-center justify-center overflow-hidden min-h-screen">
       <Link href="/">
@@ -15,7 +45,11 @@ const Login = () => {
       </Link>
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 japanese-pattern opacity-40"></div>
-        <img className="w-full h-full object-cover filter brightness-50" data-alt="Cinematic dark landscape with red Japanese architecture accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwS3Xrrs8lEK5UFPH50pQJV5j2OFzLN47yIRAXLQW33NDeYSjWdNUJfprqK_pej-sOv9d4H90FNY2ybdGSnohFF6qXilNB14V6xfcfQU-Q5MLi5JOUjDL-3COhJ8twe9TNBN0JYITM9LklTlGSS20xtcF9kLKRyxQ7YcMjKiGPkmzmu2BBodgo8ZFUOLDJymGSvtjUXNBvwvEQ05qEh-5XKOTdmjkNM1Xvaw6Uvtmiv5BmcBRnHtkLck2KtvGPYww4u6SmTt358g" />
+        <img
+          className="w-full h-full object-cover filter brightness-50"
+          data-alt="Cinematic dark landscape with red Japanese architecture accents"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwS3Xrrs8lEK5UFPH50pQJV5j2OFzLN47yIRAXLQW33NDeYSjWdNUJfprqK_pej-sOv9d4H90FNY2ybdGSnohFF6qXilNB14V6xfcfQU-Q5MLi5JOUjDL-3COhJ8twe9TNBN0JYITM9LklTlGSS20xtcF9kLKRyxQ7YcMjKiGPkmzmu2BBodgo8ZFUOLDJymGSvtjUXNBvwvEQ05qEh-5XKOTdmjkNM1Xvaw6Uvtmiv5BmcBRnHtkLck2KtvGPYww4u6SmTt358g"
+        />
         <div className="absolute inset-0 cinematic-gradient"></div>
       </div>
       <div className="relative w-[90%] max-w-sm sm:max-w-lg m-auto z-10">
@@ -23,58 +57,141 @@ const Login = () => {
           <div className="flex h-10 items-center justify-center rounded-full bg-primary/10 p-1 mb-8">
             <label className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-full px-2 has-checked:bg-primary has-checked:text-white text-slate-400 text-sm font-semibold transition-all">
               <span className="truncate">Login</span>
-              <input checked={mode==="login"} onChange={()=>{setMode("login")}} className="hidden" name="auth_mode" type="radio" value="Login" />
+              <input
+                checked={mode === "login"}
+                onChange={() => {
+                  setMode("login");
+                }}
+                className="hidden"
+                name="auth_mode"
+                type="radio"
+                value="Login"
+              />
             </label>
             <label className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-full px-2 has-checked:bg-primary has-checked:text-white text-slate-400 text-sm font-semibold transition-all">
               <span className="truncate">Sign Up</span>
-              <input checked={mode==="signup"} onChange={()=>{setMode("signup")}} className="hidden" name="auth_mode" type="radio" value="Sign Up" />
+              <input
+                checked={mode === "signup"}
+                onChange={() => {
+                  setMode("signup");
+                }}
+                className="hidden"
+                name="auth_mode"
+                type="radio"
+                value="Sign Up"
+              />
             </label>
           </div>
           <div className="space-y-5">
-            {mode==="signup" && (
+            {mode === "signup" && (
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-primary/80 px-1">Username</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-primary/80 px-1">
+                  Username
+                </label>
                 <div className="relative">
-                  <input className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all" placeholder="Enter your username" type="text" />
+                  <input
+                    className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                    placeholder="Enter your username"
+                    type="text"
+                  />
                 </div>
               </div>
             )}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-primary/80 px-1">Email Address</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-primary/80 px-1">
+                Email Address
+              </label>
               <div className="relative">
-                <input className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all" placeholder="name@example.com" type="email" />
+                <input
+                  className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                  placeholder="name@example.com"
+                  type="email"
+                />
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-primary/80 px-1">Password</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-primary/80 px-1">
+                Password
+              </label>
               <div className="relative">
-                <input className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all" placeholder="••••••••" type="password" />
+                <input
+                  className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                  placeholder="••••••••"
+                  type="password"
+                />
               </div>
             </div>
-            {mode==="signup" && (
+            {mode === "signup" && isGenerateOtpClicked === true && (
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-primary/80 px-1">OTP (One Time Password)</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-primary/80 px-1">
+                  OTP (One Time Password)
+                </label>
                 <div className="relative">
-                  <input className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all" placeholder="••••••••" type="password" />
+                  <input
+                    className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                    placeholder="••••••••"
+                    type="password"
+                  />
                 </div>
               </div>
             )}
           </div>
-          <button className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
-            Create Account
-          </button>
+
+          {mode === "signup" && !isGenerateOtpClicked && (
+            <button
+              onClick={handleGenerateOtp}
+              disabled={isGeneratingOtp}
+              className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+            >
+              {isGeneratingOtp ? (
+                <>
+                  <Loader2 className="animate-spin size-4" />
+                  <span>Generating OTP...</span>
+                </>
+              ) : (
+                "Generate OTP"
+              )}
+            </button>
+          )}
+
+         
+          {mode === "signup" && isGenerateOtpClicked && (
+            <button className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
+              Create Account
+            </button>
+          )}
+
+        
+          {mode === "login" && (
+            <button className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
+              Login
+            </button>
+          )}
+
           <div className="mt-5">
             <div className="relative flex items-center justify-center mb-4">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-primary/10"></div></div>
-              <span className="relative bg-background-dark/80 px-4 text-xs font-bold uppercase text-slate-600">Or continue with</span>
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-primary/10"></div>
+              </div>
+              <span className="relative bg-background-dark/80 px-4 text-xs font-bold uppercase text-slate-600">
+                Or continue with
+              </span>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <button className="flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-primary/10 hover:bg-primary/5 transition-all text-slate-300 font-medium text-sm">
-                <img className="size-4" data-alt="Google G logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAna0qCI-PsQ6jWjkvtgJPBUnvLRA1aBPkqSOvlgChq7LJ5WYKVslBsr8zL4mTO6Wd_aXj_fRG_CBttCIgIorpRUG0JfpcBTHkU1O9vPWVchdlJmQloYO4mrISGrKTnTKEHA7Y_YMCWFPdH85yVbS6ux9EfSOTUbsWZ_Vr9CGgzC7_Y9-EvweL_N-9fJiD1OlVrhms8YzgN64NTGAyyr-2k8rzLnKhjYDdFmWondpUvRqxra_IJ9iJmMHDofRN9_Ljpojekyi7UbQ" />
+                <img
+                  className="size-4"
+                  data-alt="Google G logo"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAna0qCI-PsQ6jWjkvtgJPBUnvLRA1aBPkqSOvlgChq7LJ5WYKVslBsr8zL4mTO6Wd_aXj_fRG_CBttCIgIorpRUG0JfpcBTHkU1O9vPWVchdlJmQloYO4mrISGrKTnTKEHA7Y_YMCWFPdH85yVbS6ux9EfSOTUbsWZ_Vr9CGgzC7_Y9-EvweL_N-9fJiD1OlVrhms8YzgN64NTGAyyr-2k8rzLnKhjYDdFmWondpUvRqxra_IJ9iJmMHDofRN9_Ljpojekyi7UbQ"
+                />
                 Google
               </button>
               <button className="flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-primary/10 hover:bg-primary/5 transition-all text-slate-300 font-medium text-sm">
-                <img className="size-4 dark:invert" data-alt="Apple logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6D09E3R1sHAP81kEMyoCABYjPsH9rJVBEgyhT2wDpGaQtci8dPqd3Jqt_1eJMHC8itEMrl6Upcxevjjkm8sXZVHGHw-mil853uO3IyG7C_oYabNvChYszCaa5JgG4MCBVLFjWZ2A76JkfauFFDuw-qivYl1G3shLeCZYSSeZpFdMnn0vFcN1ClpJJWON77cjvQ6ZMR_0a10wJdQDTatr2NY8DqSEFGNd82n9Gi_U_0WiXN4rZrA73W0dokgXn1rfuh0i-wMydjQ" />
+                <img
+                  className="size-4 dark:invert"
+                  data-alt="Apple logo"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6D09E3R1sHAP81kEMyoCABYjPsH9rJVBEgyhT2wDpGaQtci8dPqd3Jqt_1eJMHC8itEMrl6Upcxevjjkm8sXZVHGHw-mil853uO3IyG7C_oYabNvChYszCaa5JgG4MCBVLFjWZ2A76JkfauFFDuw-qivYl1G3shLeCZYSSeZpFdMnn0vFcN1ClpJJWON77cjvQ6ZMR_0a10wJdQDTatr2NY8DqSEFGNd82n9Gi_U_0WiXN4rZrA73W0dokgXn1rfuh0i-wMydjQ"
+                />
                 Apple
               </button>
             </div>
@@ -82,7 +199,7 @@ const Login = () => {
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
 export default Login;
