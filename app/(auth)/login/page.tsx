@@ -8,19 +8,34 @@ const Login = () => {
   // variables
   const [mode, setMode] = useState("login");
   const [isGenerateOtpClicked, setIsGeneratedOtpClicked] = useState(false);
-  const [isGeneratingOtp,setIsGeneratingOtp]=useState(false);
+  const [isGeneratingOtp, setIsGeneratingOtp] = useState(false);
+
+  // Form states
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+
   // use effects
   useEffect(() => {
     setIsGeneratedOtpClicked(false);
   }, [mode, setMode]);
+
   // FUNCTIONS
   const handleGenerateOtp = async () => {
+    if (!email || !username || !password) {
+      alert("Please fill in username, email, and password first.");
+      return;
+    }
     setIsGeneratingOtp(true);
 
     try {
       const response = await fetch("/api/auth/send-otp", {
         method: "POST",
-        body: JSON.stringify({ email: "test@example.com" }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password }),
       });
       const data = await response.json();
       if (data.success) {
@@ -35,6 +50,18 @@ const Login = () => {
       setIsGeneratingOtp(false);
     }
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (mode === "login") {
+      console.log("Logging in with:", { email, password });
+      // TODO: Implement login API call
+    } else {
+      console.log("Signing up with:", { username, email, password, otp });
+      // TODO: Implement signup API call with OTP verification
+    }
+  };
+
   // return code
   return (
     <section className="relative flex items-center justify-center overflow-hidden min-h-screen">
@@ -53,7 +80,10 @@ const Login = () => {
         <div className="absolute inset-0 cinematic-gradient"></div>
       </div>
       <div className="relative w-[90%] max-w-sm sm:max-w-lg m-auto z-10">
-        <div className="bg-background-dark/80 backdrop-blur-xl border border-primary/10 rounded-xl p-6 shadow-2xl">
+        <form 
+          onSubmit={handleSubmit}
+          className="bg-background-dark/80 backdrop-blur-xl border border-primary/10 rounded-xl p-6 shadow-2xl"
+        >
           <div className="flex h-10 items-center justify-center rounded-full bg-primary/10 p-1 mb-8">
             <label className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-full px-2 has-checked:bg-primary has-checked:text-white text-slate-400 text-sm font-semibold transition-all">
               <span className="truncate">Login</span>
@@ -90,6 +120,9 @@ const Login = () => {
                 </label>
                 <div className="relative">
                   <input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
                     className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                     placeholder="Enter your username"
                     type="text"
@@ -103,6 +136,9 @@ const Login = () => {
               </label>
               <div className="relative">
                 <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                   className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                   placeholder="name@example.com"
                   type="email"
@@ -115,6 +151,9 @@ const Login = () => {
               </label>
               <div className="relative">
                 <input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                   className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                   placeholder="••••••••"
                   type="password"
@@ -128,9 +167,12 @@ const Login = () => {
                 </label>
                 <div className="relative">
                   <input
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    required
                     className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
-                    placeholder="••••••••"
-                    type="password"
+                    placeholder="••••••"
+                    type="text"
                   />
                 </div>
               </div>
@@ -139,6 +181,7 @@ const Login = () => {
 
           {mode === "signup" && !isGenerateOtpClicked && (
             <button
+              type="button"
               onClick={handleGenerateOtp}
               disabled={isGeneratingOtp}
               className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
@@ -154,16 +197,20 @@ const Login = () => {
             </button>
           )}
 
-         
           {mode === "signup" && isGenerateOtpClicked && (
-            <button className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
+            <button 
+              type="submit"
+              className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+            >
               Create Account
             </button>
           )}
 
-        
           {mode === "login" && (
-            <button className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
+            <button 
+              type="submit"
+              className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+            >
               Login
             </button>
           )}
@@ -196,7 +243,7 @@ const Login = () => {
               </button>
             </div>
           </div>
-        </div>
+        </form>
       </div>
     </section>
   );
