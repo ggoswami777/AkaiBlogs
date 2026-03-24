@@ -79,8 +79,8 @@ const Login = () => {
         />
         <div className="absolute inset-0 cinematic-gradient"></div>
       </div>
-      <div className="relative w-[90%] max-w-sm sm:max-w-lg m-auto z-10">
-        <form 
+      <div className="relative w-[90%] max-w-sm sm:max-w-lg m-auto py-10 z-10 max-h-screen overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <form
           onSubmit={handleSubmit}
           className="bg-background-dark/80 backdrop-blur-xl border border-primary/10 rounded-xl p-6 shadow-2xl"
         >
@@ -112,8 +112,14 @@ const Login = () => {
               />
             </label>
           </div>
-          <div className="space-y-5">
-            {mode === "signup" && (
+          <div className="flex flex-col gap-5">
+            <div
+              className="overflow-hidden transition-all duration-300 ease-in-out"
+              style={{
+                maxHeight: mode === "signup" ? "80px" : "0px",
+                opacity: mode === "signup" ? 1 : 0,
+              }}
+            >
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-primary/80 px-1">
                   Username
@@ -129,7 +135,7 @@ const Login = () => {
                   />
                 </div>
               </div>
-            )}
+            </div>
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold uppercase tracking-widest text-primary/80 px-1">
                 Email Address
@@ -160,7 +166,13 @@ const Login = () => {
                 />
               </div>
             </div>
-            {mode === "signup" && isGenerateOtpClicked === true && (
+            <div
+              className="overflow-hidden transition-all duration-300 ease-in-out"
+              style={{
+                maxHeight: (mode === "signup") && isGenerateOtpClicked ? "80px" : "0px",
+                opacity: (mode === "signup") && isGenerateOtpClicked ? 1 : 0,
+              }}
+            >
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-primary/80 px-1">
                   OTP (One Time Password)
@@ -176,7 +188,7 @@ const Login = () => {
                   />
                 </div>
               </div>
-            )}
+            </div>
           </div>
 
           {mode === "signup" && !isGenerateOtpClicked && (
@@ -198,7 +210,7 @@ const Login = () => {
           )}
 
           {mode === "signup" && isGenerateOtpClicked && (
-            <button 
+            <button
               type="submit"
               className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
             >
@@ -207,7 +219,7 @@ const Login = () => {
           )}
 
           {mode === "login" && (
-            <button 
+            <button
               type="submit"
               className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
             >
