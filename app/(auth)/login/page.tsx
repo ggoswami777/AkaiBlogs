@@ -59,6 +59,29 @@ const Login = () => {
     } else {
       console.log("Signing up with:", { username, email, password, otp });
       // TODO: Implement signup API call with OTP verification
+      if(!otp){
+        alert("Please enter the Otp!");
+        return ;
+      }
+      try {
+        const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password ,otp}),
+      });
+      const data = await response.json();
+      if(data.success){
+        alert("User created successfully");
+      }else{
+        alert(data.message);
+      }
+      } catch (error) {
+        console.error("Error signing up:", error);
+      }
+      
+    
     }
   };
 
