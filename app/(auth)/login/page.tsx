@@ -9,7 +9,7 @@ const Login = () => {
   const [mode, setMode] = useState("login");
   const [isGenerateOtpClicked, setIsGeneratedOtpClicked] = useState(false);
   const [isGeneratingOtp, setIsGeneratingOtp] = useState(false);
-
+  const [creatingUser,setCreatingUser]=useState(false);
   // Form states
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -54,16 +54,35 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === "login") {
-      console.log("Logging in with:", { email, password });
-      // TODO: Implement login API call
+    
+      try {
+        setCreatingUser(true);
+        const response=await fetch("/api/auth/login",{
+          method:"POST",
+          headers:{
+            "Content-Type": "application/json",
+          },
+          body:JSON.stringify({email,password})
+        })
+        const data=await response.json();
+        if(data.success){
+          alert("User loggedIn successfully");
+          setCreatingUser(false);
+        console.log("token:",data.token);
+        }
+      } catch (error) {
+        setCreatingUser(false);
+        console.error("Error logging in:", error);
+      }
     } else {
-      console.log("Signing up with:", { username, email, password, otp });
-      // TODO: Implement signup API call with OTP verification
+    
+    
       if(!otp){
         alert("Please enter the Otp!");
         return ;
       }
       try {
+        setCreatingUser(true);
         const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
@@ -74,9 +93,11 @@ const Login = () => {
       const data = await response.json();
       if(data.success){
         alert("User created successfully");
+        console.log("token:",data.token);
       }else{
         alert(data.message);
       }
+      setCreatingUser(false);
       } catch (error) {
         console.error("Error signing up:", error);
       }
@@ -219,7 +240,7 @@ const Login = () => {
               type="button"
               onClick={handleGenerateOtp}
               disabled={isGeneratingOtp}
-              className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+              className={`w-full mt-8 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 ${isGeneratingOtp ? 'bg-red-900' : 'bg-primary hover:bg-primary/90'}`}
             >
               {isGeneratingOtp ? (
                 <>
@@ -235,18 +256,34 @@ const Login = () => {
           {mode === "signup" && isGenerateOtpClicked && (
             <button
               type="submit"
-              className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+              disabled={creatingUser}
+              className={`w-full mt-8 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 ${creatingUser ? 'bg-red-900' : 'bg-primary hover:bg-primary/90'}`}
             >
-              Create Account
+              {creatingUser ? (
+                <>
+                  <Loader2 className="animate-spin size-4" />
+                  <span>Creating Account...</span>
+                </>
+              ) : (
+                "Create Account"
+              )}
             </button>
           )}
 
           {mode === "login" && (
             <button
               type="submit"
-              className="w-full mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+              disabled={creatingUser}
+              className={`w-full mt-8 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 ${creatingUser ? 'bg-red-900' : 'bg-primary hover:bg-primary/90'}`}
             >
-              Login
+              {creatingUser ? (
+                <>
+                  <Loader2 className="animate-spin size-4" />
+                  <span>Logging In...</span>
+                </>
+              ) : (
+                "Login"
+              )}
             </button>
           )}
 
