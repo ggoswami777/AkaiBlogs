@@ -10,7 +10,7 @@ const Login = () => {
   const [mode, setMode] = useState("login");
   const [isGenerateOtpClicked, setIsGeneratedOtpClicked] = useState(false);
   const [isGeneratingOtp, setIsGeneratingOtp] = useState(false);
-  const [creatingUser,setCreatingUser]=useState(false);
+  const [creatingUser, setCreatingUser] = useState(false);
   // Form states
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -18,15 +18,30 @@ const Login = () => {
   const [otp, setOtp] = useState("");
 
   //toasties
-  const alertFailOtp = () =>{
-    toast.error('Failed to send OTP',{
+  const alertFailOtp = () => {
+    toast.error('Failed to send OTP', {
+      transition: Slide
+    })
+  }
+  const alertFillDetail = () => {
+    toast.warn('Please fill in username, email, and password first.', {
+      transition: Slide
+    });
+  }
+  const alertFillOtp = () =>{
+    toast.warn("Please enter the Otp!",{
       transition:Slide
     })
   }
-  const alertFillDetail = () =>{
-    toast.warn('Please fill in username, email, and password first.',{
+  const alertUserSuccess = () =>{
+    toast.success("User created successfully",{
       transition:Slide
-    });
+    })
+  }
+  const alertLoginSuccess = ()=>{
+    toast.success("User loggedIn successfully",{
+      transition:Slide
+    })
   }
 
   // use effects
@@ -67,55 +82,55 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === "login") {
-    
+
       try {
         setCreatingUser(true);
-        const response=await fetch("/api/auth/login",{
-          method:"POST",
-          headers:{
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
             "Content-Type": "application/json",
           },
-          body:JSON.stringify({email,password})
+          body: JSON.stringify({ email, password })
         })
-        const data=await response.json();
-        if(data.success){
-          alert("User loggedIn successfully");
+        const data = await response.json();
+        if (data.success) {
+          alertLoginSuccess();
           setCreatingUser(false);
-        console.log("token:",data.token);
+          console.log("token:", data.token);
         }
       } catch (error) {
         setCreatingUser(false);
         console.error("Error logging in:", error);
       }
     } else {
-    
-    
-      if(!otp){
-        alert("Please enter the Otp!");
-        return ;
+
+
+      if (!otp) {
+        alertFillOtp();
+        return;
       }
       try {
         setCreatingUser(true);
         const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, email, password ,otp}),
-      });
-      const data = await response.json();
-      if(data.success){
-        alert("User created successfully");
-        console.log("token:",data.token);
-      }else{
-        alert(data.message);
-      }
-      setCreatingUser(false);
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, email, password, otp }),
+        });
+        const data = await response.json();
+        if (data.success) {
+          alertUserSuccess();
+          console.log("token:", data.token);
+        } else {
+          alert(data.message);
+        }
+        setCreatingUser(false);
       } catch (error) {
         console.error("Error signing up:", error);
       }
-      
-    
+
+
     }
   };
 
@@ -123,9 +138,13 @@ const Login = () => {
   return (
     <section className="relative flex items-center justify-center overflow-hidden min-h-screen">
       <Link href="/">
-        <button className="z-10 absolute top-10 left-10 glass-panel text-white hover:bg-white/10 px-10 py-4 rounded-full text-lg font-extrabold transition-all">
-          Home
-        </button>
+        <div className="absolute top-10 left-10 flex items-center gap-3 z-10 ">
+          <div className="sm:size-10 size-8 text-primary">
+            <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z"></path>
+            </svg>
+          </div>
+        </div>
       </Link>
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 japanese-pattern opacity-40"></div>
@@ -185,7 +204,7 @@ const Login = () => {
                   <input
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                   
+
                     className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                     placeholder="Enter your username"
                     type="text"
