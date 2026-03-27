@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
 
 export const metadata: Metadata = {
   title: "Zolo | Stories from the Edge of the Blade",
@@ -23,6 +25,11 @@ export default function LoginLayout({
       >
         <div className="relative flex min-h-screen w-full flex-col">
           {children}
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            theme="dark"
+          />  
         </div>
       </body>
     </html>

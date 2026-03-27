@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { Slide, toast } from "react-toastify";
 
 const Login = () => {
   // variables
@@ -16,6 +17,18 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
 
+  //toasties
+  const alertFailOtp = () =>{
+    toast.error('Failed to send OTP',{
+      transition:Slide
+    })
+  }
+  const alertFillDetail = () =>{
+    toast.warn('Please fill in username, email, and password first.',{
+      transition:Slide
+    });
+  }
+
   // use effects
   useEffect(() => {
     setIsGeneratedOtpClicked(false);
@@ -24,7 +37,7 @@ const Login = () => {
   // FUNCTIONS
   const handleGenerateOtp = async () => {
     if (!email || !username || !password) {
-      alert("Please fill in username, email, and password first.");
+      alertFillDetail();
       return;
     }
     setIsGeneratingOtp(true);
@@ -42,7 +55,7 @@ const Login = () => {
         console.log("OTP SENT:", data.otp);
         setIsGeneratedOtpClicked(true);
       } else {
-        alert(data.error || "Failed to send OTP");
+        alertFailOtp();
       }
     } catch (error) {
       console.error("Error generating OTP:", error);
