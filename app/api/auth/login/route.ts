@@ -20,11 +20,18 @@ export async function POST(request: NextRequest) {
     const passwordComparision=await bcrypt.compare(password,existingUser.password);
     if(passwordComparision){
       const token=jwt.sign({userId:existingUser.id},process.env.JWT_SECRET as string ,{expiresIn:"7d"})
-      return NextResponse.json({
+      const response=NextResponse.json({
         success:true,
         message:"User loggedIn Successfully",
-        token:token,
       })
+      response.cookies.set("token",token,{
+        httpOnly:true,
+        secure:process.env.NODE_ENV==="production",
+        sameSite:"strict",
+        maxAge:60*60*24*7,
+        path:'/',
+      })
+      return response;
     }else{
       return NextResponse.json(
       { error: "Incorrect Password!",success:false }, 

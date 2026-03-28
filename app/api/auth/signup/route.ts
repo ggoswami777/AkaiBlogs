@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
     );
   }
   // verify otp
+
   try {
     const verifyingOtp = await prisma.oTPVerification.findUnique({
       where: { email: email },
@@ -67,12 +68,19 @@ export async function POST(request: NextRequest) {
       process.env.JWT_SECRET as string,
       { expiresIn: "7d" },
     );
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "User Created successfully",
       user: { id: newUser.id, username: newUser.username },
-      token: token,
     });
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+    });
+    return response;
   } catch (error) {
     console.error("Signup error:", error);
     return NextResponse.json(

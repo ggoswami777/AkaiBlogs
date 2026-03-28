@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Slide, toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 const Login = () => {
+  const router=useRouter();
   // variables
   const [mode, setMode] = useState("login");
   const [isGenerateOtpClicked, setIsGeneratedOtpClicked] = useState(false);
@@ -80,6 +82,7 @@ const Login = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    
     e.preventDefault();
     if (mode === "login") {
 
@@ -96,6 +99,7 @@ const Login = () => {
         if (data.success) {
           alertLoginSuccess();
           setCreatingUser(false);
+          router.push("/akaiBlogs/feed");
           console.log("token:", data.token);
         }
       } catch (error) {
@@ -121,6 +125,7 @@ const Login = () => {
         const data = await response.json();
         if (data.success) {
           alertUserSuccess();
+          router.push("/akaiBlogs/feed");
           console.log("token:", data.token);
         } else {
           alert(data.message);
@@ -144,6 +149,7 @@ const Login = () => {
               <path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z"></path>
             </svg>
           </div>
+          <span className="text-2xl font-black tracking-tighter uppercase italic" >ZOLO</span>
         </div>
       </Link>
       <div className="absolute inset-0 z-0">
@@ -205,6 +211,7 @@ const Login = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
 
+                    required={mode === "signup"}
                     className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                     placeholder="Enter your username"
                     type="text"
@@ -257,7 +264,7 @@ const Login = () => {
                   <input
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    required
+                    required={(mode === "signup") && isGenerateOtpClicked}
                     className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                     placeholder="••••••"
                     type="text"
