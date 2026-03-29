@@ -1,9 +1,11 @@
-import React from 'react'
+import Navbar from "@/components/layout/Navbar"
 
-const page = () => {
+const Feed = () => {
   return (
-    <div>page</div>
+    <section className=''>
+      <Navbar/>
+    </section>
   )
 }
 
-export default page
+export default Feed
