@@ -41,7 +41,17 @@ const Login = () => {
     })
   }
   const alertLoginSuccess = ()=>{
-    toast.success("User loggedIn successfully",{
+    toast.success("User Logged in successfully",{
+      transition:Slide
+    })
+  }
+  const alertFillLogin =()=>{
+    toast.warn('Please fill in email, and password first.',{
+      transition:Slide
+    })
+  }
+  const alertLoginFailed = ()=>{
+    toast.error('Failed to Log in',{
       transition:Slide
     })
   }
@@ -84,8 +94,11 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     
     e.preventDefault();
+    if (!email || !password) {
+      alertFillLogin();
+      return;
+    }
     if (mode === "login") {
-
       try {
         setCreatingUser(true);
         const response = await fetch("/api/auth/login", {
@@ -101,6 +114,9 @@ const Login = () => {
           setCreatingUser(false);
           router.push("/akaiBlogs/feed");
           console.log("token:", data.token);
+        }else{
+          alertLoginFailed();
+          setCreatingUser(false);
         }
       } catch (error) {
         setCreatingUser(false);
@@ -210,8 +226,6 @@ const Login = () => {
                   <input
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-
-                    required={mode === "signup"}
                     className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                     placeholder="Enter your username"
                     type="text"
@@ -226,8 +240,7 @@ const Login = () => {
               <div className="relative">
                 <input
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  onChange={(e) => setEmail(e.target.value)}                  
                   className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                   placeholder="name@example.com"
                   type="email"
@@ -242,7 +255,6 @@ const Login = () => {
                 <input
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
                   className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                   placeholder="••••••••"
                   type="password"
@@ -264,7 +276,6 @@ const Login = () => {
                   <input
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    required={(mode === "signup") && isGenerateOtpClicked}
                     className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                     placeholder="••••••"
                     type="text"
@@ -325,35 +336,6 @@ const Login = () => {
               )}
             </button>
           )}
-
-          <div className="mt-5">
-            <div className="relative flex items-center justify-center mb-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-primary/10"></div>
-              </div>
-              <span className="relative bg-background-dark/80 px-4 text-xs font-bold uppercase text-slate-600">
-                Or continue with
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <button className="flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-primary/10 hover:bg-primary/5 transition-all text-slate-300 font-medium text-sm">
-                <img
-                  className="size-4"
-                  data-alt="Google G logo"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAna0qCI-PsQ6jWjkvtgJPBUnvLRA1aBPkqSOvlgChq7LJ5WYKVslBsr8zL4mTO6Wd_aXj_fRG_CBttCIgIorpRUG0JfpcBTHkU1O9vPWVchdlJmQloYO4mrISGrKTnTKEHA7Y_YMCWFPdH85yVbS6ux9EfSOTUbsWZ_Vr9CGgzC7_Y9-EvweL_N-9fJiD1OlVrhms8YzgN64NTGAyyr-2k8rzLnKhjYDdFmWondpUvRqxra_IJ9iJmMHDofRN9_Ljpojekyi7UbQ"
-                />
-                Google
-              </button>
-              <button className="flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-primary/10 hover:bg-primary/5 transition-all text-slate-300 font-medium text-sm">
-                <img
-                  className="size-4 dark:invert"
-                  data-alt="Apple logo"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6D09E3R1sHAP81kEMyoCABYjPsH9rJVBEgyhT2wDpGaQtci8dPqd3Jqt_1eJMHC8itEMrl6Upcxevjjkm8sXZVHGHw-mil853uO3IyG7C_oYabNvChYszCaa5JgG4MCBVLFjWZ2A76JkfauFFDuw-qivYl1G3shLeCZYSSeZpFdMnn0vFcN1ClpJJWON77cjvQ6ZMR_0a10wJdQDTatr2NY8DqSEFGNd82n9Gi_U_0WiXN4rZrA73W0dokgXn1rfuh0i-wMydjQ"
-                />
-                Apple
-              </button>
-            </div>
-          </div>
         </form>
       </div>
     </section>
