@@ -2,8 +2,8 @@ import { Bell, Search } from "lucide-react";
 
 const Navbar = () => {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center p-4 backdrop-blur-[12px]">
-      <div className="bg-[#1f141499] w-full max-w-400 rounded-full px-8 py-3 flex items-center justify-between border-primary/10 ">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center p-4">
+      <div className="bg-[#1f141499] w-full max-w-400 rounded-full px-8 py-3 flex items-center justify-between border border-primary/10 backdrop-blur-[12px]">
         {/* logo */}
         <div className="flex items-center gap-3">
           <div className="size-8 text-primary">

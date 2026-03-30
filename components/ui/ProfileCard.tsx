@@ -2,9 +2,9 @@ import { Bookmark, BookOpen, Landmark, Settings } from "lucide-react";
 
 const ProfileCard = () => {
   return (
-    <aside className="hidden lg:block lg:col-span-3 bg-background-dark rounded-lg">
-      <div className="sticky top-24">
-        <div className="glass p-8 rounded-2xl border-white/5">
+    <aside className="hidden lg:block lg:col-span-3 rounded-lg">
+      <div className="sticky top-24 flex flex-col gap-5">
+        <div className="glass p-8 rounded-lg border border-white/5 bg-obsidian">
           <div className="flex flex-col items-center text-center mb-8">
             <div className="w-24 h-24 rounded-full border-4 border-primary/20 mb-4 overflow-hidden p-1">
               <img
@@ -63,7 +63,7 @@ const ProfileCard = () => {
             </a>
           </nav>
         </div>
-        <div className="glass p-6 rounded-2xl border-white/5">
+        <div className="glass p-6 rounded-lg border border-white/5 bg-obsidian">
           <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">
             Active Guilds
           </h4>
