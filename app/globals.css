@@ -50,3 +50,8 @@
 @utility cinematic-gradient {
     background: linear-gradient(180deg, rgba(33, 17, 17, 0.4) 0%, rgba(33, 17, 17, 0.95) 100%);
 }
+
+@utility bg-obsidian {
+    --tw-bg-opacity: 1;
+    background-color: rgb(20 10 10 / var(--tw-bg-opacity, 1));
+}
