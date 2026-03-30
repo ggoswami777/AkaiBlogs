@@ -2,8 +2,8 @@ import { Bookmark, BookOpen, Landmark, Settings } from "lucide-react";
 
 const ProfileCard = () => {
   return (
-    <aside className="hidden lg:block lg:col-span-3 rounded-lg">
-      <div className="sticky top-24 flex flex-col gap-5">
+    <aside className="hidden lg:block lg:col-span-3 rounded-lg h-full overflow-y-auto pr-2 no-scrollbar">
+      <div className="flex flex-col gap-5">
         <div className="glass p-8 rounded-lg border border-white/5 bg-obsidian">
           <div className="flex flex-col items-center text-center mb-8">
             <div className="w-24 h-24 rounded-full border-4 border-primary/20 mb-4 overflow-hidden p-1">

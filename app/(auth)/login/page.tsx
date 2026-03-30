@@ -165,7 +165,7 @@ const Login = () => {
               <path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z"></path>
             </svg>
           </div>
-          <span className="text-2xl font-black tracking-tighter uppercase italic" >ZOLO</span>
+          <span className="text-2xl font-black tracking-tighter uppercase italic" >AkaiBlogs</span>
         </div>
       </Link>
       <div className="absolute inset-0 z-0">

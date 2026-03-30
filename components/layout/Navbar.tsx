@@ -16,7 +16,7 @@ const Navbar = () => {
             </svg>
           </div>
           <h1 className="text-2xl font-black tracking-tighter text-slate-100">
-            ZOLO
+            AkaiBlogs
           </h1>
         </div>
         {/* searchbar */}

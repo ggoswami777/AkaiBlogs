@@ -2,8 +2,8 @@ import { TrendingUp } from "lucide-react";
 
 const FeedPageCard = () => {
   return (
-    <aside className="hidden md:block md:col-span-4 lg:col-span-3 rounded-lg">
-      <div className="sticky flex flex-col gap-5">
+    <aside className="hidden md:block md:col-span-4 lg:col-span-3 rounded-lg h-full overflow-y-auto pr-2 no-scrollbar scroll-smooth">
+      <div className="flex flex-col gap-5 pb-24">
         <div className="p-8 rounded-lg border bg-obsidian border-white/5">
           <h3 className="text-xl font-black mb-6 flex items-center gap-2">
             <span className="uprising- text-primary"><TrendingUp/></span>
