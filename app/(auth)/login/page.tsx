@@ -7,7 +7,7 @@ import { Slide, toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 const Login = () => {
-  const router=useRouter();
+  const router = useRouter();
   // variables
   const [mode, setMode] = useState("login");
   const [isGenerateOtpClicked, setIsGeneratedOtpClicked] = useState(false);
@@ -21,40 +21,45 @@ const Login = () => {
 
   //toasties
   const alertFailOtp = () => {
-    toast.error('Failed to send OTP', {
-      transition: Slide
-    })
-  }
-  const alertFillDetail = () => {
-    toast.warn('Please fill in username, email, and password first.', {
-      transition: Slide
+    toast.error("Failed to send OTP", {
+      transition: Slide,
     });
-  }
-  const alertFillOtp = () =>{
-    toast.warn("Please enter the Otp!",{
-      transition:Slide
-    })
-  }
-  const alertUserSuccess = () =>{
-    toast.success("User created successfully",{
-      transition:Slide
-    })
-  }
-  const alertLoginSuccess = ()=>{
-    toast.success("User Logged in successfully",{
-      transition:Slide
-    })
-  }
-  const alertFillLogin =()=>{
-    toast.warn('Please fill in email, and password first.',{
-      transition:Slide
-    })
-  }
-  const alertLoginFailed = ()=>{
-    toast.error('Failed to Log in',{
-      transition:Slide
-    })
-  }
+  };
+  const alertOtpSent = () => {
+    toast.success("OTP sent successfully!", {
+      transition: Slide,
+    });
+  };
+  const alertFillDetail = () => {
+    toast.warn("Please fill in username, email, and password first.", {
+      transition: Slide,
+    });
+  };
+  const alertFillOtp = () => {
+    toast.warn("Please enter the Otp!", {
+      transition: Slide,
+    });
+  };
+  const alertUserSuccess = () => {
+    toast.success("User created successfully", {
+      transition: Slide,
+    });
+  };
+  const alertLoginSuccess = () => {
+    toast.success("User Logged in successfully", {
+      transition: Slide,
+    });
+  };
+  const alertFillLogin = () => {
+    toast.warn("Please fill in email, and password first.", {
+      transition: Slide,
+    });
+  };
+  const alertLoginFailed = () => {
+    toast.error("Failed to Log in", {
+      transition: Slide,
+    });
+  };
 
   // use effects
   useEffect(() => {
@@ -81,6 +86,8 @@ const Login = () => {
       if (data.success) {
         console.log("OTP SENT:", data.otp);
         setIsGeneratedOtpClicked(true);
+        alertOtpSent();
+        
       } else {
         alertFailOtp();
       }
@@ -92,7 +99,6 @@ const Login = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    
     e.preventDefault();
     if (!email || !password) {
       alertFillLogin();
@@ -106,15 +112,15 @@ const Login = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email, password })
-        })
+          body: JSON.stringify({ email, password }),
+        });
         const data = await response.json();
         if (data.success) {
           alertLoginSuccess();
           setCreatingUser(false);
           router.push("/akaiBlogs/feed");
           console.log("token:", data.token);
-        }else{
+        } else {
           alertLoginFailed();
           setCreatingUser(false);
         }
@@ -123,8 +129,6 @@ const Login = () => {
         console.error("Error logging in:", error);
       }
     } else {
-
-
       if (!otp) {
         alertFillOtp();
         return;
@@ -144,14 +148,12 @@ const Login = () => {
           router.push("/akaiBlogs/feed");
           console.log("token:", data.token);
         } else {
-          alert(data.message);
+          toast.error(data.message, { transition: Slide });
         }
         setCreatingUser(false);
       } catch (error) {
         console.error("Error signing up:", error);
       }
-
-
     }
   };
 
@@ -161,11 +163,17 @@ const Login = () => {
       <Link href="/">
         <div className="absolute top-10 left-10 flex items-center gap-3 z-10 ">
           <div className="sm:size-10 size-8 text-primary">
-            <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              fill="currentColor"
+              viewBox="0 0 48 48"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z"></path>
             </svg>
           </div>
-          <span className="text-2xl font-black tracking-tighter uppercase italic" >AkaiBlogs</span>
+          <span className="text-2xl font-black tracking-tighter uppercase italic">
+            AkaiBlogs
+          </span>
         </div>
       </Link>
       <div className="absolute inset-0 z-0">
@@ -240,7 +248,7 @@ const Login = () => {
               <div className="relative">
                 <input
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}                  
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-6 pr-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                   placeholder="name@example.com"
                   type="email"
@@ -264,8 +272,9 @@ const Login = () => {
             <div
               className="overflow-hidden transition-all duration-300 ease-in-out"
               style={{
-                maxHeight: (mode === "signup") && isGenerateOtpClicked ? "80px" : "0px",
-                opacity: (mode === "signup") && isGenerateOtpClicked ? 1 : 0,
+                maxHeight:
+                  mode === "signup" && isGenerateOtpClicked ? "80px" : "0px",
+                opacity: mode === "signup" && isGenerateOtpClicked ? 1 : 0,
               }}
             >
               <div className="flex flex-col gap-2">
@@ -290,7 +299,7 @@ const Login = () => {
               type="button"
               onClick={handleGenerateOtp}
               disabled={isGeneratingOtp}
-              className={`w-full mt-8 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 ${isGeneratingOtp ? 'bg-red-900' : 'bg-primary hover:bg-primary/90'}`}
+              className={`w-full mt-8 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 ${isGeneratingOtp ? "bg-red-900" : "bg-primary hover:bg-primary/90"}`}
             >
               {isGeneratingOtp ? (
                 <>
@@ -304,27 +313,41 @@ const Login = () => {
           )}
 
           {mode === "signup" && isGenerateOtpClicked && (
-            <button
-              type="submit"
-              disabled={creatingUser}
-              className={`w-full mt-8 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 ${creatingUser ? 'bg-red-900' : 'bg-primary hover:bg-primary/90'}`}
-            >
-              {creatingUser ? (
-                <>
-                  <Loader2 className="animate-spin size-4" />
-                  <span>Creating Account...</span>
-                </>
-              ) : (
-                "Create Account"
-              )}
-            </button>
+            <>
+              <div className="flex items-center justify-between mt-2 px-1">
+                <p className="text-xs text-slate-400">Haven't received OTP?</p>
+                <button
+                  type="button"
+                  onClick={handleGenerateOtp}
+                  disabled={isGeneratingOtp}
+                  className="text-xs font-bold text-primary hover:text-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isGeneratingOtp ? "Resending..." : "Resend OTP"}
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={creatingUser}
+                className={`w-full mt-8 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 ${creatingUser ? "bg-red-900" : "bg-primary hover:bg-primary/90"}`}
+              >
+                {creatingUser ? (
+                  <>
+                    <Loader2 className="animate-spin size-4" />
+                    <span>Creating Account...</span>
+                  </>
+                ) : (
+                  "Create Account"
+                )}
+              </button>
+            </>
           )}
 
           {mode === "login" && (
             <button
               type="submit"
               disabled={creatingUser}
-              className={`w-full mt-8 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 ${creatingUser ? 'bg-red-900' : 'bg-primary hover:bg-primary/90'}`}
+              className={`w-full mt-8 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 ${creatingUser ? "bg-red-900" : "bg-primary hover:bg-primary/90"}`}
             >
               {creatingUser ? (
                 <>
