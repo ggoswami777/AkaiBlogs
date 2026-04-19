@@ -1,4 +1,5 @@
 import { Bell, Search } from "lucide-react";
+import Link from "next/link";
 
 const Navbar = () => {
   return (
@@ -15,9 +16,12 @@ const Navbar = () => {
               <path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z"></path>
             </svg>
           </div>
-          <h1 className="text-2xl font-black tracking-tighter text-slate-100">
+          <Link href={`/akaiBlogs/`} >
+            <h1 className="text-2xl font-black tracking-tighter text-slate-100">
             AkaiBlogs
           </h1>
+          </Link>
+          
         </div>
         {/* searchbar */}
         <div className="hidden md:flex items-center gap-10">

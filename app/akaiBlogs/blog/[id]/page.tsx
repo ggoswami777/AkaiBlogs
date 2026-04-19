@@ -197,7 +197,7 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
             </svg>
           </div>
           <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-bold tracking-widest uppercase mb-2">AkaiBlogs Collective</p>
-          <p className="text-slate-600 dark:text-slate-500 text-[10px] md:text-xs">© 2024 Insights from the Edge of the Blade.</p>
+          <p className="text-slate-600 dark:text-slate-500 text-[10px] md:text-xs">© 2026 Insights from the Edge of the Blade.</p>
         </div>
       </footer>
     </div>

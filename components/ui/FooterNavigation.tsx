@@ -1,4 +1,4 @@
-import { Home, Compass, Plus, Bell, User } from "lucide-react"
+import { Home, Compass, Plus, Bell, User, MessageCircle } from "lucide-react"
 
 export default function FooterNavigation() {
   return (
@@ -15,8 +15,8 @@ export default function FooterNavigation() {
       <span className="material-symbols-outlined text-3xl"><Plus></Plus></span>
     </button>
     <button className="flex flex-col items-center p-2 text-slate-500">
-      <span className="material-symbols-outlined"><Bell></Bell></span>
-      <span className="text-[10px] font-bold">Alerts</span>
+      <span className="material-symbols-outlined"><MessageCircle/></span>
+      <span className="text-[10px] font-bold">Chats</span>
     </button>
     <button className="flex flex-col items-center p-2 text-primary">
       <span className="material-symbols-outlined"><User></User></span>

@@ -13,6 +13,7 @@ const Header = () => {
                 <path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z"></path>
               </svg>
             </div>
+            
             <h2 className="text-2xl font-black tracking-tighter uppercase italic">AkaiBlogs</h2>
           </div>
           <nav className="hidden md:flex items-center gap-8">

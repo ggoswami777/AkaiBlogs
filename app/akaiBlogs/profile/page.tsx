@@ -1,3 +1,4 @@
+import Navbar from '@/components/layout/Navbar'
 import FooterNavigation from '@/components/ui/FooterNavigation'
 import ProfileCardPage from '@/components/ui/ProfilePageCard'
 import ProfilePageNavbar from '@/components/ui/ProfilePageNavbar'
@@ -6,7 +7,7 @@ import React from 'react'
 const page = () => {
   return (
     <>
-      <ProfilePageNavbar></ProfilePageNavbar>
+      <Navbar/>
       <ProfileCardPage></ProfileCardPage>
       <FooterNavigation></FooterNavigation>
     </>
