@@ -1,4 +1,4 @@
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, MessageSquare, Plus } from "lucide-react";
 import Link from "next/link";
 
 const Navbar = () => {
@@ -16,39 +16,55 @@ const Navbar = () => {
               <path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z"></path>
             </svg>
           </div>
-          <Link href={`/akaiBlogs/`} >
+          <Link href={`/akaiBlogs/feed`} >
             <h1 className="text-2xl font-black tracking-tighter text-slate-100">
             AkaiBlogs
           </h1>
           </Link>
           
         </div>
+
         {/* searchbar */}
-        <div className="hidden md:flex items-center gap-10">
+        <div className="hidden lg:flex items-center gap-10">
           <div className="relative group">
             <input
               className="bg-black/40 border border-white/10 rounded-full px-6 py-1.5 text-sm w-64 focus:outline-none focus:border-primary transition-all"
               placeholder="Search the scrolls..."
               type="text"
             />
-            <span className="material-symbols-outlined absolute right-5 top-1/3 -translate-y-1/2 text-slate-500 text-sm w-3 h-3">
-              <Search />
+            <span className="material-symbols-outlined absolute right-5 top-1/2 -translate-y-1/2 text-slate-500">
+              <Search size={14} />
             </span>
           </div>
         </div>
-        {/* noti and profile */}
-        <div className="flex items-center gap-8">
-          <button className="text-slate-300 hover:text-primary transition-colors">
-            <span className="material-symbols-outlined"><Bell/></span>
+
+        {/* actions */}
+        <div className="flex items-center gap-4 md:gap-6">
+          <Link href="/akaiBlogs/create">
+            <button className="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-full text-xs font-bold transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20 flex items-center gap-2">
+              <Plus size={16} />
+              <span className="hidden sm:inline">New Scroll</span>
+            </button>
+          </Link>
+          
+          <button className="text-slate-300 hover:text-primary transition-colors hidden md:block">
+            <MessageSquare size={20} />
           </button>
-          <div className="w-10 h-10 rounded-full border-2 border-primary/50 p-0.5">
+          
+          <button className="text-slate-300 hover:text-primary transition-colors hidden sm:block">
+            <Bell size={20} />
+          </button>
+
+          <Link href="/akaiBlogs/profile" className="w-10 h-10 rounded-full border-2 border-primary/50 p-0.5 hover:scale-110 transition-transform">
             <img
               alt="Profile"
               className="w-full h-full rounded-full object-cover"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQREzBniPFG2Rv_94OnCxJg4cRDD40044S_MYT3ZXzSs4-9GW-Jv3-nb6sUnnqs2nTb6XE0OcJsPGnJDuMQJZ9QcIcQ_aHE1N7YwlkHcXxTBimzOzoqZ6IzCaH-CeERYMzm06b5vHmwCKTr24X--k89shI3ntfJqHPuc2pmf9UGQ60JwENsEpz0xxzRexZnHPo4N61bX1AIe4QBvRpu7bNUZKwep55iMNKLCoKqkRSQK4tfIUepeZ3C9uu4pIuIbkiT-5nAYtHiQ"
             />
-          </div>
+          </Link>
         </div>
+
+
       </div>
     </nav>
   );

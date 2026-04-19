@@ -1,17 +1,15 @@
-import Navbar from '@/components/layout/Navbar'
-import FooterNavigation from '@/components/ui/FooterNavigation'
-import ProfileCardPage from '@/components/ui/ProfilePageCard'
-import ProfilePageNavbar from '@/components/ui/ProfilePageNavbar'
-import React from 'react'
+import React from 'react';
+import Navbar from '@/components/layout/Navbar';
+import ProfileCardPage from '@/components/ui/ProfilePageCard';
 
 const page = () => {
   return (
-    <>
-      <Navbar/>
-      <ProfileCardPage></ProfileCardPage>
-      <FooterNavigation></FooterNavigation>
-    </>
+    <div>
+      <ProfileCardPage />
+    </div>
   )
+
 }
+
 
 export default page

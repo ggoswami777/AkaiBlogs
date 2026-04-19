@@ -12,8 +12,8 @@ const Feed = () => {
 
   return (
     <section className=''>
-      <Navbar />
-      <main className="max-w-[1700px] mx-auto px-4 pt-24 pb-6 grid grid-cols-1 md:grid-cols-12 gap-8 h-screen overflow-hidden">
+      <main className="max-w-[1700px] mx-auto px-4 pt-4 pb-6 grid grid-cols-1 md:grid-cols-12 gap-8 h-screen overflow-hidden">
+
         <ProfileCard />
         <section className="col-span-1 md:col-span-8 lg:col-span-6 space-y-4 h-full overflow-y-auto no-scrollbar scroll-smooth pb-24">
           <div className="relative h-32 rounded-2xl overflow-hidden glass border-white/5 group">

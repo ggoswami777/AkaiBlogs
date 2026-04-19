@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   description: "A Japanese-themed social blogging sanctuary for the modern ronin. Forge your legacy, share your path, and find your clan.",
 };
 
+import FooterNavigation from "@/components/ui/FooterNavigation";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,13 +37,15 @@ export default function RootLayout({
       <body
         className={`font-display antialiased bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 overflow-x-hidden`}
       >
-        <div className="relative flex min-h-screen w-full flex-col">
+        <div className="relative flex min-h-screen w-full flex-col pb-20 md:pb-0">
           <Header />
           {children}
           <Footer />
           <ToastContainer />
         </div>
+        <FooterNavigation />
       </body>
     </html>
   );
 }
+
