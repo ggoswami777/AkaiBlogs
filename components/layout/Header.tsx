@@ -25,7 +25,7 @@ const Header = () => {
         <div className="flex items-center gap-6">
           <SearchBar />
           <Link href='/login'>
-            <button className="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20">
+            <button className="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20 hidden md:block">
               Join Collective
             </button>
           </Link>
