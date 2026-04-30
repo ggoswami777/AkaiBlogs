@@ -1,6 +1,6 @@
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
-import ProfileCardPage from '@/components/ui/ProfilePageCard';
+import ProfileCardPage from '@/components/profile/ProfilePageCard';
 
 const page = () => {
   return (

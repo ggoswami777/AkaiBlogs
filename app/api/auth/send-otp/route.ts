@@ -4,12 +4,23 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, username, password } = await request.json();
+    const body = await request.json();
+    const { email, username, password } = body;
+
+    if (!email || !username || !password) {
+      return NextResponse.json(
+        { error: "Missing required fields: email, username, or password" },
+        { status: 400 }
+      );
+    }
 
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [{ username: username }, { email: email }],
-      },
+        OR: [
+          { username },
+          { email }
+        ]
+      }
     });
 
     if (existingUser) {
@@ -52,7 +63,8 @@ export async function POST(request: NextRequest) {
     console.error("send-otp error:", error);
     return NextResponse.json({ 
       error: "Error while generating OTP!",
-      details: error.message 
+      details: error.message,
+      stack: error.stack
     }, { status: 500 });
   }
 }

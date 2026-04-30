@@ -1,6 +1,6 @@
 import React from "react";
 import "../globals.css";
-import FooterNavigation from "@/components/ui/FooterNavigation";
+import FooterNavigation from "@/components/layout/FooterNavigation";
 import Navbar from "@/components/layout/Navbar";
 
 export default function AkaiBlogsLayout({

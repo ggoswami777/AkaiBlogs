@@ -1,5 +1,5 @@
 import React from 'react'
-import { HomeBlogCardType } from '@/lib/types'
+import { HomeBlogCardType } from '@/types'
 import { Notebook } from 'lucide-react'
 
 const HomeBlogCard = ({ title, author, category, image }: HomeBlogCardType) => {

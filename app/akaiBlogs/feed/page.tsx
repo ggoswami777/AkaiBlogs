@@ -1,8 +1,8 @@
 import Navbar from "@/components/layout/Navbar"
 import Footer2 from "@/components/layout/Footer2"
-import ProfileCard from "@/components/ui/ProfileCard"
-import FeedPageCard from "@/components/ui/FeedPageCard"
-import FeedBlogsCard from "@/components/ui/FeedBlogsCard"
+import ProfileCard from "@/components/profile/ProfileCard"
+import FeedPageCard from "@/components/blog/FeedPageCard"
+import FeedBlogsCard from "@/components/blog/FeedBlogsCard"
 
 import { blogsData } from "@/lib/data"
 

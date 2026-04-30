@@ -1,8 +1,7 @@
-import ProfileHeader from "./profile/ProfileHeader";
-
-import ProfileStats from "./profile/ProfileStats";
-import ProfileTabs from "./profile/ProfileTabs";
-import ProfilePostCard from "./profile/ProfilePostCard";
+import ProfileHeader from "./ProfileHeader";
+import ProfileStats from "./ProfileStats";
+import ProfileTabs from "./ProfileTabs";
+import ProfilePostCard from "./ProfilePostCard";
 
 const ProfileCardPage = () => {
   const profileData = {

@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   description: "A Japanese-themed social blogging sanctuary for the modern ronin. Forge your legacy, share your path, and find your clan.",
 };
 
-import FooterNavigation from "@/components/ui/FooterNavigation";
+import FooterNavigation from "@/components/layout/FooterNavigation";
 
 export default function RootLayout({
   children,

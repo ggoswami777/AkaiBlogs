@@ -1,7 +1,7 @@
 import React from "react";
 import HomePageGlassCard from "@/components/ui/HomePageGlassCard";
-import HomeBlogCard from "@/components/ui/HomeBlogCard";
-import { HomePageGlassCardTypeArray, HomeBlogCardTypeArray } from "@/lib/types";
+import HomeBlogCard from "@/components/blog/HomeBlogCard";
+import { HomePageGlassCardTypeArray, HomeBlogCardTypeArray } from "@/types";
 import { ArrowRight, Book, GroupIcon, LucideSwords, Shield, Sword } from "lucide-react";
 import Link from "next/link";
 

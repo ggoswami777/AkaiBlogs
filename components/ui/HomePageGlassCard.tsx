@@ -1,5 +1,5 @@
 import React from 'react'
-import { HomePageGlassCardType } from '@/lib/types'
+import { HomePageGlassCardType } from '@/types'
 
 const HomePageGlassCard = ({ title, data, icon }: HomePageGlassCardType) => {
   return (
