@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
+    
+
     const body = await request.json();
     const { email, username, password } = body;
 
@@ -64,7 +66,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       error: "Error while generating OTP!",
       details: error.message,
-      stack: error.stack
+     
     }, { status: 500 });
   }
 }

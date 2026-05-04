@@ -5,12 +5,10 @@ import { Pool } from "pg";
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const connectionString = process.env.DATABASE_URL!;
-
+console.log("DB URL loaded:", !!connectionString);
 const pool = new Pool({
   connectionString: connectionString,
-  ssl: {
-    rejectUnauthorized: false
-  }
+
 });
 const adapter = new PrismaPg(pool as any);
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
