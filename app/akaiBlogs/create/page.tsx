@@ -14,7 +14,7 @@ import {
   Tag,
   Eye,
 } from "lucide-react";
-
+import { useUploadThing } from "@/lib/uploadthing";
 const categories = [
   "Technology",
   "Design",
@@ -33,11 +33,15 @@ export default function CreateBlogPage() {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [content, setContent] = useState("");
+  const { startUpload, isUploading } = useUploadThing("imageUploader");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setCoverPreview(reader.result as string);
       reader.readAsDataURL(file);
@@ -49,6 +53,7 @@ export default function CreateBlogPage() {
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
     if (file && file.type.startsWith("image/")) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setCoverPreview(reader.result as string);
       reader.readAsDataURL(file);
@@ -60,6 +65,35 @@ export default function CreateBlogPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handlePublish = async () => {
+    if (!selectedFile || !title) {
+      alert("Please provide title and a cover image");
+      return;
+    }
+    try {
+      const uploadRes = await startUpload([selectedFile]);
+      if (!uploadRes || uploadRes.length == 0) {
+        throw new Error("Upload failed");
+      }
+      const imageUrl = uploadRes[0]?.url;
+      const response = await fetch("/api/akaiBlogs/create", {
+        method: "POST",
+        body: JSON.stringify({
+          title,
+          excerpt,
+          category: selectedCategory,
+          image: imageUrl,
+          content,
+        }),
+      });
+      if (response.ok) {
+        alert("Scroll forged successfully");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occured while publishing");
+    }
+  };
   return (
     <section className="min-h-screen">
       {/* Ambient background glow */}
@@ -279,6 +313,7 @@ export default function CreateBlogPage() {
             <div className="relative">
               <textarea
                 id="post-content"
+                onChange={(e) => setContent(e.target.value)}
                 placeholder="Begin writing your scroll here... Let the ink flow."
                 rows={10}
                 className="w-full bg-obsidian border border-white/[0.06] rounded-2xl px-6 py-5 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-primary/40 focus:shadow-[0_0_30px_rgba(234,42,51,0.06)] transition-all duration-300 resize-none leading-relaxed"
@@ -309,10 +344,23 @@ export default function CreateBlogPage() {
               </button>
               <button
                 id="publish-btn"
-                className="flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white text-sm font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 transform hover:scale-[1.03] active:scale-[0.97]"
+                onClick={handlePublish}
+                disabled={isUploading}
+                className={`flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white text-sm font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 transform hover:scale-[1.03] active:scale-[0.97] ${
+                  isUploading ? "opacity-70 cursor-not-allowed scale-100" : ""
+                }`}
               >
-                <Send size={16} />
-                Publish
+                {isUploading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Forging Scroll...
+                  </>
+                ) : (
+                  <>
+                    <Send size={16} />
+                    Publish
+                  </>
+                )}
               </button>
             </div>
           </div>
