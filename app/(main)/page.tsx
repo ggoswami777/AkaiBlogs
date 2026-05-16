@@ -1,9 +1,12 @@
-import React from "react";
+'use client'
+
+import React, { useEffect } from "react";
 import HomePageGlassCard from "@/components/ui/HomePageGlassCard";
 import HomeBlogCard from "@/components/blog/HomeBlogCard";
 import { HomePageGlassCardTypeArray, HomeBlogCardTypeArray } from "@/types";
 import { ArrowRight, Book, GroupIcon, LucideSwords, Shield, Sword } from "lucide-react";
 import Link from "next/link";
+import { useBlogStore } from "@/store/useBlogStore";
 
 const temporaryData: HomePageGlassCardTypeArray = [
   { id: 1, title: "Active Ronin", data: "12.5k", icon: <GroupIcon/> },
@@ -36,6 +39,13 @@ const temporaryBlogData: HomeBlogCardTypeArray = [
 ];
 
 const Page = () => {
+  const { blogs, stats, setBlogs, setStats } = useBlogStore();
+
+  useEffect(() => {
+    // Putting props/data into the store
+    setStats(temporaryData);
+    setBlogs(temporaryBlogData);
+  }, [setBlogs, setStats]);
   return (
     <main className="flex-1">
       {/* Hero Section */}
@@ -78,7 +88,7 @@ const Page = () => {
       {/* Stats Strip */}
       <section className="max-w-7xl mx-auto px-6 -mt-5 md:mt-20 relative z-30">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {temporaryData.map((item) => (
+          {stats.map((item) => (
             <HomePageGlassCard key={item.id} {...item} />
           ))}
         </div>
@@ -96,7 +106,7 @@ const Page = () => {
           </a>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {temporaryBlogData.map((blog) => (
+          {blogs.map((blog) => (
             <HomeBlogCard key={blog.id} {...blog} />
           ))}
         </div>
