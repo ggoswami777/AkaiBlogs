@@ -12,5 +12,5 @@ export function proxy(request:NextRequest){
     return NextResponse.next()
 }
 export const config={
-    matcher:['/login','/signup','/akaiBlogs/:path',],
+    matcher:['/login','/signup','/akaiBlogs/:path', '/uploadthing'],
 }
