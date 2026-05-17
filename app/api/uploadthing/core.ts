@@ -1,7 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { cookies } from "next/headers";
-import { createUploadthing, type FileRouter } from "uploadthing/next-legacy";
-import { UploadThingError } from "uploadthing/server";
 
 const f = createUploadthing();
 

@@ -62,6 +62,7 @@ export default function CreateBlogPage() {
 
   const removeCover = () => {
     setCoverPreview(null);
+    setSelectedFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -313,6 +314,7 @@ export default function CreateBlogPage() {
             <div className="relative">
               <textarea
                 id="post-content"
+                value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Begin writing your scroll here... Let the ink flow."
                 rows={10}

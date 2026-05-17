@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     // check if password is correct 
     const passwordComparision=await bcrypt.compare(password,existingUser.password);
     if(passwordComparision){
-      const token=jwt.sign({userId:existingUser.id},process.env.JWT_SECRET as string ,{expiresIn:"7d"})
+      const token=jwt.sign({userId:existingUser.id , username:existingUser.username},process.env.JWT_SECRET as string ,{expiresIn:"7d"})
       const response=NextResponse.json({
         success:true,
         message:"User loggedIn Successfully",
