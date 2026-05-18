@@ -1,10 +1,20 @@
-import { getAuthUserServer } from "@/lib/authHelper";
+"use client";
+
+import { useEffect } from "react";
 import { Bookmark, BookOpen, Landmark, Settings } from "lucide-react";
 import Link from "next/link";
+import { useBlogStore } from "@/store/useBlogStore";
 
-const ProfileCard = async() => {
-  const activeUser = await getAuthUserServer();
-  const username = activeUser?.username || "Guest";
+const ProfileCard = () => {
+  const { currentUser, fetchCurrentUser } = useBlogStore();
+
+  useEffect(() => {
+    if (!currentUser) {
+      fetchCurrentUser();
+    }
+  }, [currentUser, fetchCurrentUser]);
+
+  const username = currentUser || "Guest";
   return (
     <aside className="hidden lg:block lg:col-span-3 rounded-lg h-full overflow-y-auto pr-2 no-scrollbar">
       <div className="flex flex-col gap-5">
