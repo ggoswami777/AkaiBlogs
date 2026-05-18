@@ -1,7 +1,10 @@
+import { getAuthUserServer } from "@/lib/authHelper";
 import { Bookmark, BookOpen, Landmark, Settings } from "lucide-react";
 import Link from "next/link";
 
-const ProfileCard = () => {
+const ProfileCard = async() => {
+  const activeUser = await getAuthUserServer();
+  const username = activeUser?.username || "Guest";
   return (
     <aside className="hidden lg:block lg:col-span-3 rounded-lg h-full overflow-y-auto pr-2 no-scrollbar">
       <div className="flex flex-col gap-5">
@@ -16,7 +19,7 @@ const ProfileCard = () => {
               />
               </Link>
             </div>
-            <h3 className="text-xl font-bold text-white">Kenji Sato</h3>
+            <h3 className="text-xl font-bold text-white">{username}</h3>
             <p className="text-slate-500 text-xs tracking-widest uppercase mt-1">
               Digital Ronin
             </p>
