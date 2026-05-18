@@ -1,7 +1,7 @@
 import { Edit, Share } from "lucide-react";
 
 interface ProfileHeaderProps {
-  name: string;
+  name: any;
   username: string;
   bio: string;
   avatarUrl?: string;

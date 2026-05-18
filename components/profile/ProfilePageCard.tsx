@@ -2,11 +2,14 @@ import ProfileHeader from "./ProfileHeader";
 import ProfileStats from "./ProfileStats";
 import ProfileTabs from "./ProfileTabs";
 import ProfilePostCard from "./ProfilePostCard";
+import { getAuthUser, getAuthUserServer } from "@/lib/authHelper";
 
-const ProfileCardPage = () => {
+  const ProfileCardPage = async() => {
+const activeUser = await getAuthUserServer();
+const username = activeUser?.username || "Guest";
   const profileData = {
-    name: "Kenji Sato",
-    username: "kenjisato",
+    name: username,
+    username:username,
     bio: "Digital nomad & coffee enthusiast. Sharing my journey through Tokyo's hidden neon streets and quiet temples.",
     avatarUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuDQREzBniPFG2Rv_94OnCxJg4cRDD40044S_MYT3ZXzSs4-9GW-Jv3-nb6sUnnqs2nTb6XE0OcJsPGnJDuMQJZ9QcIcQ_aHE1N7YwlkHcXxTBimzOzoqZ6IzCaH-CeERYMzm06b5vHmwCKTr24X--k89shI3ntfJqHPuc2pmf9UGQ60JwENsEpz0xxzRexZnHPo4N61bX1AIe4QBvRpu7bNUZKwep55iMNKLCoKqkRSQK4tfIUepeZ3C9uu4pIuIbkiT-5nAYtHiQ",
     stats: {
@@ -87,4 +90,4 @@ const ProfileCardPage = () => {
   );
 };
 
-export default ProfileCardPage;
+export default ProfileCardPage;
