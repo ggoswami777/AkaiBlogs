@@ -4,15 +4,28 @@ import { blogsData } from '@/lib/data';
 import Navbar from '@/components/layout/Navbar';
 import { notFound } from 'next/navigation';
 import { ThumbsUp, ThumbsDown, Share2, Bookmark, MessageSquare } from 'lucide-react';
+import { prisma } from '@/lib/prisma';
 
 export default async function BlogPage({ params }: { params: { id: string } }) {
   const { id } = await params;
-  const blog = blogsData.find((b) => b.id === id);
+  const blog =  await prisma.blog.findUnique({
+    where:{id:id},
+    include:{
+      author:true,
+    }
+  })
 
   if (!blog) {
     notFound();
   }
-
+  const formattedDate=new Date(blog.createdAt).toLocaleDateString("en-US",{
+    month:"short",
+    day:"numeric",
+    year:"numeric"
+  })
+  const authorName=blog.author.username
+  const authorAvatar=blog.author.avatarUrl || "https://lh3.googleusercontent.com/aida-public/AB6AXuDQREzBniPFG2Rv_94OnCxJg4cRDD40044S_MYT3ZXzSs4-9GW-Jv3-nb6sUnnqs2nTb6XE0OcJsPGnJDuMQJZ9QcIcQ_aHE1N7YwlkHcXxTBimzOzoqZ6IzCaH-CeERYMzm06b5vHmwCKTr24X--k89shI3ntfJqHPuc2pmf9UGQ60JwENsEpz0xxzRexZnHPo4N61bX1AIe4QBvRpu7bNUZKwep55iMNKLCoKqkRSQK4tfIUepeZ3C9uu4pIuIbkiT-5nAYtHiQ";
+  const coverImage=blog.coverImage || "https://lh3.googleusercontent.com/aida-public/AB6AXuBGqQusKRN51nhQea1nffq_Ca4j_-0PMBC1Kq8Vwk3S6jpo6nwpTYVY9C5t2-Ps7WCl_HN0E_e30iwbpfkb0j4bs6k63XOw7TVhsgAlwIeGTFvT_c1AUkp1dcYxDuM9IWKpJE9cCmcJjFGZmhNgQohmddj93Gwlxi6-sx2YwsqCglBPWx0yGxsya0QQ13S-hfTeEFKPcdM6GaS6YjQmr9ks2qHyAPzxsGcqEZtfsuw_kjHXipNXV2KUmSXhQXSsiLm-zQOqO1WCJg";
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen">
       
@@ -34,21 +47,21 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
           </h1>
 
           <p className="text-slate-600 dark:text-slate-400 text-lg md:text-2xl font-medium leading-relaxed mb-10">
-            {blog.subtitle || blog.excerpt}
+            { blog.excerpt || "A newly forged Scroll."}
           </p>
 
           {/* Author Card */}
           <div className="flex items-center gap-4 mb-10 p-4 md:p-6 rounded-2xl bg-slate-100 dark:bg-primary/5 border border-primary/10">
             <div 
               className="size-12 md:size-16 rounded-full bg-cover bg-center border-2 border-primary/20 flex-shrink-0" 
-              style={{ backgroundImage: `url("${blog.authorImage}")` }}
+              style={{ backgroundImage: `url("${authorAvatar}")` }}
             ></div>
             <div className="flex flex-col min-w-0">
-              <p className="text-slate-900 dark:text-white text-base md:text-lg font-bold truncate">{blog.author}</p>
+              <p className="text-slate-900 dark:text-white text-base md:text-lg font-bold truncate">{authorName}</p>
               <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs md:text-sm font-medium">
-                <span>{blog.date || "Oct 24, 2024"}</span>
+                <span>{formattedDate || "Oct 24, 2024"}</span>
                 <span className="size-1 rounded-full bg-primary/30"></span>
-                <span className="text-primary font-bold uppercase text-[9px] md:text-[10px] tracking-widest">{blog.readTime || "8 min read"}</span>
+                <span className="text-primary font-bold uppercase text-[9px] md:text-[10px] tracking-widest"> 8 min read</span>
               </div>
             </div>
           </div>
@@ -56,7 +69,7 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
           {/* Hero Image */}
           <div className="w-full mb-12 aspect-video rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl shadow-primary/20 group">
             <img 
-              src={blog.postImage} 
+              src={coverImage} 
               alt={blog.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
             />
@@ -84,7 +97,7 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
               <div className="flex items-center gap-3">
                 <button className="flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 rounded-full bg-primary text-white font-black hover:bg-primary/90 transition-all shadow-xl shadow-primary/30 active:scale-95">
                   <ThumbsUp size={20} />
-                  <span>{blog.likes}</span>
+                  <span>{blog.likesCount}</span>
                 </button>
                 <button className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full glass-panel text-slate-400 hover:text-primary transition-colors border-primary/10">
                   <ThumbsDown size={20} />
@@ -94,7 +107,7 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
               <div className="flex items-center gap-4">
                 <button className="flex items-center gap-2 text-slate-400 hover:text-primary transition-colors font-bold uppercase text-xs sm:text-sm tracking-widest">
                   <MessageSquare size={18} />
-                  <span>{blog.comments} Comments</span>
+                  <span>{blog.commentsCount} Comments</span>
                 </button>
               </div>
             </div>
