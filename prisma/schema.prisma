@@ -29,6 +29,8 @@ model User {
   receivedMessages Message[]      @relation("ReceivedMessages")
   conversations    Conversation[] @relation("UserConversations")
   createdAt     DateTime  @default(now())
+  likes          Like[]
+  comments       Comment[]
 }
 
 
@@ -49,12 +51,44 @@ model Blog {
   excerpt     String?
   coverImage  String?
   published   Boolean   @default(true)
+  category    String    @default("General") 
   author      User      @relation("UserBlogs", fields: [authorId], references: [id])
   authorId    String
   sharedInMessages Message[] @relation("SharedBlog")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  likesCount  Int       @default(0)
+  viewsCount  Int       @default(0)
+  commentsCount  Int       @default(0)
+  likes       Like[]
+  comments    Comment[]
+  @@index([authorId])
+  @@index([category,published])
+  @@index([createdAt(sort:Desc)])
 }
+
+
+model Like {
+  userId String
+  blogId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blog   Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@id([userId, blogId]) 
+}
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  blogId    String
+  authorId  String
+  createdAt DateTime @default(now())
+  
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id])
+
+  @@index([blogId]) // Speed up loading comments on a blog page
+}
+
 
 model Conversation {
   id          String    @id @default(uuid())
