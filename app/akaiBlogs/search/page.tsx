@@ -6,6 +6,7 @@ import SearchInput from "@/components/search/SearchInput";
 import SearchTabs from "@/components/search/SearchTabs";
 import SearchPostCard, { SearchPost } from "@/components/search/SearchPostCard";
 import SearchUserCard, { SearchUser } from "@/components/search/SearchUserCard";
+import { SearchPostSkeleton, SearchUserSkeleton } from "@/components/search/SearchSkeletons";
 import { ChevronDown } from "lucide-react";
 
 function SearchContent() {
@@ -72,9 +73,19 @@ function SearchContent() {
         {/* Search Results Display Area */}
         <div className="flex flex-col gap-6">
           {isLoading ? (
-            <div className="text-center py-20 text-slate-500 font-bold tracking-widest uppercase text-xs animate-pulse">
-              Unrolling scrolls...
-            </div>
+            activeTab === "posts" ? (
+              <div className="grid grid-cols-1 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <SearchPostSkeleton key={i} />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <SearchUserSkeleton key={i} />
+                ))}
+              </div>
+            )
           ) : activeTab === "posts" ? (
             <>
               <h3 className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest px-1">
