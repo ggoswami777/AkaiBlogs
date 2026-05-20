@@ -17,7 +17,7 @@ export default function SearchInput({ value, onChange }: SearchInputProps) {
   return (
     <form onSubmit={handleSubmit} className="w-full flex items-center">
       <div className="relative w-full group">
-        {/* Same styling tokens as the header Navbar search input */}
+       
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -25,7 +25,7 @@ export default function SearchInput({ value, onChange }: SearchInputProps) {
           placeholder="Search the scrolls..."
           type="text"
         />
-        {/* Same right-aligned search button as header */}
+      
         <button type="submit" className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-primary transition-colors">
           <Search size={14} />
         </button>
