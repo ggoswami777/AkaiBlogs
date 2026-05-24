@@ -139,9 +139,17 @@ function SearchContent() {
 export default function SearchPage() {
   return (
     <Suspense fallback={
-      <div className="flex justify-center items-center min-h-screen text-slate-500 tracking-widest uppercase text-xs animate-pulse">
-        Unrolling scrolls...
-      </div>
+      <main className="flex flex-1 justify-center py-5 px-4 min-h-screen">
+        <div className="layout-content-container flex flex-col max-w-[960px] flex-1 gap-6 pt-12">
+          <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 gap-4">
+              {[1, 2, 3].map((key) => (
+                <SearchPostSkeleton key={key} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
     }>
       <SearchContent />
     </Suspense>

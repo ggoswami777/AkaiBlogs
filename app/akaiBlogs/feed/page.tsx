@@ -4,6 +4,7 @@ import Footer2 from "@/components/layout/Footer2";
 import ProfileCard from "@/components/profile/ProfileCard";
 import FeedPageCard from "@/components/blog/FeedPageCard";
 import FeedBlogsCard from "@/components/blog/FeedBlogsCard";
+import FeedBlogsSkeleton from "@/components/skeletons/FeedBlogsSkeleton";
 
 import { blogsData } from "@/lib/data";
 import { useBlogStore } from "@/store/useBlogStore";
@@ -37,8 +38,10 @@ const Feed = () => {
             </div>
           </div>
           {isLoadingBlogs ? (
-            <div className="text-center py-20 text-slate-500 font-bold tracking-widest uppercase text-xs animate-pulse">
-              Unrolling Scrolls...
+            <div className="space-y-4">
+              {[1, 2, 3].map((n) => (
+                <FeedBlogsSkeleton key={n} />
+              ))}
             </div>
           ) : (
             blogs.map((blog:any) => <FeedBlogsCard key={blog.id} blog={blog} />)
