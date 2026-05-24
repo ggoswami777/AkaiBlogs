@@ -1,6 +1,6 @@
 interface ProfileStatsProps {
-  followers: string;
-  following: string;
+  followers: number;
+  following: number;
   posts: number;
 }
 
