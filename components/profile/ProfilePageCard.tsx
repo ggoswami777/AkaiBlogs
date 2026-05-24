@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ProfileHeader from "./ProfileHeader";
 import ProfileStats from "./ProfileStats";
 import ProfileTabs from "./ProfileTabs";
@@ -9,7 +9,27 @@ import { userProfileStore } from "@/store/useProfileStore";
 
 const ProfileCardPage = () => {
   const { profile, fetchProfile, isLoadingProfile } = userProfileStore();
-
+  const [blogs,setBlogs]=useState<any[]>([]);
+  const [isLoadingBlogs,setIsLoadingBlogs]=useState(true);
+  useEffect(()=>{
+    const fetchProfileBlogs=async()=>{
+      setIsLoadingBlogs(true);
+      try {
+        const res=await fetch("/api/akaiBlogs/profileBlogs");
+        const data=await res.json();
+        if(data?.success){
+          setBlogs(data.blogs);
+          console.log(data.blogs);
+        }
+        
+      } catch (error) {
+        console.error("failed to fetch profile blogs",error);
+      }finally{
+        setIsLoadingBlogs(false);
+      }
+    }
+    fetchProfileBlogs();
+  },[])
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
@@ -36,35 +56,35 @@ const ProfileCardPage = () => {
     );
   }
 
-  const posts = [
-    {
-      id: 1,
-      title: "Midnight in Shinjuku",
-      excerpt: "Found this amazing small ramen shop tucked away behind the main station. Best broth I've had this month!",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBGqQusKRN51nhQea1nffq_Ca4j_-0PMBC1Kq8Vwk3S6jpo6nwpTYVY9C5t2-Ps7WCl_HN0E_e30iwbpfkb0j4bs6k63XOw7TVhsgAlwIeGTFvT_c1AUkp1dcYxDuM9IWKpJE9cCmcJjFGZmhNgQohmddj93Gwlxi6-sx2YwsqCglBPWx0yGxsya0QQ13S-hfTeEFKPcdM6GaS6YjQmr9ks2qHyAPzxsGcqEZtfsuw_kjHXipNXV2KUmSXhQXSsiLm-zQOqO1WCJg",
-      likes: "2.4k",
-      comments: 156,
-      date: "Oct 24, 2023"
-    },
-    {
-      id: 2,
-      title: "Finding Zen in the Chaos",
-      excerpt: "Even in the world's busiest city, silence is only a temple gate away. Spent the morning at Meiji Jingu.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBCsuL_1udSYH8r1Z3LBdxqz8ressHppnxPzzvsEeRzvomxyyWun5CG0A9KvVnH2oIEJ_sv62s9bomWVL6TpNH2f2EOtMgL9wXRmyDBhMRgcP5Sjb7_1A8u8JFwp19u8-jPSvec6zjsVhVxXdIdBuMgPuOBR3Ph38x6CjhPnsVVfwTmQ63iAo0iFkkHh8bT45iRiYKf6QI377SmMuNh0yOp-wfH0U8y8aamo8pa6dM8pl-JSG71lPonCeQaZjR6ocjxdtFGwbF4IQ",
-      likes: "1.8k",
-      comments: 89,
-      date: "Oct 20, 2023"
-    },
-    {
-      id: 3,
-      title: "Tokyo Coffee Culture",
-      excerpt: "The attention to detail in these specialty shops is unreal. This pour-over took 10 minutes but was worth every second.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDGFzYQJ-FElA9PXTUc9p53s7iUIm0geLKI-1uCLmgJx3S6gtALpCAm8IC2RzHg0jFwxvj63j4SEUNLYUVuTXeIgRtmBVA2PjK1nuXvIY6X2rOAL9xXet8uB9_RGKIuJEy84eboVy8PNnIyZh-NpbAO_-Dflf3xkmgF6Df7-0mx0MZlhG8H79T2f-9pIvyy4LLxkhcTYxHxYZKW9THXpJ6Miw_e5H1GNdSh2q0WqLZq2wW5R7G6-fL3wflFjjkPsKLIQT-pkRdN5w",
-      likes: "3.1k",
-      comments: 243,
-      date: "Oct 15, 2023"
-    }
-  ];
+  // const posts = [
+  //   {
+  //     id: 1,
+  //     title: "Midnight in Shinjuku",
+  //     excerpt: "Found this amazing small ramen shop tucked away behind the main station. Best broth I've had this month!",
+  //     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBGqQusKRN51nhQea1nffq_Ca4j_-0PMBC1Kq8Vwk3S6jpo6nwpTYVY9C5t2-Ps7WCl_HN0E_e30iwbpfkb0j4bs6k63XOw7TVhsgAlwIeGTFvT_c1AUkp1dcYxDuM9IWKpJE9cCmcJjFGZmhNgQohmddj93Gwlxi6-sx2YwsqCglBPWx0yGxsya0QQ13S-hfTeEFKPcdM6GaS6YjQmr9ks2qHyAPzxsGcqEZtfsuw_kjHXipNXV2KUmSXhQXSsiLm-zQOqO1WCJg",
+  //     likes: "2.4k",
+  //     comments: 156,
+  //     date: "Oct 24, 2023"
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Finding Zen in the Chaos",
+  //     excerpt: "Even in the world's busiest city, silence is only a temple gate away. Spent the morning at Meiji Jingu.",
+  //     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBCsuL_1udSYH8r1Z3LBdxqz8ressHppnxPzzvsEeRzvomxyyWun5CG0A9KvVnH2oIEJ_sv62s9bomWVL6TpNH2f2EOtMgL9wXRmyDBhMRgcP5Sjb7_1A8u8JFwp19u8-jPSvec6zjsVhVxXdIdBuMgPuOBR3Ph38x6CjhPnsVVfwTmQ63iAo0iFkkHh8bT45iRiYKf6QI377SmMuNh0yOp-wfH0U8y8aamo8pa6dM8pl-JSG71lPonCeQaZjR6ocjxdtFGwbF4IQ",
+  //     likes: "1.8k",
+  //     comments: 89,
+  //     date: "Oct 20, 2023"
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Tokyo Coffee Culture",
+  //     excerpt: "The attention to detail in these specialty shops is unreal. This pour-over took 10 minutes but was worth every second.",
+  //     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDGFzYQJ-FElA9PXTUc9p53s7iUIm0geLKI-1uCLmgJx3S6gtALpCAm8IC2RzHg0jFwxvj63j4SEUNLYUVuTXeIgRtmBVA2PjK1nuXvIY6X2rOAL9xXet8uB9_RGKIuJEy84eboVy8PNnIyZh-NpbAO_-Dflf3xkmgF6Df7-0mx0MZlhG8H79T2f-9pIvyy4LLxkhcTYxHxYZKW9THXpJ6Miw_e5H1GNdSh2q0WqLZq2wW5R7G6-fL3wflFjjkPsKLIQT-pkRdN5w",
+  //     likes: "3.1k",
+  //     comments: 243,
+  //     date: "Oct 15, 2023"
+  //   }
+  // ];
 
   return (
     <main className="flex flex-col justify-center py-5 max-w-[1400px] mx-auto px-4">
@@ -88,17 +108,26 @@ const ProfileCardPage = () => {
         <ProfileTabs />
 
         <div className="flex flex-col gap-6">
-          {posts.map(post => (
-            <ProfilePostCard
-              key={post.id}
-              title={post.title}
-              excerpt={post.excerpt}
-              image={post.image}
-              likes={post.likes}
-              comments={post.comments}
-              date={post.date}
-            />
-          ))}
+          {isLoadingBlogs ? (
+        
+            <p className="text-slate-500 text-sm animate-pulse text-center py-10">Loading scrolls...</p>
+          ) : blogs.length === 0 ? (
+            <p className="text-slate-500 text-sm text-center py-10">No scrolls forged yet.</p>
+          ) : (
+            blogs.map((blog) => (
+              <ProfilePostCard
+                key={blog.id}
+                id={blog.id}
+                title={blog.title}
+                excerpt={blog.excerpt || ""}
+                image={blog.coverImage}
+                likes={blog.likesCount}
+                comments={blog.commentsCount}
+                date={new Date(blog.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              />
+            ))
+          )}
+
         </div>
 
         <div className="h-20 lg:hidden"></div>
