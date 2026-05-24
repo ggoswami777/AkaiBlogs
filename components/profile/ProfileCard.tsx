@@ -5,6 +5,7 @@ import { Bookmark, BookOpen, Landmark, Settings } from "lucide-react";
 import Link from "next/link";
 import { useBlogStore } from "@/store/useBlogStore";
 import { userProfileStore } from "@/store/useProfileStore";
+import ProfileCardSkeleton from "@/components/skeletons/ProfileCardSkeleton";
 
 const ProfileCard = () => {
   const { currentUser, fetchCurrentUser } = useBlogStore();
@@ -19,7 +20,7 @@ const ProfileCard = () => {
     fetchProfile();
   },[fetchProfile])
 
-  if(isLoadingProfile || !profile) return <div>loading...</div>
+  if (isLoadingProfile || !profile) return <ProfileCardSkeleton />;
   const username = currentUser || "Guest";
   return (
     <aside className="hidden lg:block lg:col-span-3 rounded-lg h-full overflow-y-auto pr-2 no-scrollbar">
