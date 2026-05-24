@@ -4,16 +4,22 @@ import { useEffect } from "react";
 import { Bookmark, BookOpen, Landmark, Settings } from "lucide-react";
 import Link from "next/link";
 import { useBlogStore } from "@/store/useBlogStore";
+import { userProfileStore } from "@/store/useProfileStore";
 
 const ProfileCard = () => {
   const { currentUser, fetchCurrentUser } = useBlogStore();
-
+  const {profile,fetchProfile,isLoadingProfile}=userProfileStore();
   useEffect(() => {
     if (!currentUser) {
       fetchCurrentUser();
     }
   }, [currentUser, fetchCurrentUser]);
 
+  useEffect(()=>{
+    fetchProfile();
+  },[fetchProfile])
+
+  if(isLoadingProfile || !profile) return <div>loading...</div>
   const username = currentUser || "Guest";
   return (
     <aside className="hidden lg:block lg:col-span-3 rounded-lg h-full overflow-y-auto pr-2 no-scrollbar">
@@ -36,13 +42,13 @@ const ProfileCard = () => {
           </div>
           <div className="grid grid-cols-2 divide-x divide-white/10 mb-8">
             <div className="text-center px-2">
-              <p className="text-xl font-black text-white">1.2k</p>
+              <p className="text-xl font-black text-white">{profile.followersCount}</p>
               <p className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">
                 Followers
               </p>
             </div>
             <div className="text-center px-2">
-              <p className="text-xl font-black text-white">482</p>
+              <p className="text-xl font-black text-white">{profile.followingCount}</p>
               <p className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">
                 Following
               </p>

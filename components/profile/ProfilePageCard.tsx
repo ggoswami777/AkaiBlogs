@@ -1,23 +1,40 @@
+"use client";
+
+import { useEffect } from "react";
 import ProfileHeader from "./ProfileHeader";
 import ProfileStats from "./ProfileStats";
 import ProfileTabs from "./ProfileTabs";
 import ProfilePostCard from "./ProfilePostCard";
-import { getAuthUser, getAuthUserServer } from "@/lib/authHelper";
+import { userProfileStore } from "@/store/useProfileStore";
 
-  const ProfileCardPage = async() => {
-const activeUser = await getAuthUserServer();
-const username = activeUser?.username || "Guest";
-  const profileData = {
-    name: username,
-    username:username,
-    bio: "Digital nomad & coffee enthusiast. Sharing my journey through Tokyo's hidden neon streets and quiet temples.",
-    avatarUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuDQREzBniPFG2Rv_94OnCxJg4cRDD40044S_MYT3ZXzSs4-9GW-Jv3-nb6sUnnqs2nTb6XE0OcJsPGnJDuMQJZ9QcIcQ_aHE1N7YwlkHcXxTBimzOzoqZ6IzCaH-CeERYMzm06b5vHmwCKTr24X--k89shI3ntfJqHPuc2pmf9UGQ60JwENsEpz0xxzRexZnHPo4N61bX1AIe4QBvRpu7bNUZKwep55iMNKLCoKqkRSQK4tfIUepeZ3C9uu4pIuIbkiT-5nAYtHiQ",
-    stats: {
-      followers: "1.2k",
-      following: "850",
-      posts: 42
-    }
-  };
+const ProfileCardPage = () => {
+  const { profile, fetchProfile, isLoadingProfile } = userProfileStore();
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  if (isLoadingProfile || !profile) {
+    return (
+      <main className="flex flex-col justify-center py-5 max-w-[1400px] mx-auto px-4">
+        <div className="flex flex-col flex-1 max-w-[800px] w-full mx-auto mt-6 animate-pulse space-y-6">
+          <div className="flex items-end gap-6">
+            <div className="w-32 h-32 rounded-full bg-white/10"></div>
+            <div className="space-y-2 flex-1">
+              <div className="h-8 w-48 bg-white/10 rounded"></div>
+              <div className="h-4 w-24 bg-white/10 rounded"></div>
+              <div className="h-4 w-64 bg-white/10 rounded"></div>
+            </div>
+          </div>
+          <div className="flex gap-6">
+            <div className="h-6 w-20 bg-white/10 rounded"></div>
+            <div className="h-6 w-20 bg-white/10 rounded"></div>
+            <div className="h-6 w-20 bg-white/10 rounded"></div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   const posts = [
     {
@@ -53,18 +70,18 @@ const username = activeUser?.username || "Guest";
     <main className="flex flex-col justify-center py-5 max-w-[1400px] mx-auto px-4">
       <div className="flex flex-col flex-1 max-w-[800px] w-full mx-auto mt-6 lg:mt-0">
 
-        <ProfileHeader 
-          name={profileData.name}
-          username={profileData.username}
-          bio={profileData.bio}
-          avatarUrl={profileData.avatarUrl}
+        <ProfileHeader
+          name={profile.username}
+          username={profile.username}
+          bio={profile.bio || "Digital nomad & coffee enthusiast. Sharing my journey through Tokyo's hidden neon streets and quiet temples."}
+          avatarUrl={profile.avatarUrl}
         />
 
         <div className="my-6">
-          <ProfileStats 
-            followers={profileData.stats.followers}
-            following={profileData.stats.following}
-            posts={profileData.stats.posts}
+          <ProfileStats
+            followers={profile.followersCount}
+            following={profile.followingCount}
+            posts={profile.postsCount}
           />
         </div>
 
@@ -72,7 +89,7 @@ const username = activeUser?.username || "Guest";
 
         <div className="flex flex-col gap-6">
           {posts.map(post => (
-            <ProfilePostCard 
+            <ProfilePostCard
               key={post.id}
               title={post.title}
               excerpt={post.excerpt}
@@ -83,7 +100,7 @@ const username = activeUser?.username || "Guest";
             />
           ))}
         </div>
-        
+
         <div className="h-20 lg:hidden"></div>
       </div>
     </main>
