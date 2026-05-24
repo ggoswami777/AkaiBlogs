@@ -5,6 +5,7 @@ import ProfileHeader from "./ProfileHeader";
 import ProfileStats from "./ProfileStats";
 import ProfileTabs from "./ProfileTabs";
 import ProfilePostCard from "./ProfilePostCard";
+import ProfilePostCardSkeleton from "@/components/skeletons/ProfilePostCardSkeleton";
 import { userProfileStore } from "@/store/useProfileStore";
 
 const ProfileCardPage = () => {
@@ -109,8 +110,11 @@ const ProfileCardPage = () => {
 
         <div className="flex flex-col gap-6">
           {isLoadingBlogs ? (
-        
-            <p className="text-slate-500 text-sm animate-pulse text-center py-10">Loading scrolls...</p>
+            <div className="space-y-6">
+              <ProfilePostCardSkeleton />
+              <ProfilePostCardSkeleton />
+              <ProfilePostCardSkeleton />
+            </div>
           ) : blogs.length === 0 ? (
             <p className="text-slate-500 text-sm text-center py-10">No scrolls forged yet.</p>
           ) : (
