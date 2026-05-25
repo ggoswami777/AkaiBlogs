@@ -24,15 +24,19 @@ const ProfilePostCard = ({ id,title, excerpt, image, likes, comments, date, onDe
       </div>)}
       <div className="flex flex-col justify-between flex-1 py-1 min-w-0">
         <div>
-          <div className="flex justify-between items-start">
-            <Link href={`/akaiBlogs/blog/${id}`}><h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 truncate">{title}</h3></Link>
+          <div className="flex justify-between items-start gap-4">
+            <Link href={`/akaiBlogs/blog/${id}`} className="flex-1 min-w-0">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 line-clamp-2 break-words">
+                {title}
+              </h3>
+            </Link>
             <button 
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 if (onDelete) onDelete();
               }}
-              className="text-slate-400 hover:text-primary transition-colors p-2 -mt-2 -mr-2"
+              className="text-slate-400 hover:text-primary transition-colors p-2 -mt-2 -mr-2 shrink-0"
             >
               <Trash2 size={18} />
             </button>
