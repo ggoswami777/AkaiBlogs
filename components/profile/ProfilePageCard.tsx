@@ -7,11 +7,15 @@ import ProfileTabs from "./ProfileTabs";
 import ProfilePostCard from "./ProfilePostCard";
 import ProfilePostCardSkeleton from "@/components/skeletons/ProfilePostCardSkeleton";
 import { userProfileStore } from "@/store/useProfileStore";
+import DeleteConfirmModal from "./DeleteConfirmModal";
 
 const ProfileCardPage = () => {
   const { profile, fetchProfile, isLoadingProfile } = userProfileStore();
   const [blogs,setBlogs]=useState<any[]>([]);
   const [isLoadingBlogs,setIsLoadingBlogs]=useState(true);
+  const [blogToDelete, setBlogToDelete] = useState<any | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   useEffect(()=>{
     const fetchProfileBlogs=async()=>{
       setIsLoadingBlogs(true);
@@ -31,9 +35,44 @@ const ProfileCardPage = () => {
     }
     fetchProfileBlogs();
   },[])
+
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
+
+  const handleDeleteConfirm = async () => {
+    if (!blogToDelete) return;
+    try {
+      const res = await fetch(`/api/akaiBlogs/delete?id=${blogToDelete.id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        // Remove from local state blogs list
+        setBlogs((prev) => prev.filter((b) => b.id !== blogToDelete.id));
+        // Decrement postsCount in the global Zustand store to update sidebar & header stats
+        userProfileStore.setState((state) => {
+          if (state.profile) {
+            return {
+              profile: {
+                ...state.profile,
+                postsCount: Math.max(0, state.profile.postsCount - 1),
+              },
+            };
+          }
+          return {};
+        });
+      } else {
+        alert(data.error || "Failed to delete blog");
+      }
+    } catch (error) {
+      console.error("Error deleting blog:", error);
+      alert("An error occurred while deleting the blog");
+    } finally {
+      setIsDeleteModalOpen(false);
+      setBlogToDelete(null);
+    }
+  };
 
   if (isLoadingProfile || !profile) {
     return (
@@ -128,6 +167,10 @@ const ProfileCardPage = () => {
                 likes={blog.likesCount}
                 comments={blog.commentsCount}
                 date={new Date(blog.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                onDelete={() => {
+                  setBlogToDelete(blog);
+                  setIsDeleteModalOpen(true);
+                }}
               />
             ))
           )}
@@ -136,6 +179,16 @@ const ProfileCardPage = () => {
 
         <div className="h-20 lg:hidden"></div>
       </div>
+
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setBlogToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        blogTitle={blogToDelete?.title || ""}
+      />
     </main>
   );
 };
