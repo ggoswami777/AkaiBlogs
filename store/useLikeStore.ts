@@ -9,7 +9,6 @@ interface LikeStore {
 }
 
 export const useLikeStore = create<LikeStore>((set, get) => ({
- 
   likedBlogs: {},
   likesCount: {},
   isLoading: {},
@@ -19,13 +18,11 @@ export const useLikeStore = create<LikeStore>((set, get) => ({
       likesCount: { ...state.likesCount, [blogId]: count },
     }));
   },
-
   toggleLike: async (blogId) => {
     if (get().isLoading[blogId]) return;
     set((state) => ({
       isLoading: { ...state.isLoading, [blogId]: true },
     }));
-
     try {
       const res = await fetch("/api/akaiBlogs/likes", {
         method: "POST",
