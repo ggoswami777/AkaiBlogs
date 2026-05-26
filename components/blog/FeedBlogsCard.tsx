@@ -1,10 +1,11 @@
 import { useLikeStore } from "@/store/useLikeStore";
 import { Bookmark, Ellipsis, Heart, MessageSquare, Share2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const FeedBlogsCard = ({ blog }: any) => {
   const { likedBlogs, likesCount, toggleLike, setInitialState, isLoading } = useLikeStore();
+  const [showHeartOverlay, setShowHeartOverlay] = useState(false);
 
   useEffect(() => {
     // If the backend feeds likesCount and whether current user liked, set it in store
@@ -13,6 +14,19 @@ const FeedBlogsCard = ({ blog }: any) => {
 
   const isLiked = likedBlogs[blog.id] || false;
   const totalLikes = likesCount[blog.id] ?? (blog.likesCount || 0);
+
+  const handleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const wasLiked = isLiked;
+    await toggleLike(blog.id);
+    if (!wasLiked) {
+      setShowHeartOverlay(true);
+      setTimeout(() => {
+        setShowHeartOverlay(false);
+      }, 800);
+    }
+  };
 
   return (
     <div key={blog.id} className="space-y-6">
@@ -54,6 +68,14 @@ const FeedBlogsCard = ({ blog }: any) => {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               src={blog.postImage}
             />
+            {showHeartOverlay && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none z-10">
+                <Heart 
+                  className="text-primary fill-primary animate-heart-burst drop-shadow-[0_0_20px_rgba(234,42,51,0.8)]" 
+                  size={72} 
+                />
+              </div>
+            )}
           </div>
 
           {/* Content */}
@@ -70,11 +92,7 @@ const FeedBlogsCard = ({ blog }: any) => {
               <div className="flex items-center gap-5">
                 {/* Like Button */}
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    toggleLike(blog.id);
-                  }}
+                  onClick={handleLike}
                   disabled={isLoading[blog.id]}
                   className="flex items-center gap-1.5 text-slate-400 hover:text-primary transition-colors"
                 >
