@@ -95,7 +95,7 @@ const FeedBlogsCard = ({ blog }: any) => {
                   <span className="material-symbols-outlined text-lg">
                     <MessageSquare size={18} />
                   </span>
-                  <span className="text-[10px] font-bold">{blog.comments || 0}</span>
+                  <span className="text-[10px] font-bold">{blog.commentsCount ?? blog.comments ?? 0}</span>
                 </button>
 
                 {/* Share Button */}
