@@ -30,16 +30,18 @@ const ProfilePostCard = ({ id,title, excerpt, image, likes, comments, date, onDe
                 {title}
               </h3>
             </Link>
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                if (onDelete) onDelete();
-              }}
-              className="text-slate-400 hover:text-primary transition-colors p-2 -mt-2 -mr-2 shrink-0"
-            >
-              <Trash2 size={18} />
-            </button>
+            {onDelete && (
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if (onDelete) onDelete();
+                }}
+                className="text-slate-400 hover:text-primary transition-colors p-2 -mt-2 -mr-2 shrink-0"
+              >
+                <Trash2 size={18} />
+              </button>
+            )}
           </div>
           <Link href={`/akaiBlogs/blog/${id}`}><p className="text-slate-600 dark:text-slate-400 line-clamp-2 text-sm md:text-base">{excerpt}</p></Link>
         </div>

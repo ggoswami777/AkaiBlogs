@@ -20,12 +20,15 @@ export default function SearchUserCard({ user }: SearchUserCardProps) {
   const [isFollowing, setIsFollowing] = useState(user.isFollowing);
 
   const handleFollowToggle = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigating if wrapped in a link later
+    // prevent the parent Link from triggering when clicking follow
+    e.stopPropagation();
+    e.preventDefault();
     setIsFollowing((prev) => !prev);
   };
 
   return (
-    <div className="flex items-center justify-between p-4 bg-white dark:bg-primary/5 border border-primary/10 rounded-xl hover:border-primary/25 transition-all">
+    <Link href={`/akaiBlogs/profile/${user.username}`} className="block">
+      <div className="flex items-center justify-between p-4 bg-white dark:bg-primary/5 border border-primary/10 rounded-xl hover:border-primary/25 transition-all">
       <div className="flex items-center gap-4">
         {/* User Avatar */}
         <div
@@ -51,6 +54,7 @@ export default function SearchUserCard({ user }: SearchUserCardProps) {
       >
         {isFollowing ? "Following" : "Follow"}
       </button>
-    </div>
+      </div>
+    </Link>
   );
 }
