@@ -18,8 +18,7 @@ const Header = () => {
           </Link>
         </div>
         <div className="flex items-center gap-6">
-          <SearchBar />
-          
+         
           <div className="hidden md:flex items-center gap-6 border-l border-white/10 pl-6 h-8">
             <Link href="/akaiBlogs/create">
               <button className="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20 flex items-center gap-2">

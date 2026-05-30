@@ -90,7 +90,8 @@ export default function UserProfilePage({ params }: PageProps) {
             username={profile.username}
             bio={profile.bio || "Sharing my journey through neon streets and quiet temples."}
             avatarUrl={profile.avatarUrl}
-            isOwnProfile={false} 
+            isOwnProfile={false}
+            isFollowing={profile.isFollowing}
           />
 
           <div className="my-6">

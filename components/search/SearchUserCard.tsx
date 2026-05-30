@@ -16,14 +16,32 @@ interface SearchUserCardProps {
 }
 
 export default function SearchUserCard({ user }: SearchUserCardProps) {
-  // Use state to make follow actions interactive on the UI side
-  const [isFollowing, setIsFollowing] = useState(user.isFollowing);
 
-  const handleFollowToggle = (e: React.MouseEvent) => {
-    // prevent the parent Link from triggering when clicking follow
+  const [isFollowing, setIsFollowing] = useState(user.isFollowing);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleFollowToggle = async (e: React.MouseEvent) => {
+    
     e.stopPropagation();
     e.preventDefault();
-    setIsFollowing((prev) => !prev);
+    
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/profile/follow/${user.username}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsFollowing(data.isfollowing);
+      }
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -46,13 +64,14 @@ export default function SearchUserCard({ user }: SearchUserCardProps) {
       {/* Interactive Follow Button */}
       <button
         onClick={handleFollowToggle}
-        className={`text-sm font-bold px-5 py-2 rounded-full transition-all duration-300 ${
+        disabled={isLoading}
+        className={`text-sm font-bold px-5 py-2 rounded-full transition-all duration-300 disabled:opacity-50 ${
           isFollowing
             ? "bg-primary/20 hover:bg-primary/30 text-primary"
             : "bg-primary hover:bg-primary/90 text-white"
         }`}
       >
-        {isFollowing ? "Following" : "Follow"}
+        {isLoading ? "..." : isFollowing ? "Following" : "Follow"}
       </button>
       </div>
     </Link>

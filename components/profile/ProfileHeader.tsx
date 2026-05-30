@@ -1,5 +1,6 @@
 // components/profile/ProfileHeader.tsx
 import { Edit, Share } from "lucide-react";
+import { useState } from "react";
 
 interface ProfileHeaderProps {
   name: any;
@@ -9,7 +10,29 @@ interface ProfileHeaderProps {
   isOwnProfile?: boolean; 
 }
 
-const ProfileHeader = ({ name, username, bio, avatarUrl, isOwnProfile }: ProfileHeaderProps) => {
+interface ProfileHeaderProps {
+  name: any;
+  username: string;
+  bio: string;
+  avatarUrl?: string;
+  isOwnProfile?: boolean;
+  isFollowing?: boolean;
+}
+
+const ProfileHeader = ({ name, username, bio, avatarUrl, isOwnProfile, isFollowing: initialIsFollowing }: ProfileHeaderProps) => {
+  const [isFollowing,setIsFollowing]=useState(initialIsFollowing ?? false);
+  const handleFollow=async()=>{
+    const res= await fetch(`/api/profile/follow/${username}`,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+      }
+    })
+    const data=await res.json();
+    if(data.success){
+      setIsFollowing(data.isfollowing);
+    }
+  }
   return (
     <div className="flex w-full flex-col gap-6 items-center md:flex-row md:items-end md:justify-between">
       <div className="flex flex-col md:flex-row gap-6 items-center md:items-end">
@@ -37,8 +60,10 @@ const ProfileHeader = ({ name, username, bio, avatarUrl, isOwnProfile }: Profile
             <span>Edit Profile</span>
           </button>
         ) : (
-          <button className="flex flex-1 md:flex-none min-w-[120px] cursor-pointer items-center justify-center rounded-full h-11 px-6 bg-primary text-white text-sm font-bold hover:brightness-110 active:scale-95 transition-all">
-            <span>Follow</span>
+          <button onClick={handleFollow} className={`flex flex-1 md:flex-none min-w-  [120px] cursor-pointer items-center justify-center rounded-full h-11 px-6 text-sm font-bold hover:brightness-110 active:scale-95 transition-all ${
+            isFollowing ? "bg-primary/20 hover:bg-primary/30 text-primary" : "bg-primary hover:bg-primary/90 text-white"
+          }`}>
+            <span>{isFollowing?"Unfollow":"Follow"}</span>
           </button>
         )}
         <button className="flex items-center justify-center rounded-full h-11 w-11 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors">
