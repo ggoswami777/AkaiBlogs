@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const { username } = await params;
-    const activeUser = await getAuthUserServer(); // FIX 1: was missing `await`
+    const activeUser = await getAuthUserServer(); 
     if (!activeUser) {
       return NextResponse.json({ success: false, message: "Unauthorized" });
     }
