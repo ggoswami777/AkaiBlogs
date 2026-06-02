@@ -5,6 +5,7 @@ import Navbar from '@/components/layout/Navbar';
 import { notFound } from 'next/navigation';
 import { ThumbsUp, ThumbsDown, Share2, Bookmark, MessageSquare } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
+import CommentCard from '@/components/blog/CommentCard';
 
 export default async function BlogPage({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -157,24 +158,13 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
                   content: "I've practiced calligraphy in Gion for years, and you've captured exactly how the light feels at twilight."
                 }
               ].map((comment, idx) => (
-                <div key={idx} className="flex gap-3 md:gap-4 p-4 md:p-6 rounded-2xl glass-panel border-white/5 transition-all hover:border-primary/20">
-                  <div className="size-10 md:size-12 rounded-full border-2 border-primary/30 overflow-hidden shrink-0">
-                    <img src={comment.avatar} alt={comment.user} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="space-y-1 md:space-y-2 min-w-0">
-                    <div className="flex items-center gap-3">
-                      <h4 className="font-bold text-white text-sm md:text-base truncate">{comment.user}</h4>
-                      <span className="text-[9px] md:text-xs text-slate-500 font-medium uppercase tracking-tighter shrink-0">{comment.time}</span>
-                    </div>
-                    <p className="text-slate-400 text-xs md:text-sm leading-relaxed">
-                      {comment.content}
-                    </p>
-                    <div className="flex items-center gap-4 pt-1">
-                      <button className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">Reply</button>
-                      <button className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors">Honor</button>
-                    </div>
-                  </div>
-                </div>
+                <CommentCard
+                  key={idx}
+                  user={comment.user}
+                  avatar={comment.avatar}
+                  time={comment.time}
+                  content={comment.content}
+                />
               ))}
             </div>
           </div>
