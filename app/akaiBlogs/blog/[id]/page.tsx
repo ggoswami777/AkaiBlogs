@@ -5,7 +5,7 @@ import Navbar from '@/components/layout/Navbar';
 import { notFound } from 'next/navigation';
 import { ThumbsUp, ThumbsDown, Share2, Bookmark, MessageSquare } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
-import CommentCard from '@/components/blog/CommentCard';
+import BlogComments from '@/components/blog/BlogComments';
 
 export default async function BlogPage({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -115,59 +115,7 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
           </div>
 
           {/* Comment Section */}
-          <div className="mt-16 space-y-10">
-            <div className="flex flex-col gap-6">
-              <h3 className="text-xl md:text-2xl font-black text-white italic flex items-center gap-3">
-                <MessageSquare className="text-primary" />
-                Grand Hall Discussion
-              </h3>
-              
-              {/* Comment Input */}
-              <div className="flex gap-4">
-                <div className="hidden sm:block size-12 rounded-full border-2 border-primary/30 overflow-hidden shrink-0">
-                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuARrNF78qTP1Qjs8WBhowU7Lkc1VfhyYOOo6WVPbSmDT1HKzHDwczfhNZda_UrGmb4HT8A1z19TeRhMkJ7dKz5dNNEZX6YuOedHRvBa4rm3aMj3a7xam19YC7oslObzYbPAMAun1BK-MCE4Xs7vgb00is7arR6xc7R9aumrGsPYSt1WuUA44pU_EZiUsM6LtCrpg8Woxr-YhntVUW_xOcGm3wpG5JxG4f_yX4yGs4Orl3ewnJHPlkJykGJa5CR_7wcgnQA_6t6m-g" alt="You" className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1 space-y-3 min-w-0">
-                  <textarea 
-                    className="w-full bg-accent-dark/30 border border-primary/10 rounded-2xl p-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-primary/50 transition-colors resize-none" 
-                    placeholder="Contribute to the collective knowledge..."
-                    rows={3}
-                  />
-                  <div className="flex justify-end">
-                    <button className="bg-primary hover:bg-primary/90 text-white px-6 md:px-8 py-2 md:py-3 rounded-full font-bold text-sm transition-all transform hover:scale-105">
-                      Post Scroll
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Hardcoded Comments */}
-            <div className="space-y-6 md:space-y-8">
-              {[
-                {
-                  user: "Takeshi Kovacs",
-                  avatar: "https://i.pravatar.cc/100?img=11",
-                  time: "2 hours ago",
-                  content: "This analysis of the Gion district is spot on. The way silence is integrated into the architecture is truly unique to Kyoto."
-                },
-                {
-                  user: "Miyamoto S.",
-                  avatar: "https://i.pravatar.cc/100?img=12",
-                  time: "5 hours ago",
-                  content: "I've practiced calligraphy in Gion for years, and you've captured exactly how the light feels at twilight."
-                }
-              ].map((comment, idx) => (
-                <CommentCard
-                  key={idx}
-                  user={comment.user}
-                  avatar={comment.avatar}
-                  time={comment.time}
-                  content={comment.content}
-                />
-              ))}
-            </div>
-          </div>
+          <BlogComments blogId={blog.id} />
 
           {/* Next Post Preview */}
           <div className="mt-24 p-6 md:p-12 rounded-[2rem] md:rounded-[2.5rem] glass-panel border border-primary/20 text-center relative overflow-hidden group">
