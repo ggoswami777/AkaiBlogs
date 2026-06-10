@@ -6,9 +6,11 @@ import { notFound } from 'next/navigation';
 import { ThumbsUp, ThumbsDown, Share2, Bookmark, MessageSquare } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import BlogComments from '@/components/blog/BlogComments';
+import { getAuthUserServer } from '@/lib/authHelper';
 
 export default async function BlogPage({ params }: { params: { id: string } }) {
   const { id } = await params;
+  const activeUser=await getAuthUserServer();
   const blog =  await prisma.blog.findUnique({
     where:{id:id},
     include:{
@@ -115,7 +117,7 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
           </div>
 
           {/* Comment Section */}
-          <BlogComments blogId={blog.id} />
+          <BlogComments blogId={blog.id} currentUser={activeUser} blogAuthorId={blog.authorId} />
 
           {/* Next Post Preview */}
           <div className="mt-24 p-6 md:p-12 rounded-[2rem] md:rounded-[2.5rem] glass-panel border border-primary/20 text-center relative overflow-hidden group">
