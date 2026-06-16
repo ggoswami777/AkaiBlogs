@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, act } from "react";
 import {
   ImagePlus,
   X,
@@ -15,6 +15,8 @@ import {
   Eye,
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing";
+import { DocumentAST } from "@/types/blogRenderingType";
+import { applyStyleToSpans, getSelectionSites } from "@/utils/editorSelection";
 const categories = [
   "Technology",
   "Design",
@@ -25,7 +27,6 @@ const categories = [
   "Philosophy",
   "Art",
 ];
-
 export default function CreateBlogPage() {
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -37,6 +38,38 @@ export default function CreateBlogPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [content, setContent] = useState("");
   const { startUpload, isUploading } = useUploadThing("imageUploader");
+  const [blocks, setBlocks] = useState<DocumentAST>([
+    {
+      id: "block-1",
+      type: "paragraph",
+      children: [{ text: "Begin writing your scroll here..." }],
+    },
+  ]);
+
+  const applyInlineStyle = (styleKey: "bold" | "italic", value: boolean) => {
+    // get crurrent active block element
+    const activeElement = document.activeElement as HTMLElement;
+    if (!activeElement || !activeElement.dataset.blockId) return;
+    const blockId = activeElement.dataset.blockId;
+    // get slices
+    const slices = getSelectionSites(activeElement);
+    if (!slices || !slices.selected) return;
+
+    // update block
+    setBlocks((prevBlocks) =>
+      prevBlocks.map((block) => {
+        if (block.id !== blockId) return block;
+        const newSpans = applyStyleToSpans(
+          block.children,
+          slices.startOffset,
+          slices.endOffset,
+          styleKey,
+          value,
+        );
+        return { ...block, children: newSpans };
+      }),
+    );
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -312,14 +345,61 @@ export default function CreateBlogPage() {
               Content
             </label>
             <div className="relative">
-              <textarea
-                id="post-content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Begin writing your scroll here... Let the ink flow."
-                rows={10}
-                className="w-full bg-obsidian border border-white/[0.06] rounded-2xl px-6 py-5 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-primary/40 focus:shadow-[0_0_30px_rgba(234,42,51,0.06)] transition-all duration-300 resize-none leading-relaxed"
-              />
+              <div className="space-y-4 bg-obsidian border border-white/[0.06] rounded-2xl p-6">
+                {/* TOOLBAR */}
+                <div className="flex items-center gap-2 pb-4 border-b border-white/[0.06] mb-4">
+                  <button
+                    onClick={() => applyInlineStyle("bold", true)}
+                    className="p-2 bg-white/[0.03] hover:bg-white/[0.08] text-white rounded-lg text-xs font-bold"
+                  >
+                    B
+                  </button>
+                  <button
+                    onClick={() => applyInlineStyle("italic", true)}
+                    className="p-2 bg-white/[0.03] hover:bg-white/[0.08] text-white rounded-lg text-xs italic font-bold"
+                  >
+                    I
+                  </button>
+                </div>
+
+                {/* EDITOR CANVAS */}
+                {blocks.map((block) => (
+                  <div
+                    key={block.id}
+                    data-block-id={block.id}
+                    contentEditable
+                    suppressContentEditableWarning
+                    className="outline-none text-white text-sm leading-relaxed min-h-[24px]"
+                    onBlur={(e) => {
+                      // Sync editing changes back to react state on blur
+                      const updatedText = e.currentTarget.innerText;
+                      setBlocks((prev) =>
+                        prev.map((b) =>
+                          b.id === block.id
+                            ? { ...b, children: [{ text: updatedText }] }
+                            : b,
+                        ),
+                      );
+                    }}
+                  >
+                    {block.children.map((span, index) => {
+                      let classes = "";
+                      if (span.bold) classes += " font-bold";
+                      if (span.italic) classes += " italic";
+                      return (
+                        <span
+                          key={index}
+                          className={classes}
+                          style={{ color: span.color }}
+                        >
+                          {span.text}
+                        </span>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+
               <div className="absolute bottom-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
             </div>
           </div>
