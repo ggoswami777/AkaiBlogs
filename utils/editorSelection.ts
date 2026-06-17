@@ -58,6 +58,7 @@ export function mergeAdjacentSpans(spans: span[]): span[] {
     const next = spans[i];
     const stylesMatch =
       !!current.bold === !!next.bold &&
+      !!current.subbold === !!next.subbold && 
       !!current.italic === !!next.italic &&
       current.color === next.color;
 
@@ -73,13 +74,44 @@ export function mergeAdjacentSpans(spans: span[]): span[] {
 }
 
 /**
+ * Splits span list at global offset to preserve format attributes when Enter is pressed
+ */
+export function splitSpansAtOffset(spans: span[], offset: number): [span[], span[]] {
+  const left: span[] = [];
+  const right: span[] = [];
+  let currentOffset = 0;
+
+  for (const item of spans) {
+    const len = item.text.length;
+    const start = currentOffset;
+    const end = currentOffset + len;
+
+    if (end <= offset) {
+      left.push(item);
+    } else if (start >= offset) {
+      right.push(item);
+    } else {
+      const splitIndex = offset - start;
+      const leftPart = { ...item, text: item.text.slice(0, splitIndex) };
+      const rightPart = { ...item, text: item.text.slice(splitIndex) };
+
+      if (leftPart.text) left.push(leftPart);
+      if (rightPart.text) right.push(rightPart);
+    }
+    currentOffset += len;
+  }
+
+  return [left, right];
+}
+
+/**
  * Iterates through existing spans and slices only the ones intersecting the selection
  */
 export function applyStyleToSpans(
   spans: span[],
   startOffset: number,
   endOffset: number,
-  styleKey: "bold" | "italic",
+  styleKey: "bold" | "italic" | "subbold",
   value: boolean,
 ): span[] {
   let currentOffset = 0;
@@ -129,28 +161,63 @@ export function applyStyleToSpans(
   return mergeAdjacentSpans(newSpans);
 }
 
-export function parseDOMToSpans(element:HTMLElement):span[]{
-  const spans:span[]=[];
-  element.childNodes.forEach((node)=>{
-    if(node.nodeType==Node.TEXT_NODE){
-      spans.push({text:node.textContent || ""});
+export function parseDOMToSpans(element: HTMLElement): span[] {
+  const spans: span[] = [];
+
+  
+  function traverse(
+    node: Node,
+    currentStyles: { bold?: boolean; subbold?: boolean; italic?: boolean; color?: string }
+  ) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent || "";
+      if (text) {
+        spans.push({
+          text,
+          ...currentStyles,
+        });
+      }
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const el = node as HTMLElement;
+
+      const bold =
+        currentStyles.bold ||
+        el.tagName === "STRONG" ||
+        el.tagName === "B" ||
+        el.classList.contains("font-bold") ||
+        el.style.fontWeight === "bold" ||
+        parseInt(el.style.fontWeight) >= 700;
+
+      const subbold =
+        currentStyles.subbold ||
+        el.classList.contains("font-semibold") ||
+        el.style.fontWeight === "semibold" ||
+        parseInt(el.style.fontWeight) === 600;
+
+      const italic =
+        currentStyles.italic ||
+        el.tagName === "EM" ||
+        el.tagName === "I" ||
+        el.classList.contains("italic") ||
+        el.style.fontStyle === "italic";
+
+      const color = el.style.color || currentStyles.color;
+
+      node.childNodes.forEach((child) => {
+        traverse(child, {
+          bold: bold ? true : undefined,
+          subbold: subbold ? true : undefined,
+          italic: italic ? true : undefined,
+          color,
+        });
+      });
     }
-    else if(node.nodeType===Node.ELEMENT_NODE){
-      const el=node as HTMLElement;
-      const text=el.textContent || "";
-      const bold=el.tagName==="STRONG" || el.tagName==="B" || el.classList.contains("font-bold");
-      const subbold=el.classList.contains("font-semibold");
-      const italic=el.tagName==="EM" || el.tagName=="I" || el.classList.contains("italic");
-      const color=el.style.color || undefined;
-      spans.push({
-        text,
-        bold:bold?true:undefined,
-        subbold:subbold?true:undefined,
-        italic:italic?true:undefined,
-        color
-      })
-    }
-  })
+  }
+
+  element.childNodes.forEach((child) => {
+    traverse(child, {});
+  });
+
   return mergeAdjacentSpans(spans);
 }
 

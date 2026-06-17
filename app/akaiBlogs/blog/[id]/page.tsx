@@ -7,12 +7,12 @@ import { prisma } from '@/lib/prisma';
 import BlogComments from '@/components/blog/BlogComments';
 import { getAuthUserServer } from '@/lib/authHelper';
 
-// Define strict interfaces for your block editor's JSON structure
+
 interface ContentNode {
   text?: string;
   bold?: boolean;
   italic?: boolean;
-  [key: string]: any; // Catch-all for extra layout attributes
+  [key: string]: any; 
 }
 
 interface BlockNode {
@@ -20,10 +20,10 @@ interface BlockNode {
   children?: ContentNode[];
 }
 
-// Custom AST component to parse block formatting seamlessly
+
 function RenderBlogContent({ content }: { content: string }) {
   try {
-    // Attempt to parse content assuming it's a JSON array from your block editor
+    
     const blocks: BlockNode[] = JSON.parse(content);
 
     if (!Array.isArray(blocks)) {
@@ -33,7 +33,7 @@ function RenderBlogContent({ content }: { content: string }) {
     return (
       <div className="space-y-6 text-slate-800 dark:text-slate-200">
         {blocks.map((block, blockIdx) => {
-          // Inner function to format the inline text leaves (bold/italic flags)
+         
           const renderChildren = () =>
             block.children?.map((child, childIdx) => {
               let element: React.ReactNode = child.text || '';
@@ -48,7 +48,7 @@ function RenderBlogContent({ content }: { content: string }) {
               return <React.Fragment key={childIdx}>{element}</React.Fragment>;
             });
 
-          // Block container assignment
+        
           switch (block.type) {
             case 'heading-1':
               return (
@@ -86,7 +86,7 @@ function RenderBlogContent({ content }: { content: string }) {
       </div>
     );
   } catch (error) {
-    // Fallback: If content is a raw HTML string instead of stringified JSON, render safely
+    
     return (
       <div 
         className="prose prose-sm sm:prose-lg dark:prose-invert max-w-none text-slate-800 dark:text-slate-200"

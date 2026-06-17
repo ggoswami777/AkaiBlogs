@@ -16,7 +16,13 @@ import {
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing";
 import { DocumentAST } from "@/types/blogRenderingType";
-import { applyStyleToSpans, getSelectionSites } from "@/utils/editorSelection";
+import {
+  applyStyleToSpans,
+  getSelectionSites,
+  parseDOMToSpans,
+  splitSpansAtOffset,
+} from "@/utils/editorSelection";
+import { parse } from "path";
 const categories = [
   "Technology",
   "Design",
@@ -46,28 +52,66 @@ export default function CreateBlogPage() {
     },
   ]);
 
-  const applyInlineStyle = (styleKey: "bold" | "italic", value: boolean) => {
-    // get crurrent active block element
+  const applyInlineStyle = (
+    styleKey: "bold" | "subbold" | "italic",
+    value: boolean,
+  ) => {
+  
+    if (styleKey === "bold") {
+      document.execCommand("bold", false);
+    } else if (styleKey === "italic") {
+      document.execCommand("italic", false);
+    } else if (styleKey === "subbold") {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed) return;
+      const range = selection.getRangeAt(0);
+
+      let parent = range.commonAncestorContainer as HTMLElement;
+      if (parent.nodeType === Node.TEXT_NODE) {
+        parent = parent.parentElement as HTMLElement;
+      }
+
+      const existingSubbold = parent.closest(".font-semibold");
+
+      if (existingSubbold) {
+        
+        const textNode = document.createTextNode(existingSubbold.textContent || "");
+        existingSubbold.parentNode?.replaceChild(textNode, existingSubbold);
+      } else {
+        
+        const span = document.createElement("span");
+        span.className = "font-semibold text-slate-200";
+        span.appendChild(range.extractContents());
+        range.insertNode(span);
+      }
+    }
+
+    
+    const activeElement = document.activeElement as HTMLElement;
+    if (activeElement) {
+      activeElement.blur();
+      activeElement.focus();
+    }
+  };
+
+  const toggleBlockType = (type: "paragraph" | "code" | "heading-1" | "heading-2") => {
     const activeElement = document.activeElement as HTMLElement;
     if (!activeElement || !activeElement.dataset.blockId) return;
     const blockId = activeElement.dataset.blockId;
-    // get slices
-    const slices = getSelectionSites(activeElement);
-    if (!slices || !slices.selected) return;
 
-    // update block
-    setBlocks((prevBlocks) =>
-      prevBlocks.map((block) => {
-        if (block.id !== blockId) return block;
-        const newSpans = applyStyleToSpans(
-          block.children,
-          slices.startOffset,
-          slices.endOffset,
-          styleKey,
-          value,
-        );
-        return { ...block, children: newSpans };
-      }),
+   
+    const currentSpans = parseDOMToSpans(activeElement);
+
+    setBlocks((prev) =>
+      prev.map((block) =>
+        block.id === blockId
+          ? { 
+              ...block, 
+              type: block.type === type ? "paragraph" : type,
+              children: currentSpans 
+            }
+          : block
+      )
     );
   };
 
@@ -110,6 +154,30 @@ export default function CreateBlogPage() {
         throw new Error("Upload failed");
       }
       const imageUrl = uploadRes[0]?.url;
+      // convert ast to standard html
+      const htmlContent = blocks
+        .map((block) => {
+          const spansHTML = block.children
+            .map((span) => {
+              let classes = "";
+              if (span.bold) classes += "font-bold tex-white";
+              if (span.subbold) classes += "font-semibold text-slate-200";
+              if (span.italic) classes += "italic";
+              const colorStyle = span.color
+                ? `style="color:${span.color}"`
+                : "";
+              return `<span class="${classes.trim()}">${span.text}</span>`;
+            })
+            .join("");
+          if (block.type === "heading-1")
+            return `<h1 class="text-3xl font-extrabold text-white tracking-tight my-4">${spansHTML}</h1>`;
+          if (block.type === "heading-2")
+            return `<h2 class="text-2xl font-bold text-slate-100 tracking-tight my-3">${spansHTML}</h2>`;
+          if (block.type === "code")
+            return `<pre class="p-4 bg-black/40 border border-white/5 rounded-xl font-mono text-sm text-green-400 my-3"><code>${spansHTML}</code></pre>`;
+          return `<p class="text-slate-400 text-base leading-relaxed my-2">${spansHTML}</p>`;
+        })
+        .join("");
       const response = await fetch("/api/akaiBlogs/create", {
         method: "POST",
         body: JSON.stringify({
@@ -117,7 +185,7 @@ export default function CreateBlogPage() {
           excerpt,
           category: selectedCategory,
           image: imageUrl,
-          content: JSON.stringify(blocks),
+          content: htmlContent,
         }),
       });
       if (response.ok) {
@@ -128,6 +196,70 @@ export default function CreateBlogPage() {
       alert("An error occured while publishing");
     }
   };
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLDivElement>,
+    blockId: string,
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const index = blocks.findIndex((b) => b.id === blockId);
+      if (index === -1) return;
+      const currentBlock = blocks[index];
+      const activeElement = e.currentTarget;
+      
+      const slices = getSelectionSites(activeElement);
+      const splitOffset = slices ? slices.startOffset : 0;
+      
+      
+      const [leftSpans, rightSpans] = splitSpansAtOffset(currentBlock.children, splitOffset);
+
+      const newBlockId = `block-${Date.now()}`;
+      const newBlock = {
+        id: newBlockId,
+        type: "paragraph" as const,
+        children: rightSpans.length > 0 ? rightSpans : [{ text: "" }],
+      };
+      
+      const updatedBlocks = [...blocks];
+      updatedBlocks[index] = {
+        ...currentBlock,
+        children: leftSpans.length > 0 ? leftSpans : [{ text: "" }],
+      };
+
+      updatedBlocks.splice(index + 1, 0, newBlock);
+      setBlocks(updatedBlocks);
+      setTimeout(() => {
+        const nextEl = document.querySelector(
+          `[data-block-id="${newBlockId}"]`,
+        ) as HTMLElement;
+        if (nextEl) {
+          nextEl.focus();
+
+         
+          const range = document.createRange();
+          const sel = window.getSelection();
+          range.setStart(nextEl, 0);
+          range.collapse(true);
+          sel?.removeAllRanges();
+          sel?.addRange(range);
+        }
+      }, 0);
+    }
+  };
+  const getBlockClasses = (type: "paragraph" | "code" | "heading-1" | "heading-2") => {
+  switch (type) {
+    case "heading-1":
+      return "outline-none text-white text-3xl font-extrabold tracking-tight my-4 min-h-[40px] w-full";
+    case "heading-2":
+      return "outline-none text-slate-100 text-2xl font-bold tracking-tight my-3 min-h-[32px] w-full";
+    case "code":
+      return "outline-none text-green-400 font-mono text-sm p-4 bg-black/40 border border-white/5 rounded-xl my-3 min-h-[24px] w-full";
+    case "paragraph":
+    default:
+      return "outline-none text-slate-400 text-base leading-relaxed my-2 min-h-[24px] w-full";
+  }
+};
+
   return (
     <section className="min-h-screen">
       {/* Ambient background glow */}
@@ -349,63 +481,66 @@ export default function CreateBlogPage() {
                 {/* TOOLBAR */}
                 <div className="flex items-center gap-2 pb-4 border-b border-white/[0.06] mb-4">
                   <button
-                    onClick={() => applyInlineStyle("bold", true)}
-                    className="p-2 bg-white/[0.03] hover:bg-white/[0.08] text-white rounded-lg text-xs font-bold"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => toggleBlockType("heading-1")}
+                    className="px-3 py-1.5 bg-white/[0.03] hover:bg-white/[0.08] text-white rounded-lg text-xs font-black"
                   >
-                    B
+                    H1
                   </button>
                   <button
-                    onClick={() => applyInlineStyle("italic", true)}
-                    className="p-2 bg-white/[0.03] hover:bg-white/[0.08] text-white rounded-lg text-xs italic font-bold"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => toggleBlockType("heading-2")}
+                    className="px-3 py-1.5 bg-white/[0.03] hover:bg-white/[0.08] text-white rounded-lg text-xs font-extrabold"
                   >
-                    I
+                    H2
+                  </button>
+                  <button
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => applyInlineStyle("subbold", true)}
+                    className="px-3 py-1.5 bg-white/[0.03] hover:bg-white/[0.08] text-slate-200 rounded-lg text-xs font-semibold"
+                  >
+                    SB
+                  </button>
+                  <button
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => applyInlineStyle("italic", true)}
+                    className="px-3 py-1.5 bg-white/[0.03] hover:bg-white/[0.08] text-white rounded-lg text-xs italic font-bold"
+                  >
+                    Italic
                   </button>
                 </div>
 
                 {/* EDITOR CANVAS */}
-               
+
                 {blocks.map((block) => (
                   <div
                     key={block.id}
                     data-block-id={block.id}
                     contentEditable
                     suppressContentEditableWarning
-                    className="outline-none text-white text-sm leading-relaxed min-h-[24px]"
+                    onKeyDown={(e)=>handleKeyDown(e,block.id)}
+                    className={getBlockClasses(block.type)}
                     onBlur={(e) => {
-                      const updatedText = e.currentTarget.innerText;
+                      const parsedSpans = parseDOMToSpans(e.currentTarget);
                       setBlocks((prev) =>
-                        prev.map((b) => {
-                          if (b.id !== block.id) return b;
-
-  
-                          if (b.children.length <= 1) {
-                            return {
-                              ...b,
-                              children: [
-                                { ...b.children[0], text: updatedText },
-                              ],
-                            };
-                          }
-                          return b;
-                        }),
+                        prev.map((b) =>
+                          b.id === block.id
+                            ? { ...b, children: parsedSpans }
+                            : b,
+                        ),
                       );
                     }}
-                  >
-                    {block.children.map((span, index) => {
-                      let classes = "";
-                      if (span.bold) classes += " font-bold";
-                      if (span.italic) classes += " italic";
-                      return (
-                        <span
-                          key={index}
-                          className={classes}
-                          style={{ color: span.color }}
-                        >
-                          {span.text}
-                        </span>
-                      );
-                    })}
-                  </div>
+                    dangerouslySetInnerHTML={{
+                      __html: block.children.map((span) => {
+                        let classes = "";
+                        if (span.bold) classes += " font-bold text-white";
+                        if (span.subbold) classes += " font-semibold text-slate-200";
+                        if (span.italic) classes += " italic";
+                        const colorStyle = span.color ? ` style="color:${span.color}"` : "";
+                        return `<span class="${classes.trim()}"${colorStyle}>${span.text || "\u200B"}</span>`;
+                      }).join("")
+                    }}
+                  />
                 ))}
               </div>
 
