@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { blogsData } from '@/lib/data';
 import Navbar from '@/components/layout/Navbar';
@@ -8,30 +7,121 @@ import { prisma } from '@/lib/prisma';
 import BlogComments from '@/components/blog/BlogComments';
 import { getAuthUserServer } from '@/lib/authHelper';
 
+// Define strict interfaces for your block editor's JSON structure
+interface ContentNode {
+  text?: string;
+  bold?: boolean;
+  italic?: boolean;
+  [key: string]: any; // Catch-all for extra layout attributes
+}
+
+interface BlockNode {
+  type: 'paragraph' | 'heading-1' | 'heading-2' | 'heading-3' | 'code' | string;
+  children?: ContentNode[];
+}
+
+// Custom AST component to parse block formatting seamlessly
+function RenderBlogContent({ content }: { content: string }) {
+  try {
+    // Attempt to parse content assuming it's a JSON array from your block editor
+    const blocks: BlockNode[] = JSON.parse(content);
+
+    if (!Array.isArray(blocks)) {
+      throw new Error("Parsed content is not a valid block array");
+    }
+
+    return (
+      <div className="space-y-6 text-slate-800 dark:text-slate-200">
+        {blocks.map((block, blockIdx) => {
+          // Inner function to format the inline text leaves (bold/italic flags)
+          const renderChildren = () =>
+            block.children?.map((child, childIdx) => {
+              let element: React.ReactNode = child.text || '';
+
+              if (child.bold) {
+                element = <strong key={childIdx}>{element}</strong>;
+              }
+              if (child.italic) {
+                element = <em key={childIdx}>{element}</em>;
+              }
+
+              return <React.Fragment key={childIdx}>{element}</React.Fragment>;
+            });
+
+          // Block container assignment
+          switch (block.type) {
+            case 'heading-1':
+              return (
+                <h1 key={blockIdx} className="text-3xl font-extrabold text-slate-900 dark:text-white mt-8 mb-4">
+                  {renderChildren()}
+                </h1>
+              );
+            case 'heading-2':
+              return (
+                <h2 key={blockIdx} className="text-2xl font-bold text-slate-900 dark:text-white mt-6 mb-3">
+                  {renderChildren()}
+                </h2>
+              );
+            case 'heading-3':
+              return (
+                <h3 key={blockIdx} className="text-xl font-bold text-slate-900 dark:text-white mt-4 mb-2">
+                  {renderChildren()}
+                </h3>
+              );
+            case 'code':
+              return (
+                <pre key={blockIdx} className="bg-slate-900 text-slate-100 p-4 rounded-xl font-mono text-sm overflow-x-auto my-4 border border-slate-800">
+                  <code>{block.children?.map((c) => c.text).join('')}</code>
+                </pre>
+              );
+            case 'paragraph':
+            default:
+              return (
+                <p key={blockIdx} className="text-base md:text-lg leading-relaxed mb-4">
+                  {renderChildren()}
+                </p>
+              );
+          }
+        })}
+      </div>
+    );
+  } catch (error) {
+    // Fallback: If content is a raw HTML string instead of stringified JSON, render safely
+    return (
+      <div 
+        className="prose prose-sm sm:prose-lg dark:prose-invert max-w-none text-slate-800 dark:text-slate-200"
+        dangerouslySetInnerHTML={{ __html: content }} 
+      />
+    );
+  }
+}
+
 export default async function BlogPage({ params }: { params: { id: string } }) {
   const { id } = await params;
-  const activeUser=await getAuthUserServer();
-  const blog =  await prisma.blog.findUnique({
-    where:{id:id},
-    include:{
-      author:true,
+  const activeUser = await getAuthUserServer();
+  const blog = await prisma.blog.findUnique({
+    where: { id: id },
+    include: {
+      author: true,
     }
-  })
+  });
 
   if (!blog) {
     notFound();
   }
-  const formattedDate=new Date(blog.createdAt).toLocaleDateString("en-US",{
-    month:"short",
-    day:"numeric",
-    year:"numeric"
-  })
-  const authorName=blog.author.username
-  const authorAvatar=blog.author.avatarUrl || "https://lh3.googleusercontent.com/aida-public/AB6AXuDQREzBniPFG2Rv_94OnCxJg4cRDD40044S_MYT3ZXzSs4-9GW-Jv3-nb6sUnnqs2nTb6XE0OcJsPGnJDuMQJZ9QcIcQ_aHE1N7YwlkHcXxTBimzOzoqZ6IzCaH-CeERYMzm06b5vHmwCKTr24X--k89shI3ntfJqHPuc2pmf9UGQ60JwENsEpz0xxzRexZnHPo4N61bX1AIe4QBvRpu7bNUZKwep55iMNKLCoKqkRSQK4tfIUepeZ3C9uu4pIuIbkiT-5nAYtHiQ";
-  const coverImage=blog.coverImage || "https://lh3.googleusercontent.com/aida-public/AB6AXuBGqQusKRN51nhQea1nffq_Ca4j_-0PMBC1Kq8Vwk3S6jpo6nwpTYVY9C5t2-Ps7WCl_HN0E_e30iwbpfkb0j4bs6k63XOw7TVhsgAlwIeGTFvT_c1AUkp1dcYxDuM9IWKpJE9cCmcJjFGZmhNgQohmddj93Gwlxi6-sx2YwsqCglBPWx0yGxsya0QQ13S-hfTeEFKPcdM6GaS6YjQmr9ks2qHyAPzxsGcqEZtfsuw_kjHXipNXV2KUmSXhQXSsiLm-zQOqO1WCJg";
+
+  const formattedDate = new Date(blog.createdAt).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+
+  const authorName = blog.author.username;
+  const authorAvatar = blog.author.avatarUrl || "https://lh3.googleusercontent.com/aida-public/AB6AXuDQREzBniPFG2Rv_94OnCxJg4cRDD40044S_MYT3ZXzSs4-9GW-Jv3-nb6sUnnqs2nTb6XE0OcJsPGnJDuMQJZ9QcIcQ_aHE1N7YwlkHcXxTBimzOzoqZ6IzCaH-CeERYMzm06b5vHmwCKTr24X--k89shI3ntfJqHPuc2pmf9UGQ60JwENsEpz0xxzRexZnHPo4N61bX1AIe4QBvRpu7bNUZKwep55iMNKLCoKqkRSQK4tfIUepeZ3C9uu4pIuIbkiT-5nAYtHiQ";
+  const coverImage = blog.coverImage || "https://lh3.googleusercontent.com/aida-public/AB6AXuBGqQusKRN51nhQea1nffq_Ca4j_-0PMBC1Kq8Vwk3S6jpo6nwpTYVY9C5t2-Ps7WCl_HN0E_e30iwbpfkb0j4bs6k63XOw7TVhsgAlwIeGTFvT_c1AUkp1dcYxDuM9IWKpJE9cCmcJjFGZmhNgQohmddj93Gwlxi6-sx2YwsqCglBPWx0yGxsya0QQ13S-hfTeEFKPcdM6GaS6YjQmr9ks2qHyAPzxsGcqEZtfsuw_kjHXipNXV2KUmSXhQXSsiLm-zQOqO1WCJg";
+
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen">
-      
       <main className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-[800px] mx-auto w-full flex flex-col">
           {/* Category Tags */}
@@ -50,7 +140,7 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
           </h1>
 
           <p className="text-slate-600 dark:text-slate-400 text-lg md:text-2xl font-medium leading-relaxed mb-10">
-            { blog.excerpt || "A newly forged Scroll."}
+            {blog.excerpt || "A newly forged Scroll."}
           </p>
 
           {/* Author Card */}
@@ -78,19 +168,18 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
             />
           </div>
 
-          {/* Content */}
-          <article 
-            className="prose prose-sm sm:prose-lg dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 overflow-hidden"
-            dangerouslySetInnerHTML={{ __html: blog.content }}
-          />
+          {/* Content Parser Component replacing dangerouslySetInnerHTML */}
+          <article className="overflow-hidden">
+            <RenderBlogContent content={blog.content} />
+          </article>
 
           {/* Grid Images */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 my-10">
             <div className="aspect-square rounded-2xl overflow-hidden glass-panel border border-primary/20">
-               <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVUSn_rJzEUarrzFX51tacuCLxkB-OE9Igffd8WTlNPaFC5tz6ufXcE_yc93xCPNiW8SxYpyBnPFyEQoRGqZXp9l0mXmfrY-SzRqVsOa93O5PtHUDuzEjK2AJaxaznF_8AI514ix9D-_4BOwy1F-JDyGBz9O2_LD7I3oHrPOyd375HnC9yj1-lChWqcfko51MaWgWbI3AWoh0T04KjIjHnU2aBVNBdA2FkQ6EOmgkTuUU59fSBS_xrtJszzJ0Y8uzEH98pk5IjSw" className="w-full h-full object-cover opacity-80" />
+               <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVUSn_rJzEUarrzFX51tacuCLxkB-OE9Igffd8WTlNPaFC5tz6ufXcE_yc93xCPNiW8SxYpyBnPFyEQoRGqZXp9l0mXmfrY-SzRqVsOa93O5PtHUDuzEjK2AJaxaznF_8AI514ix9D-_4BOwy1F-JDyGBz9O2_LD7I3oHrPOyd375HnC9yj1-lChWqcfko51MaWgWbI3AWoh0T04KjIjHnU2aBVNBdA2FkQ6EOmgkTuUU59fSBS_xrtJszzJ0Y8uzEH98pk5IjSw" className="w-full h-full object-cover opacity-80" alt="Grid view artwork left" />
             </div>
             <div className="aspect-square rounded-2xl overflow-hidden glass-panel border border-primary/20">
-               <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAItxeq0kjJEN6m47RY08QeCtd-CURqOOnYqUnAv8_Iy8e8-lzFYxeDSrGGy6_nWYrhs2HGytXGPbFvosgwPSbKadExynEr9jWWfbLFlSD4qOWWUtz00M5Jt-yLWiQHD0hT-Nokt5Q59__5Osk70GYQuO40q8dEAACFtdfCk7FTTCNTdAHYnUF27Wr3m1SgSCSmDjl2666HMbhtjPvDIxxx0XG2nN7VOTWz87gCVlX5sfypwFj3FqjUY1QrxuGvUqkYp0DaS18QIw" className="w-full h-full object-cover opacity-80" />
+               <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAItxeq0kjJEN6m47RY08QeCtd-CURqOOnYqUnAv8_Iy8e8-lzFYxeDSrGGy6_nWYrhs2HGytXGPbFvosgwPSbKadExynEr9jWWfbLFlSD4qOWWUtz00M5Jt-yLWiQHD0hT-Nokt5Q59__5Osk70GYQuO40q8dEAACFtdfCk7FTTCNTdAHYnUF27Wr3m1SgSCSmDjl2666HMbhtjPvDIxxx0XG2nN7VOTWz87gCVlX5sfypwFj3FqjUY1QrxuGvUqkYp0DaS18QIw" className="w-full h-full object-cover opacity-80" alt="Grid view artwork right" />
             </div>
           </div>
 
@@ -152,6 +241,5 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
         </div>
       </footer>
     </div>
-
   );
 }

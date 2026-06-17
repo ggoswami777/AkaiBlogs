@@ -9,6 +9,7 @@ export interface SelectionSlices {
 export type span = {
   text: string;
   bold?: boolean;
+  subbold?:boolean;
   italic?: boolean;
   color?: string;
 };
@@ -68,7 +69,7 @@ export function mergeAdjacentSpans(spans: span[]): span[] {
     }
   }
   merged.push(current);
-  return merged.filter((s) => s.text !== ""); // Filter out empty spans
+  return merged.filter((s) => s.text !== ""); 
 }
 
 /**
@@ -126,4 +127,57 @@ export function applyStyleToSpans(
   }
 
   return mergeAdjacentSpans(newSpans);
+}
+
+export function parseDOMToSpans(element:HTMLElement):span[]{
+  const spans:span[]=[];
+  element.childNodes.forEach((node)=>{
+    if(node.nodeType==Node.TEXT_NODE){
+      spans.push({text:node.textContent || ""});
+    }
+    else if(node.nodeType===Node.ELEMENT_NODE){
+      const el=node as HTMLElement;
+      const text=el.textContent || "";
+      const bold=el.tagName==="STRONG" || el.tagName==="B" || el.classList.contains("font-bold");
+      const subbold=el.classList.contains("font-semibold");
+      const italic=el.tagName==="EM" || el.tagName=="I" || el.classList.contains("italic");
+      const color=el.style.color || undefined;
+      spans.push({
+        text,
+        bold:bold?true:undefined,
+        subbold:subbold?true:undefined,
+        italic:italic?true:undefined,
+        color
+      })
+    }
+  })
+  return mergeAdjacentSpans(spans);
+}
+
+export function serializeASTToHTML(ast:span[][],blockTypes:string[]):string{
+  return ast.map((spans,idx)=>{
+    const blockType=blockTypes[idx] || "paragraph";
+    const content=spans.map((span)=>{
+      let styles="";
+      if(span.color) styles+=`color:${span.color}`;
+      let classes="";
+      if(span.bold) classes+="font-bold text-white";
+      if(span.subbold) classes+="font-semibold text-slate-200";
+      if(span.italic) classes+="italic";
+      const styleAttr=styles?`style="${styles}":""`:""
+      const classAttr=classes?`class=${classes.trim()}`:"";
+      return `<span ${classAttr} ${styleAttr}>${span.text}</span>`
+    }).join("");
+    switch(blockType){
+      case "heading-1":
+        return `<h1 class="text-3xl font-extrabold text-white tracking-tight my-4">${content}</h1>`;
+      case "heading-2":
+        return `<h2 class="text-2xl font-bold text-slate-100 tracking-tight my-3">${content}</h2>`;
+      case "code":
+        return `<pre class="p-4 bg-black/40 border border-white/5 rounded-xl font-mono text-sm text-green-400 overflow-x-auto my-3"><code>${content}</code></pre>`;
+      case "paragraph":
+      default:
+        return `<p class="text-slate-400 text-base leading-relaxed my-2">${content}</p>`;
+    }
+  }).join("");
 }

@@ -117,7 +117,7 @@ export default function CreateBlogPage() {
           excerpt,
           category: selectedCategory,
           image: imageUrl,
-          content,
+          content: JSON.stringify(blocks),
         }),
       });
       if (response.ok) {
@@ -363,6 +363,7 @@ export default function CreateBlogPage() {
                 </div>
 
                 {/* EDITOR CANVAS */}
+               
                 {blocks.map((block) => (
                   <div
                     key={block.id}
@@ -371,14 +372,22 @@ export default function CreateBlogPage() {
                     suppressContentEditableWarning
                     className="outline-none text-white text-sm leading-relaxed min-h-[24px]"
                     onBlur={(e) => {
-                      // Sync editing changes back to react state on blur
                       const updatedText = e.currentTarget.innerText;
                       setBlocks((prev) =>
-                        prev.map((b) =>
-                          b.id === block.id
-                            ? { ...b, children: [{ text: updatedText }] }
-                            : b,
-                        ),
+                        prev.map((b) => {
+                          if (b.id !== block.id) return b;
+
+  
+                          if (b.children.length <= 1) {
+                            return {
+                              ...b,
+                              children: [
+                                { ...b.children[0], text: updatedText },
+                              ],
+                            };
+                          }
+                          return b;
+                        }),
                       );
                     }}
                   >
