@@ -9,14 +9,11 @@ export interface SelectionSlices {
 export type span = {
   text: string;
   bold?: boolean;
-  subbold?:boolean;
+  subbold?: boolean;
   italic?: boolean;
   color?: string;
 };
 
-/**
- * Calculates global selection offsets relative to the main block container
- */
 export function getSelectionSites(
   blockElement: HTMLElement,
 ): SelectionSlices | null {
@@ -28,7 +25,6 @@ export function getSelectionSites(
 
   const fullText = blockElement.innerText;
 
-  // Clone range to find global start index relative to the main container
   const preSelectionRange = range.cloneRange();
   preSelectionRange.selectNodeContents(blockElement);
   preSelectionRange.setEnd(range.startContainer, range.startOffset);
@@ -46,9 +42,6 @@ export function getSelectionSites(
   };
 }
 
-/**
- * Merges consecutive spans with identical formatting to prevent AST bloat
- */
 export function mergeAdjacentSpans(spans: span[]): span[] {
   if (spans.length === 0) return [];
   const merged: span[] = [];
@@ -58,7 +51,7 @@ export function mergeAdjacentSpans(spans: span[]): span[] {
     const next = spans[i];
     const stylesMatch =
       !!current.bold === !!next.bold &&
-      !!current.subbold === !!next.subbold && 
+      !!current.subbold === !!next.subbold &&
       !!current.italic === !!next.italic &&
       current.color === next.color;
 
@@ -70,12 +63,9 @@ export function mergeAdjacentSpans(spans: span[]): span[] {
     }
   }
   merged.push(current);
-  return merged.filter((s) => s.text !== ""); 
+  return merged.filter((s) => s.text !== "");
 }
 
-/**
- * Splits span list at global offset to preserve format attributes when Enter is pressed
- */
 export function splitSpansAtOffset(spans: span[], offset: number): [span[], span[]] {
   const left: span[] = [];
   const right: span[] = [];
@@ -104,9 +94,6 @@ export function splitSpansAtOffset(spans: span[], offset: number): [span[], span
   return [left, right];
 }
 
-/**
- * Iterates through existing spans and slices only the ones intersecting the selection
- */
 export function applyStyleToSpans(
   spans: span[],
   startOffset: number,
@@ -123,17 +110,14 @@ export function applyStyleToSpans(
     const spanEnd = currentOffset + spanLength;
     currentOffset += spanLength;
 
-    // Check if the selection overlaps with this specific span
     const hasOverlap = startOffset < spanEnd && endOffset > spanStart;
 
     if (!hasOverlap) {
       newSpans.push(item);
     } else {
-      // Determine intersection boundary offsets inside this specific span
       const overlapStart = Math.max(startOffset, spanStart) - spanStart;
       const overlapEnd = Math.min(endOffset, spanEnd) - spanStart;
 
-      // 1. Span slice before highlight start
       if (overlapStart > 0) {
         newSpans.push({
           ...item,
@@ -141,14 +125,12 @@ export function applyStyleToSpans(
         });
       }
 
-      // 2. Span slice under highlight (apply new style while keeping existing formatting)
       newSpans.push({
         ...item,
         text: item.text.slice(overlapStart, overlapEnd),
         [styleKey]: value,
       });
 
-      // 3. Span slice after highlight end
       if (overlapEnd < spanLength) {
         newSpans.push({
           ...item,
@@ -164,7 +146,6 @@ export function applyStyleToSpans(
 export function parseDOMToSpans(element: HTMLElement): span[] {
   const spans: span[] = [];
 
-  
   function traverse(
     node: Node,
     currentStyles: { bold?: boolean; subbold?: boolean; italic?: boolean; color?: string }
@@ -221,21 +202,21 @@ export function parseDOMToSpans(element: HTMLElement): span[] {
   return mergeAdjacentSpans(spans);
 }
 
-export function serializeASTToHTML(ast:span[][],blockTypes:string[]):string{
-  return ast.map((spans,idx)=>{
-    const blockType=blockTypes[idx] || "paragraph";
-    const content=spans.map((span)=>{
-      let styles="";
-      if(span.color) styles+=`color:${span.color}`;
-      let classes="";
-      if(span.bold) classes+="font-bold text-white";
-      if(span.subbold) classes+="font-semibold text-slate-200";
-      if(span.italic) classes+="italic";
-      const styleAttr=styles?`style="${styles}":""`:""
-      const classAttr=classes?`class=${classes.trim()}`:"";
-      return `<span ${classAttr} ${styleAttr}>${span.text}</span>`
+export function serializeASTToHTML(ast: span[][], blockTypes: string[]): string {
+  return ast.map((spans, idx) => {
+    const blockType = blockTypes[idx] || "paragraph";
+    const content = spans.map((span) => {
+      let styles = "";
+      if (span.color) styles += `color:${span.color}`;
+      let classes = "";
+      if (span.bold) classes += "font-bold text-white";
+      if (span.subbold) classes += "font-semibold text-slate-200";
+      if (span.italic) classes += "italic";
+      const styleAttr = styles ? `style="${styles}":""` : "";
+      const classAttr = classes ? `class=${classes.trim()}` : "";
+      return `<span ${classAttr} ${styleAttr}>${span.text}</span>`;
     }).join("");
-    switch(blockType){
+    switch (blockType) {
       case "heading-1":
         return `<h1 class="text-3xl font-extrabold text-white tracking-tight my-4">${content}</h1>`;
       case "heading-2":
