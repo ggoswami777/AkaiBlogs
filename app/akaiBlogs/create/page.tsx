@@ -23,6 +23,7 @@ import {
   splitSpansAtOffset,
 } from "@/utils/editorSelection";
 import { parse } from "path";
+import { useRouter } from "next/navigation";
 const categories = [
   "Technology",
   "Design",
@@ -51,7 +52,7 @@ export default function CreateBlogPage() {
       children: [{ text: "Begin writing your scroll here..." }],
     },
   ]);
-
+  const router=useRouter();
   const applyInlineStyle = (
     styleKey: "bold" | "subbold" | "italic",
     value: boolean,
@@ -190,6 +191,7 @@ export default function CreateBlogPage() {
       });
       if (response.ok) {
         alert("Scroll forged successfully");
+        router.push("/akaiBlogs/feed");
       }
     } catch (error) {
       console.error(error);
