@@ -146,28 +146,49 @@ export default function CreateBlogPage() {
       document.execCommand("italic", false);
     } else if (style === "subbold") {
       const sel = window.getSelection();
-      if (!sel || sel.isCollapsed) return;
+      if (!sel) return;
       const range = sel.getRangeAt(0);
-     
-      const anchor = sel.anchorNode;
-      const parent = anchor?.nodeType === Node.TEXT_NODE ? anchor.parentElement : (anchor as HTMLElement);
-      if (parent?.closest("[data-subbold]")) {
-       
-        const span = parent.closest("[data-subbold]") as HTMLElement;
-        const text = document.createTextNode(span.innerText);
-        span.parentNode?.replaceChild(text, span);
+      if (sel.isCollapsed) {
+        const anchor = sel.anchorNode;
+        const parent = anchor?.nodeType === Node.TEXT_NODE ? anchor.parentElement : (anchor as HTMLElement);
+        const subboldSpan = parent?.closest("[data-subbold]");
+        if (subboldSpan) {
+          const textNode = document.createTextNode("\u200B");
+          subboldSpan.parentNode?.insertBefore(textNode, subboldSpan.nextSibling);
+          range.setStart(textNode, 1);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else {
+          const span = document.createElement("span");
+          span.setAttribute("data-subbold", "true");
+          span.className = "font-semibold text-slate-200";
+          span.appendChild(document.createTextNode("\u200B"));
+          range.insertNode(span);
+          range.setStart(span.firstChild!, 1);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
       } else {
-        const span = document.createElement("span");
-        span.setAttribute("data-subbold", "true");
-        span.className = "font-semibold text-slate-200";
-        span.appendChild(range.extractContents());
-        range.insertNode(span);
-        
-        sel.removeAllRanges();
-        const newRange = document.createRange();
-        newRange.setStartAfter(span);
-        newRange.collapse(true);
-        sel.addRange(newRange);
+        const anchor = sel.anchorNode;
+        const parent = anchor?.nodeType === Node.TEXT_NODE ? anchor.parentElement : (anchor as HTMLElement);
+        if (parent?.closest("[data-subbold]")) {
+          const span = parent.closest("[data-subbold]") as HTMLElement;
+          const text = document.createTextNode(span.innerText);
+          span.parentNode?.replaceChild(text, span);
+        } else {
+          const span = document.createElement("span");
+          span.setAttribute("data-subbold", "true");
+          span.className = "font-semibold text-slate-200";
+          span.appendChild(range.extractContents());
+          range.insertNode(span);
+          sel.removeAllRanges();
+          const newRange = document.createRange();
+          newRange.setStartAfter(span);
+          newRange.collapse(true);
+          sel.addRange(newRange);
+        }
       }
     }
   };
@@ -195,7 +216,6 @@ export default function CreateBlogPage() {
         const idx = prev.findIndex((b) => b.id === id);
         if (idx === -1) return prev;
         const next = [...prev];
-        // New block is always paragraph
         next.splice(idx + 1, 0, { id: newId, type: "paragraph" });
         return next;
       });
@@ -325,7 +345,6 @@ export default function CreateBlogPage() {
         </div>
 
         <div className="space-y-6">
-          {/* Post Title */}
           <div className="group">
             <label className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
               <Type size={14} className="text-primary/60" />
@@ -345,7 +364,6 @@ export default function CreateBlogPage() {
             <p className="text-right text-[10px] text-slate-600 mt-2 font-bold tracking-wider">{title.length} / 120</p>
           </div>
 
-          {/* Cover Image */}
           <div>
             <label className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
               <ImagePlus size={14} className="text-primary/60" />
@@ -386,7 +404,6 @@ export default function CreateBlogPage() {
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="cover-image-input" />
           </div>
 
-          {/* Excerpt */}
           <div className="group">
             <label className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
               <AlignLeft size={14} className="text-primary/60" />
@@ -406,7 +423,6 @@ export default function CreateBlogPage() {
             <p className="text-right text-[10px] text-slate-600 mt-2 font-bold tracking-wider">{excerpt.length} / 280</p>
           </div>
 
-          {/* Category */}
           <div>
             <label className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
               <Tag size={14} className="text-primary/60" />
@@ -443,7 +459,6 @@ export default function CreateBlogPage() {
             </div>
           </div>
 
-          {/* Block Editor */}
           <div className="group">
             <label className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
               <FileText size={14} className="text-primary/60" />
@@ -452,7 +467,6 @@ export default function CreateBlogPage() {
             <div className="relative">
               <div className="space-y-0 bg-obsidian border border-white/[0.06] rounded-2xl p-6">
 
-                {/* Toolbar */}
                 <div className="flex items-center gap-2 pb-4 border-b border-white/[0.06] mb-4">
                   {(["heading-1", "heading-2", "paragraph", "italic"] as const).map((action) => {
                     const isBlockAction = action !== "italic";
@@ -474,8 +488,8 @@ export default function CreateBlogPage() {
                         }}
                         className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
                           isActive
-                            ? "bg-primary/20 text-primary border border-primary/30"
-                            : "bg-white/[0.03] hover:bg-white/[0.08] text-white border border-transparent"
+                             ? "bg-primary/20 text-primary border border-primary/30"
+                             : "bg-white/[0.03] hover:bg-white/[0.08] text-white border border-transparent"
                         } ${action === "italic" ? "italic" : ""}`}
                       >
                         {label}
@@ -484,7 +498,6 @@ export default function CreateBlogPage() {
                   })}
                 </div>
 
-                {/* Blocks */}
                 {blocks.map((block) => (
                   <BlockEditor
                     key={block.id}
@@ -506,7 +519,6 @@ export default function CreateBlogPage() {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-4 pb-10 border-t border-white/[0.05]">
             <button
               id="preview-btn"

@@ -1,231 +1,92 @@
-export interface SelectionSlices {
-  before: string;
-  selected: string;
-  after: string;
-  startOffset: number;
-  endOffset: number;
+import type { Block, BlockType } from "@/types/blogRenderingType";
+
+export function makeId(): string {
+  return `block-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
-export type span = {
-  text: string;
-  bold?: boolean;
-  subbold?: boolean;
-  italic?: boolean;
-  color?: string;
-};
-
-export function getSelectionSites(
-  blockElement: HTMLElement,
-): SelectionSlices | null {
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return null;
-
-  const range = selection.getRangeAt(0);
-  if (!blockElement.contains(range.commonAncestorContainer)) return null;
-
-  const fullText = blockElement.innerText;
-
-  const preSelectionRange = range.cloneRange();
-  preSelectionRange.selectNodeContents(blockElement);
-  preSelectionRange.setEnd(range.startContainer, range.startOffset);
-  const startOffset = preSelectionRange.toString().length;
-
-  const selectedText = range.toString();
-  const endOffset = startOffset + selectedText.length;
-
-  return {
-    before: fullText.slice(0, startOffset),
-    selected: selectedText,
-    after: fullText.slice(endOffset),
-    startOffset,
-    endOffset,
-  };
-}
-
-export function mergeAdjacentSpans(spans: span[]): span[] {
-  if (spans.length === 0) return [];
-  const merged: span[] = [];
-  let current = { ...spans[0] };
-
-  for (let i = 1; i < spans.length; i++) {
-    const next = spans[i];
-    const stylesMatch =
-      !!current.bold === !!next.bold &&
-      !!current.subbold === !!next.subbold &&
-      !!current.italic === !!next.italic &&
-      current.color === next.color;
-
-    if (stylesMatch) {
-      current.text += next.text;
-    } else {
-      merged.push(current);
-      current = { ...next };
-    }
+export function getBlockClasses(type: BlockType): string {
+  switch (type) {
+    case "heading-1":
+      return "outline-none text-white text-3xl font-extrabold tracking-tight my-2 min-h-[40px] w-full block";
+    case "heading-2":
+      return "outline-none text-slate-100 text-2xl font-bold tracking-tight my-2 min-h-[32px] w-full block";
+    case "code":
+      return "outline-none text-green-400 font-mono text-sm p-4 bg-black/40 border border-white/5 rounded-xl my-2 min-h-[24px] w-full block";
+    default:
+      return "outline-none text-slate-300 text-base leading-relaxed my-1 min-h-[24px] w-full block";
   }
-  merged.push(current);
-  return merged.filter((s) => s.text !== "");
 }
 
-export function splitSpansAtOffset(spans: span[], offset: number): [span[], span[]] {
-  const left: span[] = [];
-  const right: span[] = [];
-  let currentOffset = 0;
+export function applyInlineStyle(style: "bold" | "italic" | "subbold"): void {
+  if (style === "bold") {
+    document.execCommand("bold", false);
+  } else if (style === "italic") {
+    document.execCommand("italic", false);
+  } else if (style === "subbold") {
+    const sel = window.getSelection();
+    if (!sel) return;
+    const range = sel.getRangeAt(0);
 
-  for (const item of spans) {
-    const len = item.text.length;
-    const start = currentOffset;
-    const end = currentOffset + len;
+    if (sel.isCollapsed) {
+      const anchor = sel.anchorNode;
+      const parent = anchor?.nodeType === Node.TEXT_NODE ? anchor.parentElement : (anchor as HTMLElement);
+      const subboldSpan = parent?.closest("[data-subbold]");
 
-    if (end <= offset) {
-      left.push(item);
-    } else if (start >= offset) {
-      right.push(item);
-    } else {
-      const splitIndex = offset - start;
-      const leftPart = { ...item, text: item.text.slice(0, splitIndex) };
-      const rightPart = { ...item, text: item.text.slice(splitIndex) };
-
-      if (leftPart.text) left.push(leftPart);
-      if (rightPart.text) right.push(rightPart);
-    }
-    currentOffset += len;
-  }
-
-  return [left, right];
-}
-
-export function applyStyleToSpans(
-  spans: span[],
-  startOffset: number,
-  endOffset: number,
-  styleKey: "bold" | "italic" | "subbold",
-  value: boolean,
-): span[] {
-  let currentOffset = 0;
-  const newSpans: span[] = [];
-
-  for (const item of spans) {
-    const spanLength = item.text.length;
-    const spanStart = currentOffset;
-    const spanEnd = currentOffset + spanLength;
-    currentOffset += spanLength;
-
-    const hasOverlap = startOffset < spanEnd && endOffset > spanStart;
-
-    if (!hasOverlap) {
-      newSpans.push(item);
-    } else {
-      const overlapStart = Math.max(startOffset, spanStart) - spanStart;
-      const overlapEnd = Math.min(endOffset, spanEnd) - spanStart;
-
-      if (overlapStart > 0) {
-        newSpans.push({
-          ...item,
-          text: item.text.slice(0, overlapStart),
-        });
+      if (subboldSpan) {
+        const textNode = document.createTextNode("\u200B");
+        subboldSpan.parentNode?.insertBefore(textNode, subboldSpan.nextSibling);
+        range.setStart(textNode, 1);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } else {
+        const span = document.createElement("span");
+        span.setAttribute("data-subbold", "true");
+        span.className = "font-semibold text-slate-200";
+        span.appendChild(document.createTextNode("\u200B"));
+        range.insertNode(span);
+        range.setStart(span.firstChild!, 1);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
       }
-
-      newSpans.push({
-        ...item,
-        text: item.text.slice(overlapStart, overlapEnd),
-        [styleKey]: value,
-      });
-
-      if (overlapEnd < spanLength) {
-        newSpans.push({
-          ...item,
-          text: item.text.slice(overlapEnd),
-        });
+    } else {
+      const anchor = sel.anchorNode;
+      const parent = anchor?.nodeType === Node.TEXT_NODE ? anchor.parentElement : (anchor as HTMLElement);
+      if (parent?.closest("[data-subbold]")) {
+        const span = parent.closest("[data-subbold]") as HTMLElement;
+        const text = document.createTextNode(span.innerText);
+        span.parentNode?.replaceChild(text, span);
+      } else {
+        const span = document.createElement("span");
+        span.setAttribute("data-subbold", "true");
+        span.className = "font-semibold text-slate-200";
+        span.appendChild(range.extractContents());
+        range.insertNode(span);
+        sel.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.setStartAfter(span);
+        newRange.collapse(true);
+        sel.addRange(newRange);
       }
     }
   }
-
-  return mergeAdjacentSpans(newSpans);
 }
 
-export function parseDOMToSpans(element: HTMLElement): span[] {
-  const spans: span[] = [];
-
-  function traverse(
-    node: Node,
-    currentStyles: { bold?: boolean; subbold?: boolean; italic?: boolean; color?: string }
-  ) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const text = node.textContent || "";
-      if (text) {
-        spans.push({
-          text,
-          ...currentStyles,
-        });
-      }
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
-      const el = node as HTMLElement;
-
-      const bold =
-        currentStyles.bold ||
-        el.tagName === "STRONG" ||
-        el.tagName === "B" ||
-        el.classList.contains("font-bold") ||
-        el.style.fontWeight === "bold" ||
-        parseInt(el.style.fontWeight) >= 700;
-
-      const subbold =
-        currentStyles.subbold ||
-        el.classList.contains("font-semibold") ||
-        el.style.fontWeight === "semibold" ||
-        parseInt(el.style.fontWeight) === 600;
-
-      const italic =
-        currentStyles.italic ||
-        el.tagName === "EM" ||
-        el.tagName === "I" ||
-        el.classList.contains("italic") ||
-        el.style.fontStyle === "italic";
-
-      const color = el.style.color || currentStyles.color;
-
-      node.childNodes.forEach((child) => {
-        traverse(child, {
-          bold: bold ? true : undefined,
-          subbold: subbold ? true : undefined,
-          italic: italic ? true : undefined,
-          color,
-        });
-      });
-    }
-  }
-
-  element.childNodes.forEach((child) => {
-    traverse(child, {});
-  });
-
-  return mergeAdjacentSpans(spans);
-}
-
-export function serializeASTToHTML(ast: span[][], blockTypes: string[]): string {
-  return ast.map((spans, idx) => {
-    const blockType = blockTypes[idx] || "paragraph";
-    const content = spans.map((span) => {
-      let styles = "";
-      if (span.color) styles += `color:${span.color}`;
-      let classes = "";
-      if (span.bold) classes += "font-bold text-white";
-      if (span.subbold) classes += "font-semibold text-slate-200";
-      if (span.italic) classes += "italic";
-      const styleAttr = styles ? `style="${styles}":""` : "";
-      const classAttr = classes ? `class=${classes.trim()}` : "";
-      return `<span ${classAttr} ${styleAttr}>${span.text}</span>`;
-    }).join("");
-    switch (blockType) {
-      case "heading-1":
-        return `<h1 class="text-3xl font-extrabold text-white tracking-tight my-4">${content}</h1>`;
-      case "heading-2":
-        return `<h2 class="text-2xl font-bold text-slate-100 tracking-tight my-3">${content}</h2>`;
-      case "code":
-        return `<pre class="p-4 bg-black/40 border border-white/5 rounded-xl font-mono text-sm text-green-400 overflow-x-auto my-3"><code>${content}</code></pre>`;
-      case "paragraph":
-      default:
-        return `<p class="text-slate-400 text-base leading-relaxed my-2">${content}</p>`;
-    }
-  }).join("");
+export function collectBlocksContent(blocks: Block[]): string {
+  return blocks
+    .map((block) => {
+      const el = document.querySelector(
+        `[data-block-id="${block.id}"]`
+      ) as HTMLElement;
+      const html = el ? el.innerHTML : "";
+      if (block.type === "heading-1")
+        return `<h1 class="text-3xl font-extrabold text-white tracking-tight my-4">${html}</h1>`;
+      if (block.type === "heading-2")
+        return `<h2 class="text-2xl font-bold text-slate-100 tracking-tight my-3">${html}</h2>`;
+      if (block.type === "code")
+        return `<pre class="p-4 bg-black/40 border border-white/5 rounded-xl font-mono text-sm text-green-400 my-3"><code>${html}</code></pre>`;
+      return `<p class="text-slate-300 text-base leading-relaxed my-2">${html}</p>`;
+    })
+    .join("");
 }
