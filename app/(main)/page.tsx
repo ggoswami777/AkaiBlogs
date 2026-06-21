@@ -39,16 +39,15 @@ const temporaryBlogData: HomeBlogCardTypeArray = [
 ];
 
 const Page = () => {
-  const { blogs, stats, setBlogs, setStats } = useBlogStore();
+  const { topBlogs, stats, isLoadingBlogs, fetchBlogs, setStats } = useBlogStore();
 
   useEffect(() => {
-    // Putting props/data into the store
     setStats(temporaryData);
-    setBlogs(temporaryBlogData);
-  }, [setBlogs, setStats]);
+    fetchBlogs();
+  }, [fetchBlogs, setStats]);
+
   return (
     <main className="flex-1">
-      {/* Hero Section */}
       <section className="relative h-[85vh] w-full overflow-hidden flex items-center justify-center">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/60 to-transparent z-10"></div>
@@ -85,7 +84,6 @@ const Page = () => {
         </div>
       </section>
 
-      {/* Stats Strip */}
       <section className="max-w-7xl mx-auto px-6 -mt-5 md:mt-20 relative z-30">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {stats.map((item) => (
@@ -94,21 +92,38 @@ const Page = () => {
         </div>
       </section>
 
-      {/* Featured Posts Grid */}
       <section className="max-w-7xl mx-auto px-6 py-24">
         <div className="flex items-end justify-between mb-12">
           <div className="space-y-2">
             <h2 className="text-primary font-bold uppercase tracking-widest text-sm">Editor&apos;s Selection</h2>
             <h3 className="text-4xl font-black text-white">Featured Scrolls</h3>
           </div>
-          <a className="text-primary font-bold flex items-center gap-1 w-auto hover:underline" href="#">
+          <Link className="text-primary font-bold flex items-center gap-1 w-auto hover:underline" href="/akaiBlogs/feed">
             View All <span className="material-symbols-outlined"><ArrowRight/></span>
-          </a>
+          </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {blogs.map((blog) => (
-            <HomeBlogCard key={blog.id} {...blog} />
-          ))}
+          {isLoadingBlogs || topBlogs.length === 0 ? (
+            [1, 2, 3].map((n) => (
+              <div key={n} className="animate-pulse bg-obsidian rounded-xl aspect-4/5 border border-white/5 flex flex-col justify-end p-8 space-y-4">
+                <div className="h-4 bg-white/10 rounded w-1/4"></div>
+                <div className="h-6 bg-white/10 rounded w-3/4"></div>
+                <div className="h-4 bg-white/10 rounded w-1/2"></div>
+              </div>
+            ))
+          ) : (
+            topBlogs.map((blog: any) => (
+              <Link href={`/akaiBlogs/blog/${blog.id}`} key={blog.id}>
+                <HomeBlogCard
+                  id={blog.id}
+                  title={blog.title.length > 55 ? `${blog.title.slice(0, 55)}...` : blog.title}
+                  author={blog.author}
+                  category={blog.category}
+                  image={blog.postImage}
+                />
+              </Link>
+            ))
+          )}
         </div>
       </section>
 

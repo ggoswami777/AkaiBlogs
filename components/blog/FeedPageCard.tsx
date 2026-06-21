@@ -1,6 +1,10 @@
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, Heart } from "lucide-react";
+import { useBlogStore } from "@/store/useBlogStore";
+import Link from "next/link";
 
 const FeedPageCard = () => {
+  const { topBlogs, isLoadingBlogs } = useBlogStore();
+
   return (
     <aside className="hidden md:block md:col-span-4 lg:col-span-3 rounded-lg h-full overflow-y-auto pr-2 no-scrollbar scroll-smooth">
       <div className="flex flex-col gap-5 pb-24">
@@ -10,45 +14,38 @@ const FeedPageCard = () => {
             Rising Sun
           </h3>
           <div className="space-y-6">
-            <div className="flex gap-4 group cursor-pointer">
-              <div className="text-2xl font-black text-slate-800 group-hover:text-primary/40 transition-colors">01</div>
-              <div className="flex-1">
-                <h5 className="text-xs font-bold text-slate-100 group-hover:text-primary transition-colors leading-snug">The Architecture of Silence</h5>
-                <div className="flex items-center gap-3 mt-1 text-[9px] text-slate-500 font-bold uppercase tracking-wider">
-                  <span>Design</span>
-                  <span className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[10px] text-primary">favorite</span>
-                    2.4k
-                  </span>
+            {isLoadingBlogs || topBlogs.length === 0 ? (
+              [1, 2, 3].map((n) => (
+                <div key={n} className="flex gap-4 animate-pulse">
+                  <div className="text-2xl font-black text-slate-800">0{n}</div>
+                  <div className="flex-1 space-y-2 py-1">
+                    <div className="h-3 bg-white/10 rounded w-5/6"></div>
+                    <div className="flex gap-3">
+                      <div className="h-2 bg-white/10 rounded w-1/4"></div>
+                      <div className="h-2 bg-white/10 rounded w-1/4"></div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div className="flex gap-4 group cursor-pointer">
-              <div className="text-2xl font-black text-slate-800 group-hover:text-primary/40 transition-colors">02</div>
-              <div className="flex-1">
-                <h5 className="text-xs font-bold text-slate-100 group-hover:text-primary transition-colors leading-snug">Cyber-Ronin: Remote Work</h5>
-                <div className="flex items-center gap-3 mt-1 text-[9px] text-slate-500 font-bold uppercase tracking-wider">
-                  <span>Future</span>
-                  <span className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[10px] text-primary">favorite</span>
-                    1.8k
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-4 group cursor-pointer">
-              <div className="text-2xl font-black text-slate-800 group-hover:text-primary/40 transition-colors">03</div>
-              <div className="flex-1">
-                <h5 className="text-xs font-bold text-slate-100 group-hover:text-primary transition-colors leading-snug">Hidden Izakayas Map</h5>
-                <div className="flex items-center gap-3 mt-1 text-[9px] text-slate-500 font-bold uppercase tracking-wider">
-                  <span>Travel</span>
-                  <span className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[10px] text-primary">favorite</span>
-                    1.2k
-                  </span>
-                </div>
-              </div>
-            </div>
+              ))
+            ) : (
+              topBlogs.map((blog, idx) => (
+                <Link href={`/akaiBlogs/blog/${blog.id}`} key={blog.id} className="flex gap-4 group cursor-pointer">
+                  <div className="text-2xl font-black text-slate-800 group-hover:text-primary/40 transition-colors">0{idx + 1}</div>
+                  <div className="flex-1">
+                    <h5 className="text-xs font-bold text-slate-100 group-hover:text-primary transition-colors leading-snug">
+                      {blog.title.length > 35 ? `${blog.title.slice(0, 35)}...` : blog.title}
+                    </h5>
+                    <div className="flex items-center gap-3 mt-1 text-[9px] text-slate-500 font-bold uppercase tracking-wider">
+                      <span>{blog.category}</span>
+                      <span className="flex items-center gap-1">
+                        <Heart className="size-2 text-primary fill-primary" />
+                        {blog.likesCount}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
           <button className="w-full mt-8 py-3 rounded-xl border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/10 transition-colors">
             Leaderboard

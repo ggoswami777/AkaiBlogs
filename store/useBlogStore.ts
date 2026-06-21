@@ -5,6 +5,7 @@ interface BlogStore {
   stats: HomePageGlassCardTypeArray;
   blogs: any;
   isLoadingBlogs: boolean;
+  topBlogs:any[];
   currentUser: string | null;
   setStats: (stats: HomePageGlassCardTypeArray) => void;
   setBlogs: (blogs: HomeBlogCardTypeArray) => void;
@@ -15,6 +16,7 @@ interface BlogStore {
 export const useBlogStore = create<BlogStore>((set) => ({
   stats: [],
   blogs: [],
+  topBlogs:[],
   isLoadingBlogs: false,
   currentUser: null,
   setStats: (stats) => set({ stats }),
@@ -25,7 +27,7 @@ export const useBlogStore = create<BlogStore>((set) => ({
       const res = await fetch("/api/akaiBlogs/feed");
       const data = await res.json();
       if (data.success) {
-        set({ blogs: data.blogs });
+        set({ blogs: data.blogs ,topBlogs:data.topBlogs});
       }
     } catch (error) {
       console.error("Error fetching feed:", error);
