@@ -1,4 +1,98 @@
-import type { Block, BlockType } from "@/types/blogRenderingType";
+import type { Block, BlockType, span } from "@/types/blogRenderingType";
+
+export function splitSpansAtOffset(spans: span[], offset: number): [span[], span[]] {
+  const left: span[] = [];
+  const right: span[] = [];
+  let currentOffset = 0;
+  for (const item of spans) {
+    const len = item.text.length;
+    const start = currentOffset;
+    const end = currentOffset + len;
+    if (end <= offset) {
+      left.push(item);
+    } else if (start >= offset) {
+      right.push(item);
+    } else {
+      const splitIndex = offset - start;
+      const leftPart = { ...item, text: item.text.slice(0, splitIndex) };
+      const rightPart = { ...item, text: item.text.slice(splitIndex) };
+      if (leftPart.text) left.push(leftPart);
+      if (rightPart.text) right.push(rightPart);
+    }
+    currentOffset += len;
+  }
+  return [left, right];
+}
+
+export function parseHtmlToSpans(html: string): span[] {
+  if (typeof document === "undefined") return [];
+  const temp = document.createElement("div");
+  temp.innerHTML = html;
+  const spans: span[] = [];
+
+  function traverse(
+    node: Node,
+    parentStyles: { bold?: boolean; italic?: boolean; subbold?: boolean }
+  ) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent || "";
+      if (text) {
+        spans.push({
+          text,
+          ...parentStyles,
+        });
+      }
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const el = node as HTMLElement;
+      const tagName = el.tagName.toUpperCase();
+      const styles = { ...parentStyles };
+
+      if (tagName === "B" || tagName === "STRONG") {
+        styles.bold = true;
+      }
+      if (tagName === "I" || tagName === "EM") {
+        styles.italic = true;
+      }
+      if (el.hasAttribute("data-subbold") || el.classList.contains("font-semibold")) {
+        styles.subbold = true;
+      }
+
+      if (el.style.fontWeight === "bold" || el.style.fontWeight === "700") {
+        styles.bold = true;
+      }
+      if (el.style.fontStyle === "italic") {
+        styles.italic = true;
+      }
+
+      for (let i = 0; i < el.childNodes.length; i++) {
+        traverse(el.childNodes[i], styles);
+      }
+    }
+  }
+
+  for (let i = 0; i < temp.childNodes.length; i++) {
+    traverse(temp.childNodes[i], {});
+  }
+  return spans;
+}
+
+export function spansToHtml(spans: span[]): string {
+  return spans
+    .map((s) => {
+      let html = s.text;
+      if (s.italic) {
+        html = `<i>${html}</i>`;
+      }
+      if (s.bold) {
+        html = `<b>${html}</b>`;
+      }
+      if (s.subbold) {
+        html = `<span data-subbold="true" class="font-semibold text-slate-200">${html}</span>`;
+      }
+      return html;
+    })
+    .join("");
+}
 
 export function makeId(): string {
   return `block-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;

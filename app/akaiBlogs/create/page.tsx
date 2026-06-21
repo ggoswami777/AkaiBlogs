@@ -16,7 +16,15 @@ import {
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing";
 import type { Block, BlockType } from "@/types/blogRenderingType";
-import { makeId, getBlockClasses, applyInlineStyle, collectBlocksContent } from "@/utils/editorSelection";
+import {
+  makeId,
+  getBlockClasses,
+  applyInlineStyle,
+  collectBlocksContent,
+  parseHtmlToSpans,
+  spansToHtml,
+  splitSpansAtOffset,
+} from "@/utils/editorSelection";
 
 const categories = [
   "Technology",
@@ -39,15 +47,22 @@ function BlockEditor({
   onFocus,
 }: {
   block: Block;
-  onEnter: (id: string, caretAtStart: boolean) => void;
+  onEnter: (id: string, caretAtStart: boolean, currentCaretOffset: number) => void;
   onBackspaceEmpty: (id: string) => void;
   onTypeChange: (id: string, type: BlockType) => void;
   focusOnMount: boolean;
   onFocus: (id: string) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const hasInitialized = useRef(false);
 
-  
+  useEffect(() => {
+    if (ref.current && !hasInitialized.current) {
+      ref.current.innerHTML = spansToHtml(block.spans || []);
+      hasInitialized.current = true;
+    }
+  }, [block.spans]);
+
   useEffect(() => {
     if (focusOnMount && ref.current) {
       ref.current.focus();
@@ -65,14 +80,16 @@ function BlockEditor({
       e.preventDefault();
       const sel = window.getSelection();
       let caretAtStart = false;
+      let currentCaretOffset = 0;
       if (sel && sel.rangeCount > 0) {
         const range = sel.getRangeAt(0);
         const preRange = range.cloneRange();
         preRange.selectNodeContents(ref.current!);
         preRange.setEnd(range.startContainer, range.startOffset);
-        caretAtStart = preRange.toString().length === 0;
+        currentCaretOffset = preRange.toString().length;
+        caretAtStart = currentCaretOffset === 0;
       }
-      onEnter(block.id, caretAtStart);
+      onEnter(block.id, caretAtStart, currentCaretOffset);
     }
 
     if (e.key === "Backspace") {
@@ -111,7 +128,7 @@ export default function CreateBlogPage() {
   const { startUpload, isUploading } = useUploadThing("imageUploader");
 
   const [blocks, setBlocks] = useState<Block[]>([
-    { id: "block-initial", type: "paragraph" },
+    { id: "block-initial", type: "paragraph", spans: [] },
   ]);
   const [focusBlockId, setFocusBlockId] = useState<string | null>(null);
   const [activeBlockId, setActiveBlockId] = useState<string>("block-initial");
@@ -134,17 +151,48 @@ export default function CreateBlogPage() {
   };
 
   const handleEnter = useCallback(
-    (id: string, caretAtStart: boolean) => {
+    (id: string, caretAtStart: boolean, currentCaretOffset: number) => {
       const newId = makeId();
-      setBlocks((prev) => {
-        const idx = prev.findIndex((b) => b.id === id);
-        if (idx === -1) return prev;
-        const next = [...prev];
-        next.splice(idx + 1, 0, { id: newId, type: "paragraph" });
-        return next;
-      });
-      setFocusBlockId(newId);
-      setActiveBlockId(newId);
+      if (caretAtStart) {
+        
+        setBlocks((prev) => {
+          const idx = prev.findIndex((b) => b.id === id);
+          if (idx === -1) return prev;
+          const next = [...prev];
+          next.splice(idx, 0, { id: newId, type: "paragraph", spans: [] });
+          return next;
+        });
+        setFocusBlockId(id);
+        setActiveBlockId(id);
+      } else {
+       
+        const el = document.querySelector(`[data-block-id="${id}"]`) as HTMLElement;
+        const currentHtml = el ? el.innerHTML : "";
+        const currentSpans = parseHtmlToSpans(currentHtml);
+        
+     
+        const [left, right] = splitSpansAtOffset(currentSpans, currentCaretOffset);
+
+  
+        if (el) {
+          el.innerHTML = spansToHtml(left);
+        }
+
+      
+        setBlocks((prev) => {
+          const idx = prev.findIndex((b) => b.id === id);
+          if (idx === -1) return prev;
+          const currentBlock = prev[idx];
+          const next = [...prev];
+          next[idx] = { ...currentBlock, spans: left };
+          next.splice(idx + 1, 0, { id: newId, type: "paragraph", spans: right });
+          return next;
+        });
+        
+     
+        setFocusBlockId(newId);
+        setActiveBlockId(newId);
+      }
     },
     []
   );
