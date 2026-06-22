@@ -8,13 +8,34 @@ import ProfilePostCard from "./ProfilePostCard";
 import ProfilePostCardSkeleton from "@/components/skeletons/ProfilePostCardSkeleton";
 import { userProfileStore } from "@/store/useProfileStore";
 import DeleteConfirmModal from "./DeleteConfirmModal";
+import ProfileEditModal from "./ProfileEditModal";
+
+type ProfileBlog = {
+  id: string;
+  title: string;
+  excerpt?: string | null;
+  coverImage?: string | null;
+  likesCount: number;
+  commentsCount: number;
+  createdAt: string;
+};
+
+type UpdatedProfile = {
+  id?: string;
+  username: string;
+  email?: string;
+  bio?: string | null;
+  avatarUrl?: string | null;
+};
 
 const ProfileCardPage = () => {
   const { profile, fetchProfile, isLoadingProfile } = userProfileStore();
-  const [blogs,setBlogs]=useState<any[]>([]);
+  const [blogs,setBlogs]=useState<ProfileBlog[]>([]);
   const [isLoadingBlogs,setIsLoadingBlogs]=useState(true);
-  const [blogToDelete, setBlogToDelete] = useState<any | null>(null);
+  const [blogToDelete, setBlogToDelete] = useState<ProfileBlog | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(()=>{
     const fetchProfileBlogs=async()=>{
@@ -48,9 +69,8 @@ const ProfileCardPage = () => {
       });
       const data = await res.json();
       if (data.success) {
-        // Remove from local state blogs list
         setBlogs((prev) => prev.filter((b) => b.id !== blogToDelete.id));
-        // Decrement postsCount in the global Zustand store to update sidebar & header stats
+     
         userProfileStore.setState((state) => {
           if (state.profile) {
             return {
@@ -72,6 +92,19 @@ const ProfileCardPage = () => {
       setIsDeleteModalOpen(false);
       setBlogToDelete(null);
     }
+  };
+
+
+  const handleProfileSaved = (updatedProfile: UpdatedProfile) => {
+    userProfileStore.setState((state) => ({
+      profile: state.profile
+        ? {
+            ...state.profile,
+            ...updatedProfile,
+          }
+        : updatedProfile,
+      hasFetched: true,
+    }));
   };
 
   if (isLoadingProfile || !profile) {
@@ -135,6 +168,7 @@ const ProfileCardPage = () => {
           username={profile.username}
           bio={profile.bio || "Digital nomad & coffee enthusiast. Sharing my journey through Tokyo's hidden neon streets and quiet temples."}
           avatarUrl={profile.avatarUrl}
+          onEditClick={() => setIsEditModalOpen(true)}
         />
 
         <div className="my-6">
@@ -163,7 +197,7 @@ const ProfileCardPage = () => {
                 id={blog.id}
                 title={blog.title}
                 excerpt={blog.excerpt || ""}
-                image={blog.coverImage}
+                image={blog.coverImage ?? undefined}
                 likes={blog.likesCount}
                 comments={blog.commentsCount}
                 date={new Date(blog.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
@@ -188,6 +222,13 @@ const ProfileCardPage = () => {
         }}
         onConfirm={handleDeleteConfirm}
         blogTitle={blogToDelete?.title || ""}
+      />
+
+      <ProfileEditModal
+        isOpen={isEditModalOpen}
+        profile={profile}
+        onClose={() => setIsEditModalOpen(false)}
+        onSaved={handleProfileSaved}
       />
     </main>
   );

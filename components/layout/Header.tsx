@@ -1,8 +1,20 @@
-import SearchBar from "@/components/ui/SearchBar"
+"use client";
+
 import Link from 'next/link'
 import { Bell, MessageSquare, Plus } from 'lucide-react'
+import { useEffect } from "react";
+import { userProfileStore } from "@/store/useProfileStore";
+
+const fallbackAvatar =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuARrNF78qTP1Qjs8WBhowU7Lkc1VfhyYOOo6WVPbSmDT1HKzHDwczfhNZda_UrGmb4HT8A1z19TeRhMkJ7dKz5dNNEZX6YuOedHRvBa4rm3aMj3a7xam19YC7oslObzYbPAMAun1BK-MCE4Xs7vgb00is7arR6xc7R9aumrGsPYSt1WuUA44pU_EZiUsM6LtCrpg8Woxr-YhntVUW_xOcGm3wpG5JxG4f_yX4yGs4Orl3ewnJHPlkJykGJa5CR_7wcgnQA_6t6m-g";
 
 const Header = () => {
+  const { profile, fetchProfile } = userProfileStore();
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
   return (
     <header className="sticky top-0 z-50 w-full glass-panel border-b border-primary/10">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -39,7 +51,7 @@ const Header = () => {
             <img
               alt="Profile"
               className="w-full h-full object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuARrNF78qTP1Qjs8WBhowU7Lkc1VfhyYOOo6WVPbSmDT1HKzHDwczfhNZda_UrGmb4HT8A1z19TeRhMkJ7dKz5dNNEZX6YuOedHRvBa4rm3aMj3a7xam19YC7oslObzYbPAMAun1BK-MCE4Xs7vgb00is7arR6xc7R9aumrGsPYSt1WuUA44pU_EZiUsM6LtCrpg8Woxr-YhntVUW_xOcGm3wpG5JxG4f_yX4yGs4Orl3ewnJHPlkJykGJa5CR_7wcgnQA_6t6m-g"
+              src={profile?.avatarUrl || fallbackAvatar}
             />
           </Link>
         </div>

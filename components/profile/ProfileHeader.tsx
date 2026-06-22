@@ -1,25 +1,18 @@
-// components/profile/ProfileHeader.tsx
 import { Edit, Share } from "lucide-react";
 import { useState } from "react";
 
-interface ProfileHeaderProps {
-  name: any;
-  username: string;
-  bio: string;
-  avatarUrl?: string;
-  isOwnProfile?: boolean; 
-}
 
 interface ProfileHeaderProps {
-  name: any;
+  name: string;
   username: string;
   bio: string;
   avatarUrl?: string;
   isOwnProfile?: boolean;
   isFollowing?: boolean;
+  onEditClick?: () => void;
 }
 
-const ProfileHeader = ({ name, username, bio, avatarUrl, isOwnProfile, isFollowing: initialIsFollowing }: ProfileHeaderProps) => {
+const ProfileHeader = ({ name, username, bio, avatarUrl, isOwnProfile, isFollowing: initialIsFollowing, onEditClick }: ProfileHeaderProps) => {
   const [isFollowing,setIsFollowing]=useState(initialIsFollowing ?? false);
   const handleFollow=async()=>{
     const res= await fetch(`/api/profile/follow/${username}`,{
@@ -43,7 +36,8 @@ const ProfileHeader = ({ name, username, bio, avatarUrl, isOwnProfile, isFollowi
           >
           </div>
           {isOwnProfile !== false && (
-            <button className="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full shadow-lg border-2 border-background-dark hover:scale-110 transition-transform">
+          
+            <button onClick={onEditClick} className="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full shadow-lg border-2 border-background-dark hover:scale-110 transition-transform">
               <Edit size={14} />
             </button>
           )}
@@ -56,7 +50,8 @@ const ProfileHeader = ({ name, username, bio, avatarUrl, isOwnProfile, isFollowi
       </div>
       <div className="flex gap-3 w-full md:w-auto">
         {isOwnProfile !== false ? (
-          <button className="flex flex-1 md:flex-none min-w-[120px] cursor-pointer items-center justify-center rounded-full h-11 px-6 bg-primary text-white text-sm font-bold hover:brightness-110 active:scale-95 transition-all">
+        
+          <button onClick={onEditClick} className="flex flex-1 md:flex-none min-w-[120px] cursor-pointer items-center justify-center rounded-full h-11 px-6 bg-primary text-white text-sm font-bold hover:brightness-110 active:scale-95 transition-all">
             <span>Edit Profile</span>
           </button>
         ) : (

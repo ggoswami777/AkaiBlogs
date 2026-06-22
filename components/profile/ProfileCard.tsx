@@ -7,6 +7,9 @@ import { useBlogStore } from "@/store/useBlogStore";
 import { userProfileStore } from "@/store/useProfileStore";
 import ProfileCardSkeleton from "@/components/skeletons/ProfileCardSkeleton";
 
+const fallbackAvatar =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuDQREzBniPFG2Rv_94OnCxJg4cRDD40044S_MYT3ZXzSs4-9GW-Jv3-nb6sUnnqs2nTb6XE0OcJsPGnJDuMQJZ9QcIcQ_aHE1N7YwlkHcXxTBimzOzoqZ6IzCaH-CeERYMzm06b5vHmwCKTr24X--k89shI3ntfJqHPuc2pmf9UGQ60JwENsEpz0xxzRexZnHPo4N61bX1AIe4QBvRpu7bNUZKwep55iMNKLCoKqkRSQK4tfIUepeZ3C9uu4pIuIbkiT-5nAYtHiQ";
+
 const ProfileCard = () => {
   const { currentUser, fetchCurrentUser } = useBlogStore();
   const {profile,fetchProfile,isLoadingProfile}=userProfileStore();
@@ -30,9 +33,9 @@ const ProfileCard = () => {
             <div className="w-24 h-24 rounded-full border-4 border-primary/20 mb-4 overflow-hidden p-1">
             <Link href={`/akaiBlogs/profile`} >
               <img
-                alt="Kenji Sato"
+                alt={profile.username || username}
                 className="w-full h-full rounded-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQREzBniPFG2Rv_94OnCxJg4cRDD40044S_MYT3ZXzSs4-9GW-Jv3-nb6sUnnqs2nTb6XE0OcJsPGnJDuMQJZ9QcIcQ_aHE1N7YwlkHcXxTBimzOzoqZ6IzCaH-CeERYMzm06b5vHmwCKTr24X--k89shI3ntfJqHPuc2pmf9UGQ60JwENsEpz0xxzRexZnHPo4N61bX1AIe4QBvRpu7bNUZKwep55iMNKLCoKqkRSQK4tfIUepeZ3C9uu4pIuIbkiT-5nAYtHiQ"
+                src={profile.avatarUrl || fallbackAvatar}
               />
               </Link>
             </div>
