@@ -35,12 +35,12 @@ export async function POST(request: NextRequest) {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const hashedPassword = await bcrypt.hash(password, 10);
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-
+    const hashedOtp=await bcrypt.hash(otp,10);
 
     await prisma.oTPVerification.upsert({
       where: { email: email },
       update: {
-        otp,
+        otp:hashedOtp,
         otpExpiry,
         username,
         password: hashedPassword,
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         email,
         username,
         password: hashedPassword,
-        otp,
+        otp:hashedOtp,
         otpExpiry,
       },
     });

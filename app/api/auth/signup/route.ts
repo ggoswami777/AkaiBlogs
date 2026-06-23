@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { verify } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 export async function POST(request: NextRequest) {
   const { username, email, password, otp } = await request.json();
   const existingUser = await prisma.user.findFirst({
@@ -31,7 +32,8 @@ export async function POST(request: NextRequest) {
         { status: 404 },
       );
     }
-    if (verifyingOtp.otp !== otp) {
+    const otpMatch=await bcrypt.compare(verifyingOtp.otp,otp);
+    if (!otpMatch) {
       return NextResponse.json(
         {
           success: false,
