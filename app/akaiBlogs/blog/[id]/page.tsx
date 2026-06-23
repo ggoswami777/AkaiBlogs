@@ -173,15 +173,7 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
             <RenderBlogContent content={blog.content} />
           </article>
 
-          {/* Grid Images */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 my-10">
-            <div className="aspect-square rounded-2xl overflow-hidden glass-panel border border-primary/20">
-               <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVUSn_rJzEUarrzFX51tacuCLxkB-OE9Igffd8WTlNPaFC5tz6ufXcE_yc93xCPNiW8SxYpyBnPFyEQoRGqZXp9l0mXmfrY-SzRqVsOa93O5PtHUDuzEjK2AJaxaznF_8AI514ix9D-_4BOwy1F-JDyGBz9O2_LD7I3oHrPOyd375HnC9yj1-lChWqcfko51MaWgWbI3AWoh0T04KjIjHnU2aBVNBdA2FkQ6EOmgkTuUU59fSBS_xrtJszzJ0Y8uzEH98pk5IjSw" className="w-full h-full object-cover opacity-80" alt="Grid view artwork left" />
-            </div>
-            <div className="aspect-square rounded-2xl overflow-hidden glass-panel border border-primary/20">
-               <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAItxeq0kjJEN6m47RY08QeCtd-CURqOOnYqUnAv8_Iy8e8-lzFYxeDSrGGy6_nWYrhs2HGytXGPbFvosgwPSbKadExynEr9jWWfbLFlSD4qOWWUtz00M5Jt-yLWiQHD0hT-Nokt5Q59__5Osk70GYQuO40q8dEAACFtdfCk7FTTCNTdAHYnUF27Wr3m1SgSCSmDjl2666HMbhtjPvDIxxx0XG2nN7VOTWz87gCVlX5sfypwFj3FqjUY1QrxuGvUqkYp0DaS18QIw" className="w-full h-full object-cover opacity-80" alt="Grid view artwork right" />
-            </div>
-          </div>
+         
 
           {/* Interaction Bar */}
           <div className="mt-16 pt-10 border-t border-slate-200 dark:border-primary/20">
