@@ -18,6 +18,14 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   //toasties
   const alertFailOtp = () => {
@@ -73,6 +81,7 @@ const Login = () => {
       return;
     }
     setIsGeneratingOtp(true);
+    setResendCooldown(30);
 
     try {
       const response = await fetch("/api/auth/send-otp", {
@@ -87,7 +96,6 @@ const Login = () => {
         console.log("OTP SENT:", data.otp);
         setIsGeneratedOtpClicked(true);
         alertOtpSent();
-        
       } else {
         alertFailOtp();
       }
@@ -316,14 +324,25 @@ const Login = () => {
             <>
               <div className="flex items-center justify-between mt-2 px-1">
                 <p className="text-xs text-slate-400">Haven't received OTP?</p>
-                <button
-                  type="button"
-                  onClick={handleGenerateOtp}
-                  disabled={isGeneratingOtp}
-                  className="text-xs font-bold text-primary hover:text-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isGeneratingOtp ? "Resending..." : "Resend OTP"}
-                </button>
+                <div className="flex items-center gap-2">
+                  {resendCooldown > 0 && (
+                    <span className="text-xs font-bold text-red-900">
+                      {resendCooldown}s
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleGenerateOtp}
+                    disabled={isGeneratingOtp || resendCooldown > 0}
+                    className={`text-xs font-bold transition-colors disabled:cursor-not-allowed ${
+                      resendCooldown > 0
+                        ? "text-red-900 opacity-60 cursor-not-allowed"
+                        : "text-primary hover:text-primary/80"
+                    }`}
+                  >
+                    {isGeneratingOtp ? "Resending..." : "Resend OTP"}
+                  </button>
+                </div>
               </div>
 
               <button

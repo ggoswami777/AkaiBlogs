@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         { status: 404 },
       );
     }
-    const otpMatch=await bcrypt.compare(verifyingOtp.otp,otp);
+    const otpMatch=await bcrypt.compare(otp, verifyingOtp.otp);
     if (!otpMatch) {
       return NextResponse.json(
         {

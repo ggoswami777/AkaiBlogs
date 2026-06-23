@@ -70,18 +70,19 @@ const Navbar = () => {
             <Search size={20} />
           </Link>
 
-          <Link href="/akaiBlogs/create">
-            <button className="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-full text-xs font-bold transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20 flex items-center gap-2">
+          <Link href="#">
+            <button className="bg-primary hover:bg-primary/90 text-white hidden  px-5 py-2 rounded-full text-xs font-bold transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20 md:flex items-center gap-2">
               <Plus size={16} />
               <span className="hidden sm:inline">New Scroll</span>
             </button>
           </Link>
           
+          
           <button className="text-slate-300 hover:text-primary transition-colors hidden md:block">
             <MessageSquare size={20} />
           </button>
           
-          <button className="text-slate-300 hover:text-primary transition-colors hidden sm:block">
+          <button className="text-slate-300 hover:text-primary transition-colors  block">
             <Bell size={20} />
           </button>
 

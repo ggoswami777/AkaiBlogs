@@ -190,7 +190,7 @@ const ProfileEditModal = ({
               onChange={(event) => setBio(event.target.value)}
               maxLength={250}
               rows={4}
-              className="w-full resize-none rounded-xl border border-white/[0.06] bg-obsidian px-4 py-3 text-sm leading-relaxed text-white outline-none transition-colors placeholder:text-slate-600 focus:border-primary/50"
+              className="w-full resize-none rounded-sm border border-white/[0.06] bg-obsidian px-4 py-3 text-sm leading-relaxed text-white outline-none transition-colors placeholder:text-slate-600 focus:border-primary/50"
               placeholder="Write something about your path..."
             />
             <p className="mt-2 text-right text-[10px] font-bold tracking-wider text-slate-600">
