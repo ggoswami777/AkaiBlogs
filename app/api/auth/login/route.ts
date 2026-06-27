@@ -2,9 +2,29 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+import { checkRateLimit ,resetRateLimit,getClientIp} from "@/lib/redis/rateLimit";
+
+const LOGIN_RATE_LIMIT={
+  maxAttempts:5,
+  windowSeconds:15*60,
+}
 export async function POST(request: NextRequest) {
   try {
     const {email,password}=await request.json();
+    const clientIp=getClientIp(request);
+    const rateLimit=await checkRateLimit(
+      clientIp,
+      "rate-limit:login",
+      LOGIN_RATE_LIMIT
+    )
+    if(!rateLimit.allowed){
+      return NextResponse.json(
+        {
+          success:false,
+          error:`Too many login attempts. Try again in ${rateLimit.retryAfter} seconds.`
+        }
+      )
+    }
     const existingUser=await prisma.user.findUnique({
         where:{
             email:email
@@ -19,6 +39,7 @@ export async function POST(request: NextRequest) {
     // check if password is correct 
     const passwordComparision=await bcrypt.compare(password,existingUser.password);
     if(passwordComparision){
+      await resetRateLimit(clientIp,"rate-limit:login");
       const token=jwt.sign({userId:existingUser.id , username:existingUser.username},process.env.JWT_SECRET as string ,{expiresIn:"7d"})
       const response=NextResponse.json({
         success:true,

@@ -3,12 +3,33 @@ import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { generateOtp, getOtpExpiryDate, getOtpExpiryMinutes, hashOtp } from "@/lib/otp";
 import { sendOtpEmail } from "@/lib/email/sendOtpEmail";
+import { checkRateLimit, getClientIp } from "@/lib/redis/rateLimit";
 
+const OTP_RATE_LIMIT={
+  maxAttempts:3,
+  windowSeconds:10*60,
+}
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, username, password } = body;
-
+    const clientIp=getClientIp(request);
+    const rateLimit=await checkRateLimit(
+      clientIp,
+      "rate-limit:otp",
+      OTP_RATE_LIMIT
+    )
+    if(!rateLimit.allowed){
+      return NextResponse.json(
+        {
+          success:false,
+          error:`Too many OTP requests. Try again in ${rateLimit.retryAfter} seconds.`,
+        },
+        {status:429,headers:{
+          "Retry-After":rateLimit.retryAfter.toString()
+        }}
+      )
+    }
     if (!email || !username || !password) {
       return NextResponse.json(
         { success: false, error: "Missing required fields" },
