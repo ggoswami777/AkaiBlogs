@@ -1,72 +1,98 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
+import { generateOtp, getOtpExpiryDate, getOtpExpiryMinutes, hashOtp } from "@/lib/otp";
+import { sendOtpEmail } from "@/lib/email/sendOtpEmail";
 
 export async function POST(request: NextRequest) {
   try {
-    
-
     const body = await request.json();
     const { email, username, password } = body;
 
     if (!email || !username || !password) {
       return NextResponse.json(
-        { error: "Missing required fields: email, username, or password" },
-        { status: 400 }
+        { success: false, error: "Missing required fields" },
+        { status: 400 },
+      );
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedUsername = username.trim();
+
+    if (normalizedUsername.length < 3 || normalizedUsername.length > 24) {
+      return NextResponse.json(
+        { success: false, error: "Username must be 3-24 characters" },
+        { status: 400 },
+      );
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(normalizedUsername)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Username can only contain letters, numbers, and underscores",
+        },
+        { status: 400 },
       );
     }
 
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          { username },
-          { email }
-        ]
-      }
+        OR: [{ username: normalizedUsername }, { email: normalizedEmail }],
+      },
     });
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "User already exists. Please try logging in." },
-        { status: 409 }
+        { success: false, error: "User already exists. Please try logging in." },
+        { status: 409 },
       );
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = generateOtp();
+    const hashedOtp = await hashOtp(otp);
     const hashedPassword = await bcrypt.hash(password, 10);
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-    const hashedOtp=await bcrypt.hash(otp,10);
+    const otpExpiry = getOtpExpiryDate();
+    const expiryMinutes = getOtpExpiryMinutes();
 
     await prisma.oTPVerification.upsert({
-      where: { email: email },
+      where: { email: normalizedEmail },
       update: {
-        otp:hashedOtp,
-        otpExpiry,
-        username,
+        username: normalizedUsername,
         password: hashedPassword,
+        otp: hashedOtp,
+        otpExpiry,
         isVerified: false,
       },
       create: {
-        email,
-        username,
+        email: normalizedEmail,
+        username: normalizedUsername,
         password: hashedPassword,
-        otp:hashedOtp,
+        otp: hashedOtp,
         otpExpiry,
       },
     });
 
-    console.log("OTP GENERATED:", otp);
+    await sendOtpEmail({
+      email: normalizedEmail,
+      username: normalizedUsername,
+      otp,
+      expiryMinutes,
+    });
 
     return NextResponse.json({
       success: true,
-      otp: otp, 
+      message: "OTP sent successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("send-otp error:", error);
-    return NextResponse.json({ 
-      error: "Error while generating OTP!",
-      details: error.message,
-     
-    }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to send OTP",
+      },
+      { status: 500 },
+    );
   }
 }
