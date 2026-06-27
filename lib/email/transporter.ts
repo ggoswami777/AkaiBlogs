@@ -22,7 +22,7 @@ export const emailTransporter=nodemailer.createTransport({
   },
 })
 
-export const emailForm={
+export const emailFrom={
     name:process.env.EMAIL_FORM_NAME || "AkaiBlogs",
     address:requiredEnv.gmailUser as string,
 }
