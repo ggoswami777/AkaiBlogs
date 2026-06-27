@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Zolo | Stories from the Edge of the Blade",
+  title: "AkaiBlogs | Stories from the Edge of the Blade",
   description: "A Japanese-themed social blogging sanctuary for the modern ronin. Forge your legacy, share your path, and find your clan.",
 };
 
