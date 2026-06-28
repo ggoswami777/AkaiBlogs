@@ -1,4 +1,4 @@
-import { Edit, Share } from "lucide-react";
+import { Edit, LogOut, Share } from "lucide-react";
 import { useState } from "react";
 
 
@@ -10,9 +10,10 @@ interface ProfileHeaderProps {
   isOwnProfile?: boolean;
   isFollowing?: boolean;
   onEditClick?: () => void;
+  onLogoutClick?: () => void;
 }
 
-const ProfileHeader = ({ name, username, bio, avatarUrl, isOwnProfile, isFollowing: initialIsFollowing, onEditClick }: ProfileHeaderProps) => {
+const ProfileHeader = ({ name, username, bio, avatarUrl, isOwnProfile, isFollowing: initialIsFollowing, onEditClick, onLogoutClick }: ProfileHeaderProps) => {
   const [isFollowing,setIsFollowing]=useState(initialIsFollowing ?? false);
   const handleFollow=async()=>{
     const res= await fetch(`/api/profile/follow/${username}`,{
@@ -50,10 +51,18 @@ const ProfileHeader = ({ name, username, bio, avatarUrl, isOwnProfile, isFollowi
       </div>
       <div className="flex gap-3 w-full md:w-auto">
         {isOwnProfile !== false ? (
-        
-          <button onClick={onEditClick} className="flex flex-1 md:flex-none min-w-[120px] cursor-pointer items-center justify-center rounded-full h-11 px-6 bg-primary text-white text-sm font-bold hover:brightness-110 active:scale-95 transition-all">
-            <span>Edit Profile</span>
-          </button>
+          <>
+            <button onClick={onEditClick} className="flex flex-1 md:flex-none min-w-[120px] cursor-pointer items-center justify-center rounded-full h-11 px-6 bg-primary text-white text-sm font-bold hover:brightness-110 active:scale-95 transition-all">
+              <span>Edit Profile</span>
+            </button>
+            <button
+              onClick={onLogoutClick}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary transition-colors hover:bg-primary hover:text-white"
+              aria-label="Logout"
+            >
+              <LogOut size={18} />
+            </button>
+          </>
         ) : (
           <button onClick={handleFollow} className={`flex flex-1 md:flex-none min-w-  [120px] cursor-pointer items-center justify-center rounded-full h-11 px-6 text-sm font-bold hover:brightness-110 active:scale-95 transition-all ${
             isFollowing ? "bg-primary/20 hover:bg-primary/30 text-primary" : "bg-primary hover:bg-primary/90 text-white"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import ProfileHeader from "./ProfileHeader";
 import ProfileStats from "./ProfileStats";
 import ProfileTabs from "./ProfileTabs";
@@ -9,6 +10,8 @@ import ProfilePostCardSkeleton from "@/components/skeletons/ProfilePostCardSkele
 import { userProfileStore } from "@/store/useProfileStore";
 import DeleteConfirmModal from "./DeleteConfirmModal";
 import ProfileEditModal from "./ProfileEditModal";
+import LogoutConfirmModal from "./LogoutConfirmModal";
+import { useBlogStore } from "@/store/useBlogStore";
 
 type ProfileBlog = {
   id: string;
@@ -29,6 +32,7 @@ type UpdatedProfile = {
 };
 
 const ProfileCardPage = () => {
+  const router = useRouter();
   const { profile, fetchProfile, isLoadingProfile } = userProfileStore();
   const [blogs,setBlogs]=useState<ProfileBlog[]>([]);
   const [isLoadingBlogs,setIsLoadingBlogs]=useState(true);
@@ -36,6 +40,8 @@ const ProfileCardPage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(()=>{
     const fetchProfileBlogs=async()=>{
@@ -107,6 +113,36 @@ const ProfileCardPage = () => {
     }));
   };
 
+  const handleLogoutConfirm = async () => {
+    setIsLoggingOut(true);
+    try {
+      const res = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!data.success) {
+        alert(data.error || "Failed to logout");
+        return;
+      }
+
+      userProfileStore.setState({
+        profile: null,
+        hasFetched: false,
+        isLoadingProfile: false,
+      });
+      useBlogStore.setState({
+        currentUser: null,
+      });
+      router.push("/");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      alert("An error occurred while logging out");
+    } finally {
+      setIsLoggingOut(false);
+      setIsLogoutModalOpen(false);
+    }
+  };
+
   if (isLoadingProfile || !profile) {
     return (
       <main className="flex flex-col justify-center py-5 max-w-[1400px] mx-auto px-4">
@@ -169,6 +205,7 @@ const ProfileCardPage = () => {
           bio={profile.bio || "Digital nomad & coffee enthusiast. Sharing my journey through Tokyo's hidden neon streets and quiet temples."}
           avatarUrl={profile.avatarUrl}
           onEditClick={() => setIsEditModalOpen(true)}
+          onLogoutClick={() => setIsLogoutModalOpen(true)}
         />
 
         <div className="my-6">
@@ -229,6 +266,13 @@ const ProfileCardPage = () => {
         profile={profile}
         onClose={() => setIsEditModalOpen(false)}
         onSaved={handleProfileSaved}
+      />
+
+      <LogoutConfirmModal
+        isOpen={isLogoutModalOpen}
+        isLoggingOut={isLoggingOut}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogoutConfirm}
       />
     </main>
   );
