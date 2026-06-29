@@ -2,8 +2,11 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { compareOtp } from "@/lib/otp";
+import { signupSchema, getZodErrorMessage } from "@/lib/validations/auth";
+import { ZodError } from "zod";
 export async function POST(request: NextRequest) {
-  const { username, email, password, otp } = await request.json();
+  const body=await request.json();
+  const { username, email, password, otp } =signupSchema.parse(body);
   const existingUser = await prisma.user.findFirst({
     where: {
       OR: [{ username: username }, { email: email }],
@@ -31,6 +34,16 @@ export async function POST(request: NextRequest) {
         { status: 404 },
       );
     }
+    if (verifyingOtp.username !== username) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Username does not match OTP request",
+        },
+        { status: 400 },
+      );
+    }
+
     const isOtpValid=await compareOtp(otp,verifyingOtp.otp);
     if (!isOtpValid) {
       return NextResponse.json(
@@ -83,9 +96,23 @@ export async function POST(request: NextRequest) {
     });
     return response;
   } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: getZodErrorMessage(error),
+        },
+        { status: 400 },
+      );
+    }
+
     console.error("Signup error:", error);
+
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      {
+        success: false,
+        message: "Internal server error",
+      },
       { status: 500 },
     );
   }

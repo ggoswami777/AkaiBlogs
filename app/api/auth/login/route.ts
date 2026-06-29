@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { checkRateLimit ,resetRateLimit,getClientIp} from "@/lib/redis/rateLimit";
+import { getZodErrorMessage, loginSchema } from "@/lib/validations/auth";
+import { ZodError } from "zod";
 
 const LOGIN_RATE_LIMIT={
   maxAttempts:5,
@@ -10,7 +12,8 @@ const LOGIN_RATE_LIMIT={
 }
 export async function POST(request: NextRequest) {
   try {
-    const {email,password}=await request.json();
+    const body=await request.json();
+    const {email,password}=loginSchema.parse(body);
     const clientIp=getClientIp(request);
     const rateLimit=await checkRateLimit(
       clientIp,
@@ -61,10 +64,24 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: getZodErrorMessage(error),
+        },
+        { status: 400 },
+      );
+    }
+
     console.error("Auth error:", error);
+
     return NextResponse.json(
-      { error: "Server error, please try again later" , success:false}, 
-      { status: 500 }
+      {
+        success: false,
+        error: "Server error, please try again later",
+      },
+      { status: 500 },
     );
   }
 }

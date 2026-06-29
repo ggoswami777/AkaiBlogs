@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateOtp, getOtpExpiryDate, getOtpExpiryMinutes, hashOtp } from "@/lib/otp";
 import { sendOtpEmail } from "@/lib/email/sendOtpEmail";
 import { checkRateLimit, getClientIp } from "@/lib/redis/rateLimit";
-
+import { sendOtpSchema, getZodErrorMessage } from "@/lib/validations/auth";
+import { ZodError } from "zod";
 const OTP_RATE_LIMIT={
   maxAttempts:3,
   windowSeconds:10*60,
@@ -12,7 +13,7 @@ const OTP_RATE_LIMIT={
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, username, password } = body;
+    const { email, username, password } = sendOtpSchema.parse(body);
     const clientIp=getClientIp(request);
     const rateLimit=await checkRateLimit(
       clientIp,
@@ -106,12 +107,22 @@ export async function POST(request: NextRequest) {
       message: "OTP sent successfully",
     });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: getZodErrorMessage(error),
+        },
+        { status: 400 },
+      );
+    }
+
     console.error("send-otp error:", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to send OTP",
+        error: "Error while generating OTP",
       },
       { status: 500 },
     );
