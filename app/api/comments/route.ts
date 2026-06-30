@@ -1,4 +1,5 @@
 import { getAuthUserServer } from "@/lib/authHelper";
+import { updateUserInterest } from "@/lib/feed/updateUserInterest";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -51,6 +52,19 @@ export async function POST(request:NextRequest){
                 },
             }),
         ]);
+        const blog=await prisma.blog.findUnique({
+            where:{id:blogId},
+            select:{
+                category:true,
+            },
+        });
+        if(blog){
+            await updateUserInterest({
+                userId:dbUser.id,
+                category:blog.category,
+                action:"comment"
+            })
+        }
         return NextResponse.json({
             success: true,
             message: "Comment posted successfully",

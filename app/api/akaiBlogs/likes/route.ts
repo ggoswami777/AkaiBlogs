@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/authHelper";
 import { prisma } from "@/lib/prisma";
+import { updateUserInterest } from "@/lib/feed/updateUserInterest";
 export async function POST(request: NextRequest){
     try {
         const session=getAuthUser(request);
@@ -53,6 +54,20 @@ export async function POST(request: NextRequest){
                 data:{likesCount:{increment:1}},
             })
             action="liked";
+
+            const blog=await prisma.blog.findUnique({
+                where:{id:blogId},
+                select:{
+                    category:true
+                }
+            })
+            if(blog){
+                await updateUserInterest({
+                    userId:user.id,
+                    category:blog.category,
+                    action:"like"
+                })
+            }
         }
         const updatedBlog=await prisma.blog.findUnique({
             where:{id:blogId},
