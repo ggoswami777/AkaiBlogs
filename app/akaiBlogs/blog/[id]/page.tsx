@@ -6,6 +6,7 @@ import { ThumbsUp, ThumbsDown, Share2, Bookmark, MessageSquare } from 'lucide-re
 import { prisma } from '@/lib/prisma';
 import BlogComments from '@/components/blog/BlogComments';
 import { getAuthUserServer } from '@/lib/authHelper';
+import TrackBlogView from '@/components/blog/TrackBlogView';
 
 
 interface ContentNode {
@@ -126,6 +127,7 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
         <div className="max-w-[800px] mx-auto w-full flex flex-col">
           {/* Category Tags */}
           <div className="mb-6 flex flex-wrap gap-2">
+            <TrackBlogView blogId={blog.id} />
             <span className="px-4 py-1 rounded-full bg-primary/10 text-primary text-[10px] md:text-sm font-bold tracking-wide uppercase">
               {blog.category}
             </span>
