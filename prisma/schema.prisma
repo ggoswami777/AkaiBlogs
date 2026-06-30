@@ -31,6 +31,8 @@ model User {
   createdAt     DateTime  @default(now())
   likes          Like[]
   comments       Comment[]
+  interests UserInterest[]
+  blogViews BlogView[]
 }
 
 
@@ -62,6 +64,7 @@ model Blog {
   commentsCount  Int       @default(0)
   likes       Like[]
   comments    Comment[]
+  views BlogView[]
   @@index([authorId])
   @@index([category,published])
   @@index([createdAt(sort:Desc)])
@@ -120,4 +123,32 @@ model OTPVerification {
   otpExpiry DateTime
   createdAt DateTime @default(now())
   isVerified Boolean @default(false)
+}
+model UserInterest {
+  id        String   @id @default(uuid())
+  userId    String
+  category  String
+  weight    Int      @default(0)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
+  @@index([userId])
+  @@index([category])
+}
+
+model BlogView {
+  id        String   @id @default(uuid())
+  userId    String?
+  blogId    String
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([blogId])
+  @@index([createdAt])
 }
