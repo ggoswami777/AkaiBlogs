@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
             content,
             excerpt,
             coverImage:image,
+            category:category || "general",
             authorId:userId
         }
     })
