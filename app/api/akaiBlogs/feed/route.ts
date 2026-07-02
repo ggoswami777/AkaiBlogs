@@ -30,7 +30,16 @@ export async function GET(request: NextRequest) {
 
     let userInterestsByCategory = new Map<string, number>();
     let followingAuthorIds = new Set<string>();
-
+    const viewedBlogIds=new Set<string>();
+    const viewedBlogs=await prisma.blogView.findMany({
+      where:{
+        userId,
+      },
+      select:{
+        blogId:true,
+      }
+    })
+    viewedBlogs.forEach((view)=>viewedBlogIds.add(view.blogId));
     if (userId) {
       const [userInterests, following] = await Promise.all([
         prisma.userInterest.findMany({
@@ -73,6 +82,8 @@ export async function GET(request: NextRequest) {
           blog,
           userCategoryWeight,
           isFollowingAuthor,
+          hasViewedBlog:viewedBlogIds.has(blog.id),
+          hasLikedBlog:Boolean(blog.likes && blog.likes.length>0),
         });
 
         return {

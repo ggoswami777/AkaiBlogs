@@ -26,33 +26,63 @@ export async function POST(request:NextRequest){
                 {status:404},
             )
         }
-        await prisma.$transaction([
-            prisma.blog.update({
-                where:{id:blogId},
-                data:{
-                    viewsCount:{
-                        increment:1,
+        if (activeUser) {
+         
+            const existingView = await prisma.blogView.findFirst({
+                where: {
+                    userId: activeUser.userId,
+                    blogId: blogId
+                }
+            });
+
+            if (!existingView) {
+                await prisma.$transaction([
+                    prisma.blog.update({
+                        where: { id: blogId },
+                        data: {
+                            viewsCount: {
+                                increment: 1,
+                            }
+                        }
+                    }),
+                    prisma.blogView.create({
+                        data: {
+                            blogId,
+                            userId: activeUser.userId,
+                        }
+                    })
+                ]);
+
+                await updateUserInterest({
+                    userId: activeUser.userId,
+                    category: blog.category,
+                    action: "view",
+                });
+            }
+        } else {
+           
+            await prisma.$transaction([
+                prisma.blog.update({
+                    where: { id: blogId },
+                    data: {
+                        viewsCount: {
+                            increment: 1,
+                        },
                     },
-                },
-            }),
-            prisma.blogView.create({
-                data:{
-                    blogId,
-                    userId:activeUser?.userId
-                },
-            }),
-        ]);
-        if(activeUser){
-            await updateUserInterest({
-                userId:activeUser.userId,
-                category:blog.category,
-                action:"view"
-            })
+                }),
+                prisma.blogView.create({
+                    data: {
+                        blogId,
+                        userId: null
+                    },
+                }),
+            ]);
         }
         return NextResponse.json({
             success:true,
-            message:"View tracked",
-        });
+            message:"View tracked"
+        })
+       
     }
     catch(error){
         console.error("View tracking error:",error);

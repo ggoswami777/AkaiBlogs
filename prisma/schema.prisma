@@ -148,6 +148,7 @@ model BlogView {
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
 
+  @@unique([userId,blogId])
   @@index([userId])
   @@index([blogId])
   @@index([createdAt])
