@@ -30,18 +30,11 @@ export async function GET(request: NextRequest) {
 
     let userInterestsByCategory = new Map<string, number>();
     let followingAuthorIds = new Set<string>();
-    const viewedBlogIds=new Set<string>();
-    const viewedBlogs=await prisma.blogView.findMany({
-      where:{
-        userId,
-      },
-      select:{
-        blogId:true,
-      }
-    })
-    viewedBlogs.forEach((view)=>viewedBlogIds.add(view.blogId));
+    const viewedBlogIds = new Set<string>();
+
     if (userId) {
-      const [userInterests, following] = await Promise.all([
+     
+      const [userInterests, following, viewedBlogs] = await Promise.all([
         prisma.userInterest.findMany({
           where: {
             userId,
@@ -60,6 +53,14 @@ export async function GET(request: NextRequest) {
             followingId: true,
           },
         }),
+        prisma.blogView.findMany({
+          where: {
+            userId,
+          },
+          select: {
+            blogId: true,
+          },
+        }),
       ]);
 
       userInterestsByCategory = new Map(
@@ -69,6 +70,7 @@ export async function GET(request: NextRequest) {
       followingAuthorIds = new Set(
         following.map((relation) => relation.followingId),
       );
+       viewedBlogs.forEach((view) => viewedBlogIds.add(view.blogId));
     }
 
     const scoredBlogs = dbBlogs
@@ -82,8 +84,8 @@ export async function GET(request: NextRequest) {
           blog,
           userCategoryWeight,
           isFollowingAuthor,
-          hasViewedBlog:viewedBlogIds.has(blog.id),
-          hasLikedBlog:Boolean(blog.likes && blog.likes.length>0),
+          hasViewedBlog: viewedBlogIds.has(blog.id),
+          hasLikedBlog: Boolean(blog.likes && blog.likes.length > 0),
         });
 
         return {
@@ -120,14 +122,10 @@ export async function GET(request: NextRequest) {
     const topBlogs = [...dbBlogs]
       .sort((a, b) => {
         const aScore =
-          a.likesCount * 3 +
-          a.commentsCount * 5 +
-          a.viewsCount * 0.2;
+          a.likesCount * 3 + a.commentsCount * 5 + a.viewsCount * 0.2;
 
         const bScore =
-          b.likesCount * 3 +
-          b.commentsCount * 5 +
-          b.viewsCount * 0.2;
+          b.likesCount * 3 + b.commentsCount * 5 + b.viewsCount * 0.2;
 
         return bScore - aScore;
       })
