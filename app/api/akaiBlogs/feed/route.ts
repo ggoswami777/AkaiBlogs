@@ -2,12 +2,22 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUserServer } from "@/lib/authHelper";
 import { scoreBlog } from "@/lib/feed/scoreBlog";
+import { getCache, setCache } from "@/lib/redis/cache";
+import { cacheKeys } from "@/lib/redis/cacheKeys";
 
 export async function GET(request: NextRequest) {
   try {
     const activeUser = await getAuthUserServer();
     const userId = activeUser?.userId;
-
+    const cacheKey=userId?cacheKeys.userFeed(userId):cacheKeys.guestFeed;
+    const cacheFeed=await getCache<{
+      success:true,
+      blogs:unknown[],
+      topBlogs:unknown[],
+    }>(cacheKey);
+    if(cacheFeed){
+      return NextResponse.json(cacheFeed);
+    }
     const dbBlogs = await prisma.blog.findMany({
       where: {
         published: true,
@@ -151,11 +161,17 @@ export async function GET(request: NextRequest) {
         viewsCount: blog.viewsCount,
       }));
 
-    return NextResponse.json({
-      success: true,
+    const responsePayload={
+      success:true,
       blogs,
-      topBlogs,
-    });
+      topBlogs
+    }
+    await setCache(
+      cacheKey,
+      responsePayload,
+      userId?25:50,
+    )
+    return NextResponse.json(responsePayload);
   } catch (error) {
     console.error("Feed API error:", error);
 
