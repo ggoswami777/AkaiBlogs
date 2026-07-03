@@ -2,11 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/authHelper";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
+import { deleteCache, getCache, setCache } from "@/lib/redis/cache";
+import { cacheKeys } from "@/lib/redis/cacheKeys";
+import { profile } from "console";
 
 export async function GET(request: NextRequest) {
   try {
     const activeUser = getAuthUser(request);
-
+    const cacheKey=cacheKeys.profileMe(activeUser.userId);
+    const cachedProfile=await getCache(cacheKey);
+    if(cachedProfile){
+      return NextResponse.json({
+        success:true,
+        profile:cachedProfile
+      })
+    }
     const userProfile = await prisma.user.findUnique({
       where: { username: activeUser.username },
       include: {
@@ -19,15 +29,17 @@ export async function GET(request: NextRequest) {
     if (!userProfile) {
       return NextResponse.json({ success: false }, { status: 404 });
     }
-
-    return NextResponse.json({
-      success: true,
-      profile: {
+    const  profile= {
         ...userProfile,
         followersCount: userProfile._count.followedBy,
         followingCount: userProfile._count.following,
         postsCount: userProfile._count.blogs,
-      },
+      }
+      await setCache(cacheKey,profile,120);
+    return NextResponse.json({
+      success: true,
+      profile
+     
     });
   } catch (error) {
     return NextResponse.json(
@@ -130,7 +142,11 @@ export async function PATCH(request: NextRequest) {
         avatarUrl: true,
       },
     });
-
+    await deleteCache(cacheKeys.profileMe(activeUser.userId));
+    await deleteCache(cacheKeys.profileMe(activeUser.username));
+    if (updatedUser.username !== activeUser.username) {
+  await deleteCache(cacheKeys.publicProfile(updatedUser.username));
+}
     const response = NextResponse.json({
       success: true,
       message: "Profile updated successfully",
