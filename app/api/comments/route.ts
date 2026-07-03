@@ -1,7 +1,12 @@
 import { getAuthUserServer } from "@/lib/authHelper";
+import { invalidateFeedCache } from "@/lib/feed/invalidateFeedCache";
 import { updateUserInterest } from "@/lib/feed/updateUserInterest";
 import { prisma } from "@/lib/prisma";
+import { deleteCache, getCache, setCache } from "@/lib/redis/cache";
+import { cacheKeys } from "@/lib/redis/cacheKeys";
+import { checkRateLimit } from "@/lib/redis/rateLimit";
 import { NextRequest, NextResponse } from "next/server";
+import { cache } from "react";
 
 export async function POST(request:NextRequest){
     try {
@@ -25,6 +30,20 @@ export async function POST(request:NextRequest){
         });
         if(!dbUser){
             return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
+        }
+        const commentLimit=await checkRateLimit(
+            dbUser.id,
+            "rate-limit:comments",
+            {
+                maxAttempts:10,
+                windowSeconds:60
+            }
+        )
+        if(!commentLimit.allowed){
+            return NextResponse.json({
+                success:false,
+                message:`Too many comments. Try again in ${commentLimit.retryAfter}s`,
+            },{status:429})
         }
         const [newComment]=await prisma.$transaction([
             prisma.comment.create({
@@ -65,6 +84,8 @@ export async function POST(request:NextRequest){
                 action:"comment"
             })
         }
+        await invalidateFeedCache(dbUser.id);
+        await deleteCache(cacheKeys.comments(blogId));
         return NextResponse.json({
             success: true,
             message: "Comment posted successfully",
@@ -91,6 +112,14 @@ export async function GET(request:NextRequest){
                 message:"BlogId is required"
             },{status:400})
         }
+        const cacheKey=cacheKeys.comments(blogId);
+        const cachedComments=await getCache<unknown[]>(cacheKey);
+        if(cachedComments){
+            return NextResponse.json({
+                success:true,
+                comments:cachedComments,
+            })
+        }
         const comments=await prisma.comment.findMany({
             where:{
                 blogId:blogId
@@ -108,6 +137,7 @@ export async function GET(request:NextRequest){
                 createdAt:"desc"
             }
         });
+        await setCache(cacheKey,comments,60);
         return NextResponse.json({
             success: true,
             comments: comments

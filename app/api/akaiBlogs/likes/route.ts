@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/authHelper";
 import { prisma } from "@/lib/prisma";
 import { updateUserInterest } from "@/lib/feed/updateUserInterest";
+import { invalidateFeedCache } from "@/lib/feed/invalidateFeedCache";
+import { checkRateLimit } from "@/lib/redis/rateLimit";
+
 export async function POST(request: NextRequest){
     try {
         const session=getAuthUser(request);
@@ -16,14 +19,30 @@ export async function POST(request: NextRequest){
             where:{username:session.username},
             select:{id:true},
         })
+        
         if(!user?.id){
             return NextResponse.json({success:false,error:"User not found"},{status:404});
+        }
+        const likeLimit=await checkRateLimit(
+            user.id,
+            "rate-limit:likes",
+            {
+                maxAttempts:30,
+                windowSeconds:60,
+            }
+        )
+        if(!likeLimit.allowed){
+            return NextResponse.json({
+                success:false,
+                error:`Too many like actions. Try again in ${likeLimit.retryAfter}s`,
+            },{status:429})
         }
         const existingLike=await prisma.like.findUnique({
             where:{
                 userId_blogId:{userId:user.id,blogId:blogId}
             }
         })
+
         let action="liked";
         if(existingLike){
             await prisma.like.delete({
@@ -75,6 +94,7 @@ export async function POST(request: NextRequest){
                 likesCount:true,
             }
         })
+        await invalidateFeedCache(user.id);
         return NextResponse.json({
       success: true,
       action,
