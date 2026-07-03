@@ -1,4 +1,5 @@
 import { getAuthUser } from "@/lib/authHelper";
+import { invalidateAllFeedCaches } from "@/lib/feed/invalidateFeedCache";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -16,6 +17,7 @@ export async function POST(request: NextRequest) {
             authorId:userId
         }
     })
+    await invalidateAllFeedCaches();
     return NextResponse.json({
         success:true,
         message:"Scrolled successfully forged by"+username,

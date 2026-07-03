@@ -1,4 +1,5 @@
 import { getAuthUser } from "@/lib/authHelper";
+import { invalidateAllFeedCaches } from "@/lib/feed/invalidateFeedCache";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -39,7 +40,7 @@ export async function DELETE(request: NextRequest) {
     await prisma.blog.delete({
       where: { id: blogId },
     });
-
+    await invalidateAllFeedCaches();
     return NextResponse.json({
       success: true,
       message: "Blog successfully deleted",
