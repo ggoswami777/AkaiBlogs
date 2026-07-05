@@ -177,7 +177,7 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
             />
           </div>
 
-          {/* Content Parser Component replacing dangerouslySetInnerHTML */}
+          {/* Content Parser Component replacing */}
           <article className="overflow-hidden">
             <RenderBlogContent content={blog.content} />
           </article>
