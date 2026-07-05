@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import BlogComments from '@/components/blog/BlogComments';
 import { getAuthUserServer } from '@/lib/authHelper';
 import TrackBlogView from '@/components/blog/TrackBlogView';
+import BlogLikeButton from '@/components/blog/BlogLikeButton';
 
 
 interface ContentNode {
@@ -104,6 +105,11 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
     where: { id: id },
     include: {
       author: true,
+      likes: {
+        where: {
+          userId: activeUser?.userId || "",
+        },
+      },
     }
   });
 
@@ -120,6 +126,7 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
   const authorName = blog.author.username;
   const authorAvatar = blog.author.avatarUrl || "https://lh3.googleusercontent.com/aida-public/AB6AXuDQREzBniPFG2Rv_94OnCxJg4cRDD40044S_MYT3ZXzSs4-9GW-Jv3-nb6sUnnqs2nTb6XE0OcJsPGnJDuMQJZ9QcIcQ_aHE1N7YwlkHcXxTBimzOzoqZ6IzCaH-CeERYMzm06b5vHmwCKTr24X--k89shI3ntfJqHPuc2pmf9UGQ60JwENsEpz0xxzRexZnHPo4N61bX1AIe4QBvRpu7bNUZKwep55iMNKLCoKqkRSQK4tfIUepeZ3C9uu4pIuIbkiT-5nAYtHiQ";
   const coverImage = blog.coverImage || "https://lh3.googleusercontent.com/aida-public/AB6AXuBGqQusKRN51nhQea1nffq_Ca4j_-0PMBC1Kq8Vwk3S6jpo6nwpTYVY9C5t2-Ps7WCl_HN0E_e30iwbpfkb0j4bs6k63XOw7TVhsgAlwIeGTFvT_c1AUkp1dcYxDuM9IWKpJE9cCmcJjFGZmhNgQohmddj93Gwlxi6-sx2YwsqCglBPWx0yGxsya0QQ13S-hfTeEFKPcdM6GaS6YjQmr9ks2qHyAPzxsGcqEZtfsuw_kjHXipNXV2KUmSXhQXSsiLm-zQOqO1WCJg";
+  const isLikedByCurrentUser = activeUser?.userId ? blog.likes.length > 0 : false;
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen">
@@ -177,17 +184,14 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
 
          
 
-          {/* Interaction Bar */}
           <div className="mt-16 pt-10 border-t border-slate-200 dark:border-primary/20">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-3">
-                <button className="flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 rounded-full bg-primary text-white font-black hover:bg-primary/90 transition-all shadow-xl shadow-primary/30 active:scale-95">
-                  <ThumbsUp size={20} />
-                  <span>{blog.likesCount}</span>
-                </button>
-                <button className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full glass-panel text-slate-400 hover:text-primary transition-colors border-primary/10">
-                  <ThumbsDown size={20} />
-                </button>
+                <BlogLikeButton
+                  blogId={blog.id}
+                  initialLikesCount={blog.likesCount}
+                  initialIsLiked={isLikedByCurrentUser}
+                />
               </div>
               
               <div className="flex items-center gap-4">
