@@ -8,7 +8,7 @@ export const createConservationSchema=z.object({
 
 export const sendMessageSchema=z.object({
     conversationId:z.string().min(1,"Conversation is required"),
-    recieverId:z.string().min(1,"Reciever is required"),
+    receiverId:z.string().min(1,"Receiver is required"),
     content:z.string().trim().max(2000,"Message must be in 2000 characters or less").optional(),
     sharedBlogId:z.string().optional(),
 }).refine(

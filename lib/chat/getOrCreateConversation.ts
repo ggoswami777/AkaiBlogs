@@ -2,11 +2,11 @@ import { prisma } from "../prisma";
 
 type GetOrCreateConversationInput={
     currentUserId:string;
-    recieverId:string;
+    receiverId:string;
 }
 
-export async function getOrCreateConversation({currentUserId,recieverId}:GetOrCreateConversationInput) {
-    if(currentUserId==recieverId){
+export async function getOrCreateConversation({currentUserId,receiverId}:GetOrCreateConversationInput) {
+    if(currentUserId==receiverId){
         throw new Error ("You cannot start a conversation with yourself");
     }
     const existingConversations=await prisma.conversation.findMany({
@@ -14,7 +14,7 @@ export async function getOrCreateConversation({currentUserId,recieverId}:GetOrCr
             participants:{
                 every:{
                     userId:{
-                        in:[currentUserId,recieverId],
+                        in:[currentUserId,receiverId],
                     }
                 }
             }
@@ -27,7 +27,7 @@ export async function getOrCreateConversation({currentUserId,recieverId}:GetOrCr
         (conversation)=>
             conversation.participants.length===2 && 
         conversation.participants.some((p)=>p.userId===currentUserId) &&
-        conversation.participants.some((p)=>p.userId===recieverId),
+        conversation.participants.some((p)=>p.userId===receiverId),
     )
     
     if(exisitingOneToOne){
@@ -42,7 +42,7 @@ export async function getOrCreateConversation({currentUserId,recieverId}:GetOrCr
                         userId:currentUserId,
                     },
                     {
-                        userId:recieverId,
+                        userId:receiverId,
                     },
                 ],
             },
