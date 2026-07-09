@@ -3,7 +3,7 @@ import { getOrCreateConversation } from "@/lib/chat/getOrCreateConversation";
 import { prisma } from "@/lib/prisma";
 import { createConservationSchema } from "@/lib/validations/chat";
 import { NextRequest, NextResponse } from "next/server";
-import { success, ZodError } from "zod";
+import {  ZodError } from "zod";
 
 export async function GET(request: NextRequest) {
   try {
