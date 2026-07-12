@@ -65,12 +65,12 @@ const Navbar = () => {
 
         {/* actions */}
         <div className="flex items-center gap-4 md:gap-6">
-          {/* Mobile Search Icon Link (visible on screens smaller than lg) */}
+          {/* Mobile Search Icon Link  */}
           <Link href="/akaiBlogs/search" className="text-slate-300 hover:text-primary transition-colors lg:hidden p-1 rounded-full hover:bg-white/5">
             <Search size={20} />
           </Link>
 
-          <Link href="#">
+          <Link href="/akaiBlogs/create">
             <button className="bg-primary hover:bg-primary/90 text-white hidden  px-5 py-2 rounded-full text-xs font-bold transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20 md:flex items-center gap-2">
               <Plus size={16} />
               <span className="hidden sm:inline">New Scroll</span>
@@ -78,9 +78,13 @@ const Navbar = () => {
           </Link>
           
           
-          <button className="text-slate-300 hover:text-primary transition-colors hidden md:block">
+          <Link
+            href="/akaiBlogs/chat"
+            className="text-slate-300 hover:text-primary transition-colors hidden md:block"
+            aria-label="Open chat"
+          >
             <MessageSquare size={20} />
-          </button>
+          </Link>
           
           <button className="text-slate-300 hover:text-primary transition-colors  block">
             <Bell size={20} />

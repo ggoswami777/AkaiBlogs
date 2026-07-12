@@ -1,4 +1,5 @@
 import { useLikeStore } from "@/store/useLikeStore";
+import ShareToChatModal from "@/components/chat/ShareToChatModal";
 import { Bookmark, Ellipsis, Heart, MessageSquare, Share2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -11,6 +12,7 @@ const FeedBlogsCard = ({ blog }: any) => {
   const [isPosting, setIsPosting] = useState(false);
   const [userProfile, setUserProfile] = useState<{ username: string; avatarUrl: string | null } | null>(null);
   const [commentsCount, setCommentsCount] = useState<number>(blog.commentsCount ?? blog.comments ?? 0);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
     setInitialState(blog.id, blog.isLikedByCurrentUser || false, blog.likesCount || 0);
@@ -165,6 +167,7 @@ const FeedBlogsCard = ({ blog }: any) => {
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
+                    setIsShareModalOpen(true);
                   }}
                   className="flex items-center gap-1.5 text-slate-400 hover:text-primary transition-colors"
                 >
@@ -249,6 +252,16 @@ const FeedBlogsCard = ({ blog }: any) => {
           </div>
         </div>
       )}
+
+      <ShareToChatModal
+        isOpen={isShareModalOpen}
+        blog={{
+          id: blog.id,
+          title: blog.title,
+          postImage: blog.postImage,
+        }}
+        onClose={() => setIsShareModalOpen(false)}
+      />
     </div>
   );
 };
