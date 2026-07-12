@@ -6,7 +6,27 @@ import { createClient } from "redis";
 import { getSocketUser } from "./auth";
 import type { ClientToServerEvents, ServerToClientEvents } from "../types/chat";
 import { prisma } from "@/lib/prisma";
+import z, { safeParse } from "zod";
 
+// zod stuff
+
+const messageSendSchema = z
+  .object({
+    conversationId: z.string().min(1),
+    receiverId: z.string().min(1),
+    content: z.string().optional(),
+    sharedBlogId: z.string().optional(),
+  })
+  .refine((data) => data.content?.trim() || data.sharedBlogId, {
+    message: "Message must contain text or a shared blog",
+  });
+const conversationEventSchema = z.object({
+  conversationId: z.string().min(1),
+});
+const typingEventSchema = z.object({
+  conversationId: z.string().min(1),
+  receiverId: z.string().min(1),
+});
 const PORT = Number(process.env.SOCKET_PORT || 4000);
 const CLIENT_ORIGIN =
   process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -62,7 +82,12 @@ async function bootstrap() {
       });
     }, 30000);
 
-    socket.on("conversation:join", async ({ conversationId }) => {
+    socket.on("conversation:join", async (payload) => {
+      const parsed = conversationEventSchema.safeParse(payload);
+      if (!parsed.success) return;
+      
+      const { conversationId } = parsed.data;
+
       const participant = await prisma.conversationParticipant.findUnique({
         where: {
           conversationId_userId: {
@@ -80,11 +105,16 @@ async function bootstrap() {
     });
 
     socket.on("message:send", async (payload, callback) => {
+      const parsed=messageSendSchema.safeParse(payload);
+      if(!parsed.success){
+        return callback({success:false,error:parsed.error.issues[0].message});
+      }
+      const validPayload=parsed.data;
       try {
         const participant = await prisma.conversationParticipant.findUnique({
           where: {
             conversationId_userId: {
-              conversationId: payload.conversationId,
+              conversationId: validPayload.conversationId,
               userId: user.userId,
             },
           },
@@ -101,8 +131,8 @@ async function bootstrap() {
           await prisma.conversationParticipant.findUnique({
             where: {
               conversationId_userId: {
-                conversationId: payload.conversationId,
-                userId: payload.receiverId,
+                conversationId: validPayload.conversationId,
+                userId: validPayload.receiverId,
               },
             },
           });
@@ -113,17 +143,17 @@ async function bootstrap() {
           });
           return;
         }
-        if (!payload.content?.trim() && !payload.sharedBlogId) {
+        if (!validPayload.content?.trim() && !validPayload.sharedBlogId) {
           callback({
             success: false,
             error: "Message must contain text or a shared blog",
           });
           return;
         }
-        if (payload.sharedBlogId) {
+        if (validPayload.sharedBlogId) {
           const blog = await prisma.blog.findUnique({
             where: {
-              id: payload.sharedBlogId,
+              id: validPayload.sharedBlogId,
             },
             select: {
               id: true,
@@ -137,17 +167,17 @@ async function bootstrap() {
             return;
           }
         }
-        const receiverOnoine = await pubClient.get(
-          `presence:user:${payload.receiverId}`,
+        const receiverOnline = await pubClient.get(
+          `presence:user:${validPayload.receiverId}`,
         );
         const message = await prisma.message.create({
           data: {
-            conversationId: payload.conversationId,
+            conversationId: validPayload.conversationId,
             senderId: user.userId,
-            receiverId: payload.receiverId,
-            content: payload.content?.trim() || null,
-            sharedBlogId: payload.sharedBlogId || null,
-            deliveredAt: receiverOnoine === "online" ? new Date() : null,
+            receiverId: validPayload.receiverId,
+            content: validPayload.content?.trim() || null,
+            sharedBlogId: validPayload.sharedBlogId || null,
+            deliveredAt: receiverOnline === "online" ? new Date() : null,
           },
           include: {
             sharedBlog: {
@@ -167,7 +197,7 @@ async function bootstrap() {
         });
         await prisma.conversation.update({
           where: {
-            id: payload.conversationId,
+            id: validPayload.conversationId,
           },
           data: {
             updatedAt: new Date(),
@@ -180,12 +210,12 @@ async function bootstrap() {
           readAt: message.readAt?.toISOString() || null,
         };
 
-        io.to(`conversation:${payload.conversationId}`).emit(
+        io.to(`conversation:${validPayload.conversationId}`).emit(
           "message:new",
           serializedMessage,
         );
 
-        io.to(`user:${payload.receiverId}`).emit(
+        io.to(`user:${validPayload.receiverId}`).emit(
           "message:new",
           serializedMessage,
         );
@@ -208,7 +238,12 @@ async function bootstrap() {
         });
       }
     });
-    socket.on("message:read", async ({ conversationId }) => {
+    socket.on("message:read", async (payload) => {
+      const parsed = conversationEventSchema.safeParse(payload);
+      if (!parsed.success) return;
+      
+      const { conversationId } = parsed.data;
+
       const participant = await prisma.conversationParticipant.findUnique({
         where: {
           conversationId_userId: {
@@ -245,20 +280,28 @@ async function bootstrap() {
           },
         }),
       ]);
-      
-      io.to(`conversation:${conversationId}`).emit("message:read",{
+
+      io.to(`conversation:${conversationId}`).emit("message:read", {
         conversationId,
-        readerId:user.userId,
-        readAt:readAt.toISOString(),
-      })
+        readerId: user.userId,
+        readAt: readAt.toISOString(),
+      });
     });
-    socket.on("typing:start", ({ conversationId, receiverId }) => {
+    socket.on("typing:start", (payload) => {
+      const parsed = typingEventSchema.safeParse(payload);
+      if (!parsed.success) return;
+      const { conversationId, receiverId } = parsed.data;
+
       io.to(`user:${receiverId}`).emit("typing:start", {
         conversationId,
         userId: user.userId,
       });
     });
-    socket.on("typing:stop", ({ conversationId, receiverId }) => {
+    socket.on("typing:stop", (payload) => {
+      const parsed = typingEventSchema.safeParse(payload);
+      if (!parsed.success) return;
+      const { conversationId, receiverId } = parsed.data;
+
       io.to(`user:${receiverId}`).emit("typing:stop", {
         conversationId,
         userId: user.userId,
