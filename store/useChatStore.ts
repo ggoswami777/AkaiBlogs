@@ -23,9 +23,12 @@ type ChatStore = {
 
   setActiveConversationId: (conversationId: string | null) => void;
   fetchConversations: () => Promise<void>;
+  createConversation: (receiverId: string) => Promise<string | null>;
   fetchMessages: (conversationId: string) => Promise<void>;
   connectSocket: () => void;
   joinConversation: (conversationId: string) => void;
+  startTyping: (payload: { conversationId: string; receiverId: string }) => void;
+  stopTyping: (payload: { conversationId: string; receiverId: string }) => void;
   sendMessage: (payload: {
     conversationId: string;
     receiverId: string;
@@ -53,6 +56,24 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     if (data.success) {
       set({ conversations: data.conversations });
     }
+  },
+
+  createConversation: async (receiverId) => {
+    const res = await fetch("/api/chat/conversations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ receiverId }),
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      throw new Error(data.error || "Failed to create conversation");
+    }
+
+    await get().fetchConversations();
+    return data.conversation?.id || null;
   },
 
   fetchMessages: async (conversationId) => {
@@ -159,6 +180,14 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   joinConversation: (conversationId) => {
     getSocket().emit("conversation:join", { conversationId });
+  },
+
+  startTyping: (payload) => {
+    getSocket().emit("typing:start", payload);
+  },
+
+  stopTyping: (payload) => {
+    getSocket().emit("typing:stop", payload);
   },
 
   sendMessage: async (payload) => {
