@@ -15,7 +15,9 @@ const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 const httpServer = createServer();
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   cors: {
-    origin: CLIENT_ORIGIN,
+    origin: (origin, callback) => {
+      callback(null, true);
+    },
     credentials: true,
   },
 });
@@ -199,6 +201,7 @@ async function bootstrap() {
           message: serializedMessage,
         });
       } catch (error) {
+        console.error("Error sending message:", error);
         callback({
           success: false,
           error: "Failed to send message",

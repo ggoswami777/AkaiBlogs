@@ -10,7 +10,9 @@ let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 
 export function getSocket(){
     if(!socket){
-        socket=io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000",{
+        const isClient = typeof window !== "undefined";
+        const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || (isClient ? `${window.location.protocol}//${window.location.hostname}:4000` : "http://localhost:4000");
+        socket=io(socketUrl,{
             withCredentials:true,
             transports:["websocket"],
         }) 
