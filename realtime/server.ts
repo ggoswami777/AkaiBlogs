@@ -279,8 +279,8 @@ async function bootstrap() {
       }
     });
   });
-  httpServer.listen(PORT, () => {
-    console.log(`Socket server running on http://localhost:${PORT}`);
+  httpServer.listen(PORT, "0.0.0.0", () => {
+    console.log(`Socket server running on http://0.0.0.0:${PORT}`);
   });
 }
 bootstrap().catch((error) => {

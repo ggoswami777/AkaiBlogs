@@ -3,7 +3,7 @@
 import { Bell, Search, MessageSquare, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { userProfileStore } from "@/store/useProfileStore";
 
 const fallbackAvatar =
@@ -11,8 +11,10 @@ const fallbackAvatar =
 
 const Navbar = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [headerSearch, setHeaderSearch] = useState("");
   const { profile, fetchProfile } = userProfileStore();
+  const isChatPage = pathname.startsWith("/akaiBlogs/chat");
 
   useEffect(() => {
     fetchProfile();
@@ -26,7 +28,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center p-4">
+    <nav className={`fixed top-0 left-0 right-0 z-50 flex justify-center p-4 ${isChatPage ? "hidden md:flex" : ""}`}>
       <div className="bg-[#1f141499] w-full max-w-400 rounded-full px-8 py-3 flex items-center justify-between border border-primary/10 backdrop-blur-[12px]">
         {/* logo */}
         <div className="flex items-center gap-3">

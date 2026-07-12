@@ -91,27 +91,15 @@ function ChatShellContent() {
   };
 
   return (
-    <main className="mx-auto flex h-[calc(100vh-5rem)] max-w-[1500px] flex-col px-3 pb-3 pt-3 md:px-5 md:pb-4 md:pt-4">
+    <main className="mx-auto flex h-[calc(100vh-5rem)] max-w-[1500px] flex-col -mt-20 md:mt-0 px-0 pb-0 pt-0 md:px-5 md:pb-4 md:pt-4">
       <div
-        className="flex min-h-0 flex-1 overflow-hidden rounded-3xl"
-        style={{
-          background: "rgba(10,4,4,0.92)",
-          backdropFilter: "blur(32px) saturate(180%)",
-          WebkitBackdropFilter: "blur(32px) saturate(180%)",
-          border: "1px solid rgba(234,42,51,0.10)",
-          boxShadow: "0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.04)",
-        }}
+        className="flex min-h-0 flex-1 overflow-hidden rounded-none md:rounded-3xl bg-[#0a0505] md:bg-black/90 md:backdrop-blur-2xl border-none md:border md:border-primary/10 shadow-none md:shadow-2xl"
       >
         {/* ── Sidebar ── */}
         <aside
-          className={`flex flex-col md:w-[300px] md:min-w-[300px] ${
+          className={`flex flex-col md:w-[300px] md:min-w-[300px] bg-transparent md:bg-[#0f0606]/85 md:backdrop-blur-xl md:border-r md:border-white/5 ${
             activeConversationId ? "hidden md:flex" : "flex w-full"
           }`}
-          style={{
-            background: "rgba(15,6,6,0.85)",
-            backdropFilter: "blur(20px)",
-            borderRight: "1px solid rgba(255,255,255,0.04)",
-          }}
         >
           {/* Sidebar Header */}
           <div className="flex items-center justify-between px-5 py-4">
@@ -173,12 +161,7 @@ function ChatShellContent() {
               style={{ background: "radial-gradient(ellipse at 50% 25%, rgba(234,42,51,0.06) 0%, transparent 65%)" }}
             >
               <div
-                className="mb-5 flex size-14 items-center justify-center rounded-2xl"
-                style={{
-                  background: "rgba(234,42,51,0.08)",
-                  backdropFilter: "blur(12px)",
-                  border: "1px solid rgba(234,42,51,0.15)",
-                }}
+                className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-primary/10 md:bg-primary/5 md:backdrop-blur-md border border-primary/20"
               >
                 <MessageCircle className="text-primary" size={24} />
               </div>

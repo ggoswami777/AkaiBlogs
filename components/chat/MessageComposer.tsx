@@ -55,23 +55,8 @@ export default function MessageComposer({
   };
 
   return (
-    <div
-      className="px-4 py-3"
-      style={{
-        background: "rgba(10,4,4,0.85)",
-        backdropFilter: "blur(20px)",
-        borderTop: "1px solid rgba(255,255,255,0.04)",
-      }}
-    >
-      <div
-        className="flex items-end gap-2.5 rounded-2xl px-3.5 py-2.5"
-        style={{
-          background: "rgba(255,255,255,0.04)",
-          backdropFilter: "blur(12px) saturate(160%)",
-          border: "1px solid rgba(255,255,255,0.07)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
-        }}
-      >
+    <div className="px-4 py-3 bg-[#0a0505] md:bg-[#0a0404]/85 md:backdrop-blur-xl border-t border-white/[0.04]">
+      <div className="flex items-end gap-2.5 rounded-2xl px-3.5 py-2.5 bg-white/[0.04] md:backdrop-blur-md border border-white/[0.07] shadow-none md:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
         <textarea
           ref={textareaRef}
           value={content}

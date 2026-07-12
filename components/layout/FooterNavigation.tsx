@@ -13,7 +13,6 @@ export default function FooterNavigation() {
     }
     return pathname.startsWith(path)
   }
-
   return (
     <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-background-light dark:bg-background-dark border-t border-primary/10 px-4 py-2 flex justify-around items-center z-50">
       <Link

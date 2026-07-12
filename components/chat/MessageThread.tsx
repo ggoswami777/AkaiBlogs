@@ -52,14 +52,7 @@ export default function MessageThread({
   return (
     <section className="flex min-h-0 flex-1 flex-col">
       {/* ── Header ── */}
-      <header
-        className="flex items-center justify-between gap-3 px-4 py-3"
-        style={{
-          background: "rgba(12,5,5,0.8)",
-          backdropFilter: "blur(20px)",
-          borderBottom: "1px solid rgba(255,255,255,0.04)",
-        }}
-      >
+      <header className="flex items-center justify-between gap-3 px-4 py-3 bg-[#0a0505] md:bg-[#0c0505]/80 md:backdrop-blur-xl border-b border-white/[0.04]">
         <div className="flex items-center gap-3">
           {onBackClick && (
             <button
@@ -97,10 +90,9 @@ export default function MessageThread({
       </header>
 
       {/* ── Messages ── */}
-      <div
-        className="no-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-5"
+      <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-5 bg-[#0a0505] md:bg-transparent"
         style={{
-          background: "radial-gradient(ellipse at 50% 0%, rgba(234,42,51,0.05) 0%, transparent 60%)",
+          backgroundImage: "radial-gradient(ellipse at 50% 0%, rgba(234,42,51,0.05) 0%, transparent 60%)",
         }}
       >
         <div className="mx-auto flex max-w-2xl flex-col gap-2">
@@ -133,24 +125,11 @@ export default function MessageThread({
                 <div className={`flex max-w-[68%] flex-col gap-1 ${isMine ? "items-end" : "items-start"}`}>
                   {/* Bubble */}
                   <div
-                    className="rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed"
-                    style={
+                    className={`rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${
                       isMine
-                        ? {
-                            background: "rgba(234,42,51,0.22)",
-                            backdropFilter: "blur(12px) saturate(150%)",
-                            border: "1px solid rgba(234,42,51,0.28)",
-                            color: "rgba(255,255,255,0.92)",
-                            borderBottomRightRadius: "4px",
-                          }
-                        : {
-                            background: "rgba(255,255,255,0.05)",
-                            backdropFilter: "blur(12px) saturate(150%)",
-                            border: "1px solid rgba(255,255,255,0.07)",
-                            color: "rgba(255,255,255,0.80)",
-                            borderBottomLeftRadius: "4px",
-                          }
-                    }
+                        ? "bg-primary text-white md:bg-primary/20 md:backdrop-blur-xl md:border md:border-primary/30 md:text-white/90 rounded-br-sm"
+                        : "bg-white/10 text-white md:bg-white/5 md:backdrop-blur-xl md:border md:border-white/10 md:text-white/80 rounded-bl-sm"
+                    }`}
                   >
                     {message.content && (
                       <p className="whitespace-pre-wrap break-words">{message.content}</p>

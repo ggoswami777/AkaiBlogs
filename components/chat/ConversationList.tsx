@@ -62,29 +62,11 @@ export default function ConversationList({
           <button
             key={conversation.id}
             onClick={() => onSelect(conversation.id)}
-            className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-all"
-            style={
-              isActive
-                ? {
-                    background: "rgba(234,42,51,0.10)",
-                    backdropFilter: "blur(8px)",
-                    border: "1px solid rgba(234,42,51,0.18)",
-                  }
-                : {
-                    background: "transparent",
-                    border: "1px solid transparent",
-                  }
-            }
-            onMouseEnter={(e) => {
-              if (!isActive) {
-                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isActive) {
-                (e.currentTarget as HTMLElement).style.background = "transparent";
-              }
-            }}
+            className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-all hover:bg-white/[0.03] ${
+              isActive 
+                ? "bg-primary/10 md:bg-primary/10 md:backdrop-blur-sm border-primary/20 md:border-primary/20 border" 
+                : "bg-transparent border border-transparent"
+            }`}
           >
             {/* Avatar */}
             <div className="relative shrink-0">
