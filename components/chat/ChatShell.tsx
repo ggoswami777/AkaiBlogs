@@ -91,9 +91,9 @@ function ChatShellContent() {
   };
 
   return (
-    <main className="mx-auto flex h-[calc(100vh-5rem)] max-w-[1500px] flex-col -mt-20 md:mt-0 px-0 pb-0 pt-0 md:px-5 md:pb-4 md:pt-4">
+    <main className="mx-auto flex h-[calc(100vh-5rem)] w-full flex-col -mt-20 md:mt-0">
       <div
-        className="flex min-h-0 flex-1 overflow-hidden rounded-none md:rounded-3xl bg-[#0a0505] md:bg-black/90 md:backdrop-blur-2xl border-none md:border md:border-primary/10 shadow-none md:shadow-2xl"
+        className="flex min-h-0 flex-1 overflow-hidden bg-[#0a0505] md:bg-black/90 md:backdrop-blur-2xl shadow-none md:shadow-2xl"
       >
         {/* ── Sidebar ── */}
         <aside

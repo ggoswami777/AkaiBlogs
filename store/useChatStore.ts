@@ -20,14 +20,17 @@ type ChatStore = {
   activeConversationId: string | null;
   typingUsers: Record<string, string[]>;
   onlineUserIds: Record<string, boolean>;
+  cursors: Record<string, string | null>;
 
   setActiveConversationId: (conversationId: string | null) => void;
   fetchConversations: () => Promise<void>;
   createConversation: (receiverId: string) => Promise<string | null>;
-  fetchMessages: (conversationId: string) => Promise<void>;
   connectSocket: () => void;
   joinConversation: (conversationId: string) => void;
-  startTyping: (payload: { conversationId: string; receiverId: string }) => void;
+  startTyping: (payload: {
+    conversationId: string;
+    receiverId: string;
+  }) => void;
   stopTyping: (payload: { conversationId: string; receiverId: string }) => void;
   sendMessage: (payload: {
     conversationId: string;
@@ -36,6 +39,8 @@ type ChatStore = {
     sharedBlogId?: string;
   }) => Promise<void>;
   markRead: (conversationId: string) => void;
+  isFetchingHistory: boolean;
+  fetchMessages: (conversationId: string, cursor?: string) => Promise<void>;
 };
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -44,7 +49,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   activeConversationId: null,
   typingUsers: {},
   onlineUserIds: {},
-
+  cursors: {},
+  isFetchingHistory: false,
   setActiveConversationId: (conversationId) => {
     set({ activeConversationId: conversationId });
   },
@@ -76,17 +82,41 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     return data.conversation?.id || null;
   },
 
-  fetchMessages: async (conversationId) => {
-    const res = await fetch(`/api/chat/conversations/${conversationId}/messages`);
-    const data = await res.json();
+  fetchMessages: async (conversationId, cursor) => {
+    if (get().isFetchingHistory) return;
+    set({ isFetchingHistory: true });
 
-    if (data.success) {
-      set((state) => ({
-        messagesByConversation: {
-          ...state.messagesByConversation,
-          [conversationId]: data.messages,
-        },
-      }));
+    try {
+      const url = cursor
+        ? `/api/chat/conversations/${conversationId}/messages?cursor=${cursor}`
+        : `/api/chat/conversations/${conversationId}/messages`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.success) {
+        set((state) => {
+          const existing = state.messagesByConversation[conversationId] || [];
+
+         
+          const newMessages = cursor
+            ? [...data.messages, ...existing]
+            : data.messages;
+
+          return {
+            messagesByConversation: {
+              ...state.messagesByConversation,
+              [conversationId]: newMessages,
+            },
+            cursors: {
+              ...state.cursors,
+              [conversationId]: data.nextCursor,
+            },
+          };
+        });
+      }
+    } finally {
+      set({ isFetchingHistory: false });
     }
   },
 

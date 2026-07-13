@@ -1,8 +1,9 @@
 import { CheckCheck, ArrowLeft, MoreHorizontal } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { ChatMessage } from "@/types/chat";
 import MessageComposer from "./MessageComposer";
 import SharedBlogMessageCard from "./SharedBlogMessageCard";
+import { useChatStore } from "@/store/useChatStore";
 
 type OtherUser = {
   id: string;
@@ -35,6 +36,10 @@ export default function MessageThread({
   onTypingStop: (payload: { conversationId: string; receiverId: string }) => void;
   onBackClick?: () => void;
 }) {
+  // for message fetching blockwise convo history
+  const observer = useRef<IntersectionObserver | null>(null);
+  const { cursors, fetchMessages, isFetchingHistory } = useChatStore();
+  const hasMore = cursors[conversationId] !== null && cursors[conversationId] !== undefined;
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -48,6 +53,21 @@ export default function MessageThread({
       </div>
     );
   }
+const topElementRef = useCallback(
+  (node: HTMLDivElement | null) => {
+    if (isFetchingHistory) return;
+    if (observer.current) observer.current.disconnect();
+
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) {
+        fetchMessages(conversationId, cursors[conversationId] as string);
+      }
+    });
+
+    if (node) observer.current.observe(node);
+  },
+  [isFetchingHistory, hasMore, conversationId, cursors, fetchMessages]
+);
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
@@ -95,7 +115,14 @@ export default function MessageThread({
           backgroundImage: "radial-gradient(ellipse at 50% 0%, rgba(234,42,51,0.05) 0%, transparent 60%)",
         }}
       >
-        <div className="mx-auto flex max-w-2xl flex-col gap-2">
+        <div className="mx-auto flex max-w-none w-full flex-col gap-2">
+          <div ref={topElementRef} className="h-1 w-full" />
+          
+          {isFetchingHistory && (
+            <div className="flex justify-center py-4">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
+            </div>
+          )}
           {messages.length > 0 && (
             <div className="mb-3 flex justify-center">
               <span
@@ -147,8 +174,8 @@ export default function MessageThread({
                     </span>
                     {isMine && (
                       <CheckCheck
-                        size={11}
-                        className={message.readAt ? "text-emerald-400" : "text-white/20"}
+                        size={14}
+                        className={message.readAt ? "text-emerald-400 shrink-0" : "text-white/20 shrink-0"}
                       />
                     )}
                   </div>
