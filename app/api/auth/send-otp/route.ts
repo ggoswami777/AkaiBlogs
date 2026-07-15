@@ -2,10 +2,10 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { generateOtp, getOtpExpiryDate, getOtpExpiryMinutes, hashOtp } from "@/lib/otp";
-import { sendOtpEmail } from "@/lib/email/sendOtpEmail";
 import { checkRateLimit, getClientIp } from "@/lib/redis/rateLimit";
 import { sendOtpSchema, getZodErrorMessage } from "@/lib/validations/auth";
 import { ZodError } from "zod";
+import { addOtpEmailJob } from "@/lib/queue/producers";
 const OTP_RATE_LIMIT={
   maxAttempts:3,
   windowSeconds:10*60,
@@ -95,12 +95,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    await sendOtpEmail({
-      email: normalizedEmail,
-      username: normalizedUsername,
-      otp,
-      expiryMinutes,
-    });
+    await addOtpEmailJob({email:normalizedEmail,username:normalizedUsername,otp,expiryMinutes})
 
     return NextResponse.json({
       success: true,
