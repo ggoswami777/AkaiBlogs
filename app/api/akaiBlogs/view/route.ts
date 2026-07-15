@@ -1,6 +1,7 @@
 import { getAuthUserServer } from "@/lib/authHelper";
-import { updateUserInterest } from "@/lib/feed/updateUserInterest";
+
 import { prisma } from "@/lib/prisma";
+import { addAnalyticsJob } from "@/lib/queue/producers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request:NextRequest){
@@ -53,11 +54,7 @@ export async function POST(request:NextRequest){
                     })
                 ]);
 
-                await updateUserInterest({
-                    userId: activeUser.userId,
-                    category: blog.category,
-                    action: "view",
-                });
+                await addAnalyticsJob({blogId,category:blog.category,action:"view",userId:activeUser.userId})
             }
         } else {
            

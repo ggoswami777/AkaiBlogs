@@ -1,12 +1,11 @@
 import { getAuthUserServer } from "@/lib/authHelper";
-import { invalidateFeedCache } from "@/lib/feed/invalidateFeedCache";
-import { updateUserInterest } from "@/lib/feed/updateUserInterest";
 import { prisma } from "@/lib/prisma";
+import { addAnalyticsJob, addFeedInvalidationJob } from "@/lib/queue/producers";
 import { deleteCache, getCache, setCache } from "@/lib/redis/cache";
 import { cacheKeys } from "@/lib/redis/cacheKeys";
 import { checkRateLimit } from "@/lib/redis/rateLimit";
 import { NextRequest, NextResponse } from "next/server";
-import { cache } from "react";
+
 
 export async function POST(request:NextRequest){
     try {
@@ -78,13 +77,10 @@ export async function POST(request:NextRequest){
             },
         });
         if(blog){
-            await updateUserInterest({
-                userId:dbUser.id,
-                category:blog.category,
-                action:"comment"
-            })
+            await addAnalyticsJob({ blogId, category: blog.category, action: "comment", userId: dbUser.id });
+
         }
-        await invalidateFeedCache(dbUser.id);
+        await addFeedInvalidationJob({ userId: dbUser.id, type: "single" });
         await deleteCache(cacheKeys.comments(blogId));
         return NextResponse.json({
             success: true,

@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/authHelper";
 import { prisma } from "@/lib/prisma";
-import { updateUserInterest } from "@/lib/feed/updateUserInterest";
-import { invalidateFeedCache } from "@/lib/feed/invalidateFeedCache";
 import { checkRateLimit } from "@/lib/redis/rateLimit";
+import { addAnalyticsJob, addFeedInvalidationJob } from "@/lib/queue/producers";
 
 export async function POST(request: NextRequest){
     try {
@@ -81,11 +80,7 @@ export async function POST(request: NextRequest){
                 }
             })
             if(blog){
-                await updateUserInterest({
-                    userId:user.id,
-                    category:blog.category,
-                    action:"like"
-                })
+               await addAnalyticsJob({blogId,category:blog.category,action:"like",userId:user.id});
             }
         }
         const updatedBlog=await prisma.blog.findUnique({
@@ -94,7 +89,7 @@ export async function POST(request: NextRequest){
                 likesCount:true,
             }
         })
-        await invalidateFeedCache(user.id);
+        await addFeedInvalidationJob({userId:user.id,type:"single"});
         return NextResponse.json({
       success: true,
       action,
