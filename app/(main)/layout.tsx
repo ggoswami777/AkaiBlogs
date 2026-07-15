@@ -5,7 +5,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from "react-toastify";
-
+import "@/lib/startWorkers"
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
