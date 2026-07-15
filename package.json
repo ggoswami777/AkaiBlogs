@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:socket": "tsx realtime/server.ts",
+    "dev:workers": "tsx lib/startWorkers.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -48,5 +49,10 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.0",
     "typescript": "^5"
+  },
+  "overrides": {
+    "bullmq": {
+      "ioredis": "$ioredis"
+    }
   }
 }

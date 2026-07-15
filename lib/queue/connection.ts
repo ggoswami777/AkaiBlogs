@@ -1,6 +1,8 @@
-import { ConnectionOptions } from "bullmq";
+import Redis from "ioredis";
 
-export const bullmqConnection :ConnectionOptions={
-    host:process.env.REDIS_URL?.replace("redis://","").split(":")[0] || "localhost",
-    port:parseInt(process.env.REDIS_URL?.split(":")[2] || "6379"),
-};
+export const redisConnectionInstance = new Redis(process.env.REDIS_URL || "redis://localhost:6379", {
+  maxRetriesPerRequest: null, 
+}) as any;
+
+export const bullmqConnection = redisConnectionInstance;
+
