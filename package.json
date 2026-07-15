@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:socket": "tsx realtime/server.ts",
-    "dev:workers": "tsx lib/startWorkers.ts",
+    "dev:socket": "tsx --env-file=.env realtime/server.ts",
+    "dev:workers": "tsx --env-file=.env lib/startWorkers.ts",
     "dev:services": "concurrently \"npm run dev:socket\" \"npm run dev:workers\"",
     "build": "next build",
     "start": "next start",
