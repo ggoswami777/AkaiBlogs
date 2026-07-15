@@ -2,6 +2,7 @@ import {Worker,Job} from "bullmq";
 import { bullmqConnection } from "../queue/connection";
 import { prisma } from "../prisma";
 import type { CleanupJobData } from "../queue/type";
+import { getTrendingBlogs } from "../feed/getTrendingBlogs";
 
 const cleanupWorker=new Worker<CleanupJobData>(
     "cleanup",
@@ -12,6 +13,9 @@ const cleanupWorker=new Worker<CleanupJobData>(
                 where:{otpExpiry:{lt:new Date()}},
             });
             console.log(`Cleaned ${result.count} expired OTPs`);
+        }else if(type==="trending_scores"){
+            await getTrendingBlogs();
+             console.log("Trending scores updated asynchronously");
         }
     },
     {connection:bullmqConnection}

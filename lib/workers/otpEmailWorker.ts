@@ -8,7 +8,7 @@ const otpEmailWorker=new Worker<OtpEmailJobData>(
     async(job:Job)=>{
         const {email,username,otp,expiryMinutes}=job.data;
         await sendOtpEmail({email,username,otp,expiryMinutes});
-        // send otp from here 
+       
     },
     {connection:redisConnectionInstance}
 );
