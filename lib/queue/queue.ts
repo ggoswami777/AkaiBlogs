@@ -1,7 +1,10 @@
-import { Queue } from "bullmq";
-import { bullmqConnection } from "./connection";
 
-const commonOpts={connection:bullmqConnection};
+import { Queue } from "bullmq";
+import { redisConnectionInstance } from "./connection";
+
+const commonOpts = { connection: redisConnectionInstance };
+
+
 
 export const otpEmailQueue=new Queue("otp-email",commonOpts);
 export const feedInvalidationQueue=new Queue("feed-invalidation",commonOpts);
