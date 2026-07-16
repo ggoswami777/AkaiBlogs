@@ -33,6 +33,8 @@ model User {
   comments       Comment[]
   interests UserInterest[]
   blogViews BlogView[]
+  receivedNotifications Notification[] @relation("NotificationReceiver")
+  sentNotifications     Notification[] @relation("NotificationSender")
 }
 
 
@@ -181,4 +183,26 @@ model BlogView {
   @@index([userId])
   @@index([blogId])
   @@index([createdAt])
+}
+enum NotificationType {
+  LIKE
+  COMMENT
+  FOLLOW
+  NEW_MESSAGE
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  type        NotificationType
+  receiverId  String
+  senderId    String
+  entityId    String?          // e.g., blogId for likes/comments, or messageId
+  read        Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  receiver    User             @relation("NotificationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender      User             @relation("NotificationSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([receiverId, read])
+  @@index([createdAt(sort: Desc)])
 }
