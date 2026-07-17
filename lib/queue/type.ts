@@ -20,3 +20,10 @@ export interface AnalyticsJobData {
 export interface CleanupJobData {
   type: "expired_otps";
 }
+
+export interface NotificationJobData {
+  type: "LIKE" | "COMMENT" | "FOLLOW" | "NEW_MESSAGE";
+  senderId: string;
+  receiverId: string;
+  entityId?: string;
+}
