@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --hostname 0.0.0.0",
     "dev:socket": "tsx --env-file=.env realtime/server.ts",
     "dev:workers": "tsx --env-file=.env lib/startWorkers.ts",
     "dev:services": "concurrently \"npm run dev:socket\" \"npm run dev:workers\"",

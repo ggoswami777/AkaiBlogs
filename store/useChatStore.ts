@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { getSocket } from "@/lib/socket";
 import type { ChatMessage } from "@/types/chat";
+import { toast } from "react-toastify";
+import { userProfileStore } from "./useProfileStore";
+import React from "react";
 
 type ConversationSummary = {
   id: string;
@@ -146,6 +149,62 @@ export const useChatStore = create<ChatStore>((set, get) => ({
           },
         };
       });
+
+      const currentUserId = userProfileStore.getState().profile?.id;
+      if (message.senderId !== currentUserId && get().activeConversationId !== message.conversationId) {
+        const isSharedBlog = !!message.sharedBlog;
+        const toastText = isSharedBlog
+          ? "shared a scroll"
+          : message.content || "sent you a message";
+
+        toast(
+          ({ closeToast }) => React.createElement(
+            "div",
+            {
+              onClick: () => {
+                window.location.href = `/akaiBlogs/chat?conversation=${message.conversationId}`;
+                closeToast();
+              },
+              className: "flex items-center justify-between gap-3 cursor-pointer text-slate-100 w-full",
+            },
+            React.createElement("img", {
+              src: message.sender?.avatarUrl || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+              alt: "sender",
+              className: "size-10 rounded-xl object-cover border border-white/10 shrink-0",
+            }),
+            React.createElement(
+              "div",
+              { className: "min-w-0 flex-1" },
+              React.createElement(
+                "p",
+                { className: "text-xs font-black text-white" },
+                message.sender?.username || "Someone"
+              ),
+              React.createElement(
+                "p",
+                { className: "text-[10px] text-white/60 truncate mt-0.5" },
+                toastText
+              )
+            ),
+        
+            isSharedBlog && message.sharedBlog?.coverImage
+              ? React.createElement("img", {
+                  src: message.sharedBlog.coverImage,
+                  alt: message.sharedBlog.title || "scroll",
+                  className: "w-14 h-9 rounded-md object-cover border border-white/10 shrink-0",
+                })
+              : null
+          ),
+          {
+            position: "top-center",
+            autoClose: 4000,
+            hideProgressBar: true,
+            closeOnClick: false,
+            theme: "dark",
+            className: "bg-black/95 border border-primary/10 rounded-2xl shadow-2xl backdrop-blur-xl p-3",
+          }
+        );
+      }
 
       get().fetchConversations();
     });

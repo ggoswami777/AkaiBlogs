@@ -1,5 +1,7 @@
 import React from "react";
 import "../globals.css";
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
 import FooterNavigation from "@/components/layout/FooterNavigation";
 import Navbar from "@/components/layout/Navbar";
 
@@ -20,6 +22,7 @@ export default function AkaiBlogsLayout({
           {children}
         </div>
         <FooterNavigation />
+        <ToastContainer />
       </body>
     </html>
   );
