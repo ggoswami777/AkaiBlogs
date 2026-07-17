@@ -22,6 +22,7 @@ export type ChatMessage={
     content:string|null;
     sharedBlogId:string|null;
     sharedBlog?:SharedBlogPreview|null;
+    sender?: { username: string; avatarUrl: string | null } | null;
     deliveredAt:string|null;
     readAt:string|null;
     createdAt:string;
@@ -69,4 +70,6 @@ export type ServerToClientEvents = {
   "presence:online": (payload: { userId: string }) => void;
 
   "presence:offline": (payload: { userId: string }) => void;
+
+  "notification:new": (notification: any) => void;
 };

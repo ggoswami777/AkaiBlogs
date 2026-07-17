@@ -51,7 +51,11 @@ const subClient = pubClient.duplicate();
 async function bootstrap() {
   await pubClient.connect();
   await subClient.connect();
-
+  await subClient.subscribe("notifications:dispatch", (message) => {
+    const { receiverId, notification } = JSON.parse(message);
+    
+    io.to(`user:${receiverId}`).emit("notification:new", notification);
+  });
   io.adapter(createAdapter(pubClient, subClient));
 
   io.use((socket, next) => {
@@ -85,7 +89,7 @@ async function bootstrap() {
     socket.on("conversation:join", async (payload) => {
       const parsed = conversationEventSchema.safeParse(payload);
       if (!parsed.success) return;
-      
+
       const { conversationId } = parsed.data;
 
       const participant = await prisma.conversationParticipant.findUnique({
@@ -105,11 +109,14 @@ async function bootstrap() {
     });
 
     socket.on("message:send", async (payload, callback) => {
-      const parsed=messageSendSchema.safeParse(payload);
-      if(!parsed.success){
-        return callback({success:false,error:parsed.error.issues[0].message});
+      const parsed = messageSendSchema.safeParse(payload);
+      if (!parsed.success) {
+        return callback({
+          success: false,
+          error: parsed.error.issues[0].message,
+        });
       }
-      const validPayload=parsed.data;
+      const validPayload = parsed.data;
       try {
         const participant = await prisma.conversationParticipant.findUnique({
           where: {
@@ -180,6 +187,13 @@ async function bootstrap() {
             deliveredAt: receiverOnline === "online" ? new Date() : null,
           },
           include: {
+            sender: {
+              select: {
+                id: true,
+                username: true,
+                avatarUrl: true,
+              }
+            },
             sharedBlog: {
               select: {
                 id: true,
@@ -241,7 +255,7 @@ async function bootstrap() {
     socket.on("message:read", async (payload) => {
       const parsed = conversationEventSchema.safeParse(payload);
       if (!parsed.success) return;
-      
+
       const { conversationId } = parsed.data;
 
       const participant = await prisma.conversationParticipant.findUnique({
