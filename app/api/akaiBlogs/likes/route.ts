@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/authHelper";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/redis/rateLimit";
-import { addAnalyticsJob, addFeedInvalidationJob } from "@/lib/queue/producers";
+import { addAnalyticsJob, addFeedInvalidationJob, addNotificationJob } from "@/lib/queue/producers";
 
 export async function POST(request: NextRequest){
     try {
@@ -76,11 +76,20 @@ export async function POST(request: NextRequest){
             const blog=await prisma.blog.findUnique({
                 where:{id:blogId},
                 select:{
-                    category:true
+                    category:true,
+                    authorId:true,
                 }
             })
             if(blog){
                await addAnalyticsJob({blogId,category:blog.category,action:"like",userId:user.id});
+               if (user.id !== blog.authorId) {
+                 await addNotificationJob({
+                   type: "LIKE",
+                   senderId: user.id,
+                   receiverId: blog.authorId,
+                   entityId: blogId,
+                 });
+               }
             }
         }
         const updatedBlog=await prisma.blog.findUnique({

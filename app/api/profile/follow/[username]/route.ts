@@ -1,5 +1,6 @@
 import { getAuthUserServer } from "@/lib/authHelper";
 import { prisma } from "@/lib/prisma";
+import { addNotificationJob } from "@/lib/queue/producers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest,
@@ -49,6 +50,11 @@ export async function POST(request: NextRequest,
                     followingId:targetUser.id
                 }
             })
+            await addNotificationJob({
+                type: "FOLLOW",
+                senderId: activeUser.userId,
+                receiverId: targetUser.id
+            });
             return NextResponse.json({success:true,message:"Followed successfully",isfollowing:true})
         }
         

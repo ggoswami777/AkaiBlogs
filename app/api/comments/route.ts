@@ -1,6 +1,6 @@
 import { getAuthUserServer } from "@/lib/authHelper";
 import { prisma } from "@/lib/prisma";
-import { addAnalyticsJob, addFeedInvalidationJob } from "@/lib/queue/producers";
+import { addAnalyticsJob, addFeedInvalidationJob, addNotificationJob } from "@/lib/queue/producers";
 import { deleteCache, getCache, setCache } from "@/lib/redis/cache";
 import { cacheKeys } from "@/lib/redis/cacheKeys";
 import { checkRateLimit } from "@/lib/redis/rateLimit";
@@ -74,11 +74,19 @@ export async function POST(request:NextRequest){
             where:{id:blogId},
             select:{
                 category:true,
+                authorId:true,
             },
         });
         if(blog){
             await addAnalyticsJob({ blogId, category: blog.category, action: "comment", userId: dbUser.id });
-
+            if (dbUser.id !== blog.authorId) {
+                await addNotificationJob({
+                    type: "COMMENT",
+                    senderId: dbUser.id,
+                    receiverId: blog.authorId,
+                    entityId: blogId,
+                });
+            }
         }
         await addFeedInvalidationJob({ userId: dbUser.id, type: "single" });
         await deleteCache(cacheKeys.comments(blogId));
