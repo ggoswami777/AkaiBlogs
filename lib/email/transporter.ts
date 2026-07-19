@@ -1,28 +1,21 @@
 import nodemailer from "nodemailer";
 
-const requiredEnv = {
-  gmailUser: process.env.GMAIL_USER,
-  clientId: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-};
-for(const[key,value] of Object.entries(requiredEnv)){
-    if(!value){
-        throw new Error(`Missing email env variable: ${key}`);
-    }
-}
-export const emailTransporter=nodemailer.createTransport({
-     service: "gmail",
-  auth: {
-    type: "OAuth2",
-    user: requiredEnv.gmailUser,
-    clientId: requiredEnv.clientId,
-    clientSecret: requiredEnv.clientSecret,
-    refreshToken: requiredEnv.refreshToken,
-  },
-})
+const gmailUser = process.env.GMAIL_USER;
+const gmailPass = process.env.GMAIL_APP_PASSWORD;
 
-export const emailFrom={
-    name:process.env.EMAIL_FORM_NAME || "AkaiBlogs",
-    address:requiredEnv.gmailUser as string,
+if (!gmailUser || !gmailPass) {
+  throw new Error("Missing GMAIL_USER or GMAIL_APP_PASSWORD env variables");
 }
+
+export const emailTransporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: gmailUser,
+    pass: gmailPass,
+  },
+});
+
+export const emailFrom = {
+  name: process.env.EMAIL_FORM_NAME || "AkaiBlogs",
+  address: gmailUser,
+};

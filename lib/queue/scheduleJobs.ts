@@ -13,5 +13,10 @@ export async function registerScheduledJobs() {
         {every:60*1000},
         {data:{type:"trending_scores"}},
     )
+    await cleanupQueue.upsertJobScheduler(
+        "cleanup-search-trends",
+        {every:24*60*60*1000},
+        {data:{type:"search_trends"}},
+    )
     console.log("Scheduled jobs registered");
 }
