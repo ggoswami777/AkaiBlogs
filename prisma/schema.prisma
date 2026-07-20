@@ -22,6 +22,7 @@ model User {
   password      String
   bio           String?
   avatarUrl     String?
+  publicKey     String?
   blogs         Blog[]    @relation("UserBlogs")
   followedBy    Follows[] @relation("following")
   following     Follows[] @relation("follower")

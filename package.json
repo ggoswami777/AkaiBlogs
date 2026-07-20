@@ -20,6 +20,7 @@
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.80.2",
     "cookie": "^2.0.1",
+    "idb-keyval": "^6.3.0",
     "ioredis": "^5.11.1",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.577.0",
