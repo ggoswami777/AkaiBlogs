@@ -36,6 +36,8 @@ export type ClientToServerEvents={
             conversationId:string;
             receiverId:string;
             content?:string;
+            encryptedContent?:string;
+            iv?:string;
             sharedBlogId?:string;
         },
         callback:(response:{success:boolean; message?:ChatMessage; error?:string})=>void,

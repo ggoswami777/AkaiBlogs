@@ -3,7 +3,11 @@ import { getSocket } from "@/lib/socket";
 import type { ChatMessage } from "@/types/chat";
 import { toast } from "react-toastify";
 import { userProfileStore } from "./useProfileStore";
-import React from "react";
+import React, { cache } from "react";
+import { getOrDeriveSharedKey } from "@/lib/crypto/keyCache";
+import { decryptMessage, encryptMessage } from "@/lib/crypto/crypto";
+
+
 
 type ConversationSummary = {
   id: string;
@@ -17,6 +21,36 @@ type ConversationSummary = {
   updatedAt: string;
 };
 
+const peerKeyCache=new Map<string,string>();
+
+async function fetchPeerPublicKey(username:string):Promise<string> {
+  const cached=peerKeyCache.get(username);
+  if(cached) return cached;
+  const res=await fetch(`/api/profile/${username}/public-key`);
+  const data=await res.json();
+  if(!data.success) throw new Error("Peer has no encryption key");
+  peerKeyCache.set(username,data.publickey)
+  return data.publickey;
+}
+
+async function decryptMsg(msg:ChatMessage,currentUserId:string):Promise<ChatMessage>{
+  if(!msg.encryptedContent || !msg.iv || !msg.sender) return msg;
+  try {
+    const peerUserId=msg.senderId===currentUserId?msg.receiverId:msg.senderId;
+    let peerPublicKey=peerKeyCache.get(msg.sender?.username || "") || "";
+    if(!peerPublicKey && msg.sender?.username){
+      try {
+        peerPublicKey = await fetchPeerPublicKey(msg.sender.username);
+      } catch(e) {}
+    }
+    if(!peerPublicKey) return {...msg,content:"[Unable to decrypt]"};
+    const sharedKey=await getOrDeriveSharedKey(currentUserId,peerUserId,peerPublicKey);
+    const decrypted=await decryptMessage(msg.encryptedContent,msg.iv,sharedKey);
+    return {...msg,content:decrypted};
+  } catch (error) {
+    return {...msg,content:"[Unable to decrypt]"}
+  }
+}
 type ChatStore = {
   conversations: ConversationSummary[];
   messagesByConversation: Record<string, ChatMessage[]>;
@@ -46,7 +80,7 @@ type ChatStore = {
   fetchMessages: (conversationId: string, cursor?: string) => Promise<void>;
 };
 
-export const useChatStore = create<ChatStore>((set, get) => ({
+export const  useChatStore = create<ChatStore>((set, get) => ({
   conversations: [],
   messagesByConversation: {},
   activeConversationId: null,
@@ -97,26 +131,23 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       const res = await fetch(url);
       const data = await res.json();
 
-      if (data.success) {
-        set((state) => {
-          const existing = state.messagesByConversation[conversationId] || [];
-
-         
-          const newMessages = cursor
-            ? [...data.messages, ...existing]
-            : data.messages;
-
-          return {
-            messagesByConversation: {
+      if(data.success){
+        const currentUserId=userProfileStore.getState().profile?.id;
+        const decrypted=currentUserId? await Promise.all(data.messages.map((m:ChatMessage)=>decryptMsg(m,currentUserId))) : data.messages;
+        set((state)=>{
+          const exisitng=state.messagesByConversation[conversationId] || [];
+          const newMessages=cursor?[...decrypted,...exisitng]:decrypted;
+          return{
+            messagesByConversation:{
               ...state.messagesByConversation,
-              [conversationId]: newMessages,
+              [conversationId]:newMessages,
             },
-            cursors: {
+            cursors:{
               ...state.cursors,
-              [conversationId]: data.nextCursor,
-            },
-          };
-        });
+              [conversationId]:data.nextCursor,
+            }
+          }
+        })
       }
     } finally {
       set({ isFetchingHistory: false });
@@ -133,7 +164,10 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     socket.off("presence:online");
     socket.off("presence:offline");
 
-    socket.on("message:new", (message) => {
+
+    socket.on("message:new", async (rawMessage) => {
+      const currentUserId = userProfileStore.getState().profile?.id;
+      const message=currentUserId? await decryptMsg(rawMessage,currentUserId) :rawMessage
       set((state) => {
         const existingMessages =
           state.messagesByConversation[message.conversationId] || [];
@@ -150,7 +184,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         };
       });
 
-      const currentUserId = userProfileStore.getState().profile?.id;
+      
       if (message.senderId !== currentUserId && get().activeConversationId !== message.conversationId) {
         const isSharedBlog = !!message.sharedBlog;
         const toastText = isSharedBlog
@@ -281,9 +315,22 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   sendMessage: async (payload) => {
     const socket = getSocket();
-
+    const {conversationId,receiverId,content,sharedBlogId}=payload;
+    let encryptedContent: string | undefined;
+    let iv:string | undefined;
+    if(content){
+      const currentUserId=userProfileStore.getInitialState().profile?.id;
+      if(!currentUserId) throw new Error("Not authenticated");
+      const peerPublicKeyBase64=await fetchPeerPublicKey(
+        get().conversations.find((c)=>c.otherUser?.id===receiverId)?.otherUser?.username || ""
+      );
+      const sharedKey=await getOrDeriveSharedKey(currentUserId,receiverId,peerPublicKeyBase64);
+      const encrypted=await encryptMessage(content,sharedKey);
+      encryptedContent=encrypted.ciphertext;
+      iv=encrypted.iv;
+    }
     await new Promise<void>((resolve, reject) => {
-      socket.emit("message:send", payload, (response) => {
+      socket.emit("message:send", {conversationId,receiverId,content:undefined,encryptedContent,iv,sharedBlogId}, (response) => {
         if (!response.success) {
           reject(new Error(response.error || "Failed to send message"));
           return;
