@@ -15,10 +15,12 @@ const messageSendSchema = z
     conversationId: z.string().min(1),
     receiverId: z.string().min(1),
     content: z.string().optional(),
+    encryptedContent:z.string().optional(),
+    iv:z.string().optional(),
     sharedBlogId: z.string().optional(),
   })
-  .refine((data) => data.content?.trim() || data.sharedBlogId, {
-    message: "Message must contain text or a shared blog",
+  .refine((data) => (data.encryptedContent && data.iv) || data.sharedBlogId, {
+    message: "Message must contain encrypted content or a shared blog",
   });
 const conversationEventSchema = z.object({
   conversationId: z.string().min(1),
@@ -182,7 +184,9 @@ async function bootstrap() {
             conversationId: validPayload.conversationId,
             senderId: user.userId,
             receiverId: validPayload.receiverId,
-            content: validPayload.content?.trim() || null,
+            content:  null,
+            encryptedContent:validPayload.encryptedContent || null,
+            iv:validPayload.iv || null,
             sharedBlogId: validPayload.sharedBlogId || null,
             deliveredAt: receiverOnline === "online" ? new Date() : null,
           },

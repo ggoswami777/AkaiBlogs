@@ -123,7 +123,8 @@ model ConversationParticipant {
 model Message {
   id             String        @id @default(uuid())
   content        String?       @db.Text
-
+  encryptedContent String?     @db.Text
+  iv              String?      @db.Text
   sender         User          @relation("SentMessages", fields: [senderId], references: [id])
   senderId       String
 
