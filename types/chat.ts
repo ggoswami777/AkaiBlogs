@@ -20,6 +20,8 @@ export type ChatMessage={
     senderId:string;
     receiverId:string;
     content:string|null;
+    encryptedContent:string | null;
+    iv:string | null;
     sharedBlogId:string|null;
     sharedBlog?:SharedBlogPreview|null;
     sender?: { username: string; avatarUrl: string | null } | null;
