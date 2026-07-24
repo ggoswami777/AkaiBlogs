@@ -7,6 +7,7 @@ type ConversationSummary = {
   };
   lastMessage: {
     content: string | null;
+    encryptedContent?: string | null;
     sharedBlogId: string | null;
     createdAt: string;
   } | null;
@@ -53,7 +54,9 @@ export default function ConversationList({
         const isOnline = user ? Boolean(onlineUserIds[user.id]) : false;
         const preview =
           conversation.lastMessage?.content ||
-          (conversation.lastMessage?.sharedBlogId ? "📎 Shared a post" : "Say hello!");
+          (conversation.lastMessage?.encryptedContent
+            ? " Encrypted message"
+            : "Say hello!");
         const timestamp = conversation.lastMessage?.createdAt
           ? timeAgo(conversation.lastMessage.createdAt)
           : "";
@@ -63,8 +66,8 @@ export default function ConversationList({
             key={conversation.id}
             onClick={() => onSelect(conversation.id)}
             className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-all hover:bg-white/[0.03] ${
-              isActive 
-                ? "bg-primary/10 md:bg-primary/10 md:backdrop-blur-sm border-primary/20 md:border-primary/20 border" 
+              isActive
+                ? "bg-primary/10 md:bg-primary/10 md:backdrop-blur-sm border-primary/20 md:border-primary/20 border"
                 : "bg-transparent border border-transparent"
             }`}
           >
@@ -74,7 +77,11 @@ export default function ConversationList({
                 src={user?.avatarUrl || fallbackAvatar}
                 alt={user?.username || "User"}
                 className="size-11 rounded-2xl object-cover"
-                style={{ border: isActive ? "1.5px solid rgba(234,42,51,0.3)" : "1.5px solid rgba(255,255,255,0.07)" }}
+                style={{
+                  border: isActive
+                    ? "1.5px solid rgba(234,42,51,0.3)"
+                    : "1.5px solid rgba(255,255,255,0.07)",
+                }}
               />
               {isOnline && (
                 <span
@@ -87,13 +94,19 @@ export default function ConversationList({
             {/* Text */}
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-1 mb-0.5">
-                <p className={`truncate text-xs font-bold ${isActive ? "text-white" : "text-white/80"}`}>
+                <p
+                  className={`truncate text-xs font-bold ${isActive ? "text-white" : "text-white/80"}`}
+                >
                   {user?.username || "Unknown"}
                 </p>
-                <span className="shrink-0 text-[9px] text-white/20">{timestamp}</span>
+                <span className="shrink-0 text-[9px] text-white/20">
+                  {timestamp}
+                </span>
               </div>
               <div className="flex items-center justify-between gap-1">
-                <p className={`truncate text-[10px] ${conversation.unreadCount > 0 ? "font-semibold text-white/60" : "text-white/25"}`}>
+                <p
+                  className={`truncate text-[10px] ${conversation.unreadCount > 0 ? "font-semibold text-white/60" : "text-white/25"}`}
+                >
                   {preview}
                 </p>
                 {conversation.unreadCount > 0 && (
@@ -101,7 +114,9 @@ export default function ConversationList({
                     className="flex shrink-0 min-w-[18px] h-[18px] items-center justify-center rounded-full px-1 text-[9px] font-black text-white"
                     style={{ background: "#ea2a33" }}
                   >
-                    {conversation.unreadCount > 9 ? "9+" : conversation.unreadCount}
+                    {conversation.unreadCount > 9
+                      ? "9+"
+                      : conversation.unreadCount}
                   </span>
                 )}
               </div>

@@ -8,6 +8,7 @@ import { userProfileStore } from "@/store/useProfileStore";
 import ChatUserSearch from "./ChatUserSearch";
 import ConversationList from "./ConversationList";
 import MessageThread from "./MessageThread";
+import { useE2EE } from "@/lib/useE2EE";
 
 function ChatShellContent() {
   const router = useRouter();
@@ -39,7 +40,7 @@ function ChatShellContent() {
   }, [connectSocket, fetchConversations, fetchProfile]);
 
   const userWentBack = useRef(false);
-
+  const {isReady:e2eeReady}=useE2EE();
   useEffect(() => {
     if (requestedConversationId) {
       userWentBack.current = false;
