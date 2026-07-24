@@ -7,6 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { userProfileStore } from "@/store/useProfileStore";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import { useChatStore } from "@/store/useChatStore";
+import { useE2EE } from "@/lib/useE2EE";
 
 const fallbackAvatar =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuDQREzBniPFG2Rv_94OnCxJg4cRDD40044S_MYT3ZXzSs4-9GW-Jv3-nb6sUnnqs2nTb6XE0OcJsPGnJDuMQJZ9QcIcQ_aHE1N7YwlkHcXxTBimzOzoqZ6IzCaH-CeERYMzm06b5vHmwCKTr24X--k89shI3ntfJqHPuc2pmf9UGQ60JwENsEpz0xxzRexZnHPo4N61bX1AIe4QBvRpu7bNUZKwep55iMNKLCoKqkRSQK4tfIUepeZ3C9uu4pIuIbkiT-5nAYtHiQ";
@@ -33,7 +34,7 @@ const Navbar = () => {
   const connectChatSocket = useChatStore((s) => s.connectSocket);
 
   const isChatPage = pathname.startsWith("/akaiBlogs/chat");
-
+  useE2EE();
   useEffect(() => {
     fetchProfile();
     fetchNotifications();

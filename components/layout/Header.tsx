@@ -7,6 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { userProfileStore } from "@/store/useProfileStore";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import { useChatStore } from "@/store/useChatStore";
+import { useE2EE } from "@/lib/useE2EE";
 
 const fallbackAvatar =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuARrNF78qTP1Qjs8WBhowU7Lkc1VfhyYOOo6WVPbSmDT1HKzHDwczfhNZda_UrGmb4HT8A1z19TeRhMkJ7dKz5dNNEZX6YuOedHRvBa4rm3aMj3a7xam19YC7oslObzYbPAMAun1BK-MCE4Xs7vgb00is7arR6xc7R9aumrGsPYSt1WuUA44pU_EZiUsM6LtCrpg8Woxr-YhntVUW_xOcGm3wpG5JxG4f_yX4yGs4Orl3ewnJHPlkJykGJa5CR_7wcgnQA_6t6m-g";
@@ -30,6 +31,8 @@ const Header = () => {
   const { profile, fetchProfile } = userProfileStore();
   const { notifications, unreadCount, fetchNotifications, markAllAsRead, setupSocketListener } = useNotificationStore();
   const connectChatSocket = useChatStore((s) => s.connectSocket);
+
+  useE2EE();
 
   useEffect(() => {
     fetchProfile();
