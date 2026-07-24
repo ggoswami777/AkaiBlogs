@@ -7,8 +7,6 @@ import React, { cache } from "react";
 import { getOrDeriveSharedKey } from "@/lib/crypto/keyCache";
 import { decryptMessage, encryptMessage } from "@/lib/crypto/crypto";
 
-
-
 type ConversationSummary = {
   id: string;
   otherUser?: {
@@ -21,34 +19,56 @@ type ConversationSummary = {
   updatedAt: string;
 };
 
-const peerKeyCache=new Map<string,string>();
+const peerKeyCache = new Map<string, string>();
 
-async function fetchPeerPublicKey(username:string):Promise<string> {
-  const cached=peerKeyCache.get(username);
-  if(cached) return cached;
-  const res=await fetch(`/api/profile/${username}/public-key`);
-  const data=await res.json();
-  if(!data.success) throw new Error("Peer has no encryption key");
-  peerKeyCache.set(username,data.publickey)
-  return data.publickey;
+async function fetchPeerPublicKey(username: string): Promise<string> {
+  const cached = peerKeyCache.get(username);
+  if (cached) return cached;
+  const res = await fetch(`/api/profile/${username}/public-key`);
+  const data = await res.json();
+  if (!data.success) throw new Error("Peer has no encryption key");
+  peerKeyCache.set(username, data.publicKey);
+  return data.publicKey;
 }
 
-async function decryptMsg(msg:ChatMessage,currentUserId:string):Promise<ChatMessage>{
-  if(!msg.encryptedContent || !msg.iv || !msg.sender) return msg;
+async function decryptMsg(
+  msg: ChatMessage,
+  currentUserId: string,
+): Promise<ChatMessage> {
+  if (!msg.encryptedContent || !msg.iv || !msg.sender) return msg;
   try {
-    const peerUserId=msg.senderId===currentUserId?msg.receiverId:msg.senderId;
-    let peerPublicKey=peerKeyCache.get(msg.sender?.username || "") || "";
-    if(!peerPublicKey && msg.sender?.username){
-      try {
-        peerPublicKey = await fetchPeerPublicKey(msg.sender.username);
-      } catch(e) {}
+    const isMine = msg.senderId === currentUserId;
+    const peerUserId = isMine ? msg.receiverId : msg.senderId;
+    let peerUsername = "";
+    if (!isMine && msg.sender?.username) {
+      peerUsername = msg.sender.username;
+    } else {
+      const conversations = useChatStore.getState().conversations;
+      const conv = conversations.find((c) => c.id === msg.conversationId);
+      peerUsername = conv?.otherUser?.username || "";
     }
-    if(!peerPublicKey) return {...msg,content:"[Unable to decrypt]"};
-    const sharedKey=await getOrDeriveSharedKey(currentUserId,peerUserId,peerPublicKey);
-    const decrypted=await decryptMessage(msg.encryptedContent,msg.iv,sharedKey);
-    return {...msg,content:decrypted};
+
+    let peerPublicKey = peerKeyCache.get(peerUsername) || "";
+    if (!peerPublicKey && peerUsername) {
+      try {
+        peerPublicKey = await fetchPeerPublicKey(peerUsername);
+      } catch (e) {}
+    }
+    if (!peerPublicKey) return { ...msg, content: "[Unable to decrypt]" };
+
+    const sharedKey = await getOrDeriveSharedKey(
+      currentUserId,
+      peerUserId,
+      peerPublicKey,
+    );
+    const decrypted = await decryptMessage(
+      msg.encryptedContent,
+      msg.iv,
+      sharedKey,
+    );
+    return { ...msg, content: decrypted };
   } catch (error) {
-    return {...msg,content:"[Unable to decrypt]"}
+    return { ...msg, content: "[Unable to decrypt]" };
   }
 }
 type ChatStore = {
@@ -80,7 +100,7 @@ type ChatStore = {
   fetchMessages: (conversationId: string, cursor?: string) => Promise<void>;
 };
 
-export const  useChatStore = create<ChatStore>((set, get) => ({
+export const useChatStore = create<ChatStore>((set, get) => ({
   conversations: [],
   messagesByConversation: {},
   activeConversationId: null,
@@ -131,23 +151,29 @@ export const  useChatStore = create<ChatStore>((set, get) => ({
       const res = await fetch(url);
       const data = await res.json();
 
-      if(data.success){
-        const currentUserId=userProfileStore.getState().profile?.id;
-        const decrypted=currentUserId? await Promise.all(data.messages.map((m:ChatMessage)=>decryptMsg(m,currentUserId))) : data.messages;
-        set((state)=>{
-          const exisitng=state.messagesByConversation[conversationId] || [];
-          const newMessages=cursor?[...decrypted,...exisitng]:decrypted;
-          return{
-            messagesByConversation:{
+      if (data.success) {
+        const currentUserId = userProfileStore.getState().profile?.id;
+        const decrypted = currentUserId
+          ? await Promise.all(
+              data.messages.map((m: ChatMessage) =>
+                decryptMsg(m, currentUserId),
+              ),
+            )
+          : data.messages;
+        set((state) => {
+          const exisitng = state.messagesByConversation[conversationId] || [];
+          const newMessages = cursor ? [...decrypted, ...exisitng] : decrypted;
+          return {
+            messagesByConversation: {
               ...state.messagesByConversation,
-              [conversationId]:newMessages,
+              [conversationId]: newMessages,
             },
-            cursors:{
+            cursors: {
               ...state.cursors,
-              [conversationId]:data.nextCursor,
-            }
-          }
-        })
+              [conversationId]: data.nextCursor,
+            },
+          };
+        });
       }
     } finally {
       set({ isFetchingHistory: false });
@@ -164,10 +190,11 @@ export const  useChatStore = create<ChatStore>((set, get) => ({
     socket.off("presence:online");
     socket.off("presence:offline");
 
-
     socket.on("message:new", async (rawMessage) => {
       const currentUserId = userProfileStore.getState().profile?.id;
-      const message=currentUserId? await decryptMsg(rawMessage,currentUserId) :rawMessage
+      const message = currentUserId
+        ? await decryptMsg(rawMessage, currentUserId)
+        : rawMessage;
       set((state) => {
         const existingMessages =
           state.messagesByConversation[message.conversationId] || [];
@@ -184,59 +211,68 @@ export const  useChatStore = create<ChatStore>((set, get) => ({
         };
       });
 
-      
-      if (message.senderId !== currentUserId && get().activeConversationId !== message.conversationId) {
+      if (
+        message.senderId !== currentUserId &&
+        get().activeConversationId !== message.conversationId
+      ) {
         const isSharedBlog = !!message.sharedBlog;
         const toastText = isSharedBlog
           ? "shared a scroll"
           : message.content || "sent you a message";
 
         toast(
-          ({ closeToast }) => React.createElement(
-            "div",
-            {
-              onClick: () => {
-                window.location.href = `/akaiBlogs/chat?conversation=${message.conversationId}`;
-                closeToast();
-              },
-              className: "flex items-center justify-between gap-3 cursor-pointer text-slate-100 w-full",
-            },
-            React.createElement("img", {
-              src: message.sender?.avatarUrl || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-              alt: "sender",
-              className: "size-10 rounded-xl object-cover border border-white/10 shrink-0",
-            }),
+          ({ closeToast }) =>
             React.createElement(
               "div",
-              { className: "min-w-0 flex-1" },
+              {
+                onClick: () => {
+                  window.location.href = `/akaiBlogs/chat?conversation=${message.conversationId}`;
+                  closeToast();
+                },
+                className:
+                  "flex items-center justify-between gap-3 cursor-pointer text-slate-100 w-full",
+              },
+              React.createElement("img", {
+                src:
+                  message.sender?.avatarUrl ||
+                  "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                alt: "sender",
+                className:
+                  "size-10 rounded-xl object-cover border border-white/10 shrink-0",
+              }),
               React.createElement(
-                "p",
-                { className: "text-xs font-black text-white" },
-                message.sender?.username || "Someone"
+                "div",
+                { className: "min-w-0 flex-1" },
+                React.createElement(
+                  "p",
+                  { className: "text-xs font-black text-white" },
+                  message.sender?.username || "Someone",
+                ),
+                React.createElement(
+                  "p",
+                  { className: "text-[10px] text-white/60 truncate mt-0.5" },
+                  toastText,
+                ),
               ),
-              React.createElement(
-                "p",
-                { className: "text-[10px] text-white/60 truncate mt-0.5" },
-                toastText
-              )
+
+              isSharedBlog && message.sharedBlog?.coverImage
+                ? React.createElement("img", {
+                    src: message.sharedBlog.coverImage,
+                    alt: message.sharedBlog.title || "scroll",
+                    className:
+                      "w-14 h-9 rounded-md object-cover border border-white/10 shrink-0",
+                  })
+                : null,
             ),
-        
-            isSharedBlog && message.sharedBlog?.coverImage
-              ? React.createElement("img", {
-                  src: message.sharedBlog.coverImage,
-                  alt: message.sharedBlog.title || "scroll",
-                  className: "w-14 h-9 rounded-md object-cover border border-white/10 shrink-0",
-                })
-              : null
-          ),
           {
             position: "top-center",
             autoClose: 4000,
             hideProgressBar: true,
             closeOnClick: false,
             theme: "dark",
-            className: "bg-black/95 border border-primary/10 rounded-2xl shadow-2xl backdrop-blur-xl p-3",
-          }
+            className:
+              "bg-black/95 border border-primary/10 rounded-2xl shadow-2xl backdrop-blur-xl p-3",
+          },
         );
       }
 
@@ -315,29 +351,46 @@ export const  useChatStore = create<ChatStore>((set, get) => ({
 
   sendMessage: async (payload) => {
     const socket = getSocket();
-    const {conversationId,receiverId,content,sharedBlogId}=payload;
+    const { conversationId, receiverId, content, sharedBlogId } = payload;
     let encryptedContent: string | undefined;
-    let iv:string | undefined;
-    if(content){
-      const currentUserId=userProfileStore.getInitialState().profile?.id;
-      if(!currentUserId) throw new Error("Not authenticated");
-      const peerPublicKeyBase64=await fetchPeerPublicKey(
-        get().conversations.find((c)=>c.otherUser?.id===receiverId)?.otherUser?.username || ""
+    let iv: string | undefined;
+    if (content) {
+      const currentUserId = userProfileStore.getState().profile?.id;
+      if (!currentUserId) throw new Error("Not authenticated");
+
+      const peerUsername = get().conversations.find((c) => c.otherUser?.id === receiverId)
+        ?.otherUser?.username || "";
+
+      const peerPublicKeyBase64 = await fetchPeerPublicKey(peerUsername);
+      const sharedKey = await getOrDeriveSharedKey(
+        currentUserId,
+        receiverId,
+        peerPublicKeyBase64,
       );
-      const sharedKey=await getOrDeriveSharedKey(currentUserId,receiverId,peerPublicKeyBase64);
-      const encrypted=await encryptMessage(content,sharedKey);
-      encryptedContent=encrypted.ciphertext;
-      iv=encrypted.iv;
+      const encrypted = await encryptMessage(content, sharedKey);
+      encryptedContent = encrypted.ciphertext;
+      iv = encrypted.iv;
     }
     await new Promise<void>((resolve, reject) => {
-      socket.emit("message:send", {conversationId,receiverId,content:undefined,encryptedContent,iv,sharedBlogId}, (response) => {
-        if (!response.success) {
-          reject(new Error(response.error || "Failed to send message"));
-          return;
-        }
+      socket.emit(
+        "message:send",
+        {
+          conversationId,
+          receiverId,
+          content: undefined,
+          encryptedContent,
+          iv,
+          sharedBlogId,
+        },
+        (response) => {
+          if (!response.success) {
+            reject(new Error(response.error || "Failed to send message"));
+            return;
+          }
 
-        resolve();
-      });
+          resolve();
+        },
+      );
     });
   },
 

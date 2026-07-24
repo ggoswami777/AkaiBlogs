@@ -152,7 +152,7 @@ async function bootstrap() {
           });
           return;
         }
-        if (!validPayload.content?.trim() && !validPayload.sharedBlogId) {
+       if (!validPayload.content?.trim() && !validPayload.encryptedContent && !validPayload.sharedBlogId) {
           callback({
             success: false,
             error: "Message must contain text or a shared blog",
