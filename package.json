@@ -7,6 +7,9 @@
     "dev:socket": "tsx --env-file=.env realtime/server.ts",
     "dev:workers": "tsx --env-file=.env lib/startWorkers.ts",
     "dev:services": "concurrently \"npm run dev:socket\" \"npm run dev:workers\"",
+    "db:seed": "npx prisma db seed",
+    "db:push": "npx prisma db push",
+    "db:reset": "npx prisma db push --force-reset",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -58,5 +61,8 @@
     "bullmq": {
       "ioredis": "$ioredis"
     }
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
