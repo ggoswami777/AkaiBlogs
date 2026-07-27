@@ -82,7 +82,7 @@ const ProfileCardPage = () => {
             return {
               profile: {
                 ...state.profile,
-                postsCount: Math.max(0, state.profile.postsCount - 1),
+                postsCount: Math.max(0, (state.profile.postsCount ?? 0) - 1),
               },
             };
           }
@@ -104,11 +104,11 @@ const ProfileCardPage = () => {
   const handleProfileSaved = (updatedProfile: UpdatedProfile) => {
     userProfileStore.setState((state) => ({
       profile: state.profile
-        ? {
+        ? ({
             ...state.profile,
             ...updatedProfile,
-          }
-        : updatedProfile,
+          } as any)
+        : (updatedProfile as any),
       hasFetched: true,
     }));
   };
@@ -203,16 +203,16 @@ const ProfileCardPage = () => {
           name={profile.username}
           username={profile.username}
           bio={profile.bio || "Digital nomad & coffee enthusiast. Sharing my journey through Tokyo's hidden neon streets and quiet temples."}
-          avatarUrl={profile.avatarUrl}
+          avatarUrl={profile.avatarUrl || undefined}
           onEditClick={() => setIsEditModalOpen(true)}
           onLogoutClick={() => setIsLogoutModalOpen(true)}
         />
 
         <div className="my-6">
           <ProfileStats
-            followers={profile.followersCount}
-            following={profile.followingCount}
-            posts={profile.postsCount}
+            followers={profile.followersCount ?? 0}
+            following={profile.followingCount ?? 0}
+            posts={profile.postsCount ?? 0}
           />
         </div>
 

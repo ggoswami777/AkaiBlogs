@@ -2,7 +2,7 @@ import { Queue } from "bullmq";
 import { bullmqConnection } from "./connection";
 
 export async function registerScheduledJobs() {
-    const cleanupQueue=new Queue("cleanup",{connection:bullmqConnection});
+    const cleanupQueue=new Queue("cleanup",{connection:bullmqConnection as any});
     await cleanupQueue.upsertJobScheduler(
         "cleanup-expired-otps",
         {every:60*60*1000},

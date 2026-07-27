@@ -2,7 +2,7 @@
 import { Queue } from "bullmq";
 import { redisConnectionInstance } from "./connection";
 
-const commonOpts = { connection: redisConnectionInstance };
+const commonOpts = { connection: redisConnectionInstance as any };
 
 
 

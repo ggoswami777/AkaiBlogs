@@ -21,7 +21,7 @@ const feedInvalidationWorker = new Worker<FeedInvalidationJobData>(
     }
     console.log(`Feed cache invalidated and recomputed: ${type}`);
   },
-  { connection: bullmqConnection },
+  { connection: bullmqConnection as any },
 );
 feedInvalidationWorker.on("failed", (job, err) => {
   console.error(`Feed invalidation job ${job?.id} failed:`, err.message);

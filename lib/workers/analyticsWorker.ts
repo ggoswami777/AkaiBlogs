@@ -12,7 +12,7 @@ const analyticsWorker=new Worker<AnalyticsJobData>(
         }
         console.log(`Analytic processed: ${action} on ${blogId}`);
     },
-    {connection:bullmqConnection}
+    {connection:bullmqConnection as any}
 )
 analyticsWorker.on("failed", (job, err) => {
   console.error(`Analytics job ${job?.id} failed:`, err.message);

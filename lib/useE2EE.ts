@@ -11,17 +11,18 @@ export function useE2EE() {
     const { profile } = userProfileStore();
 
     useEffect(() => {
-        if (!profile?.id) return;
+        const profileId = profile?.id;
+        if (!profileId) return;
 
         async function init() {
             try {
-                const existingKey = await getPrivateKey(profile.id);
+                const existingKey = await getPrivateKey(profileId as string);
                 if (existingKey) {
                     setIsReady(true);
                     return;
                 }
                 const keyPair = await generateUserKeyPair();
-                await storePrivateKey(profile.id, keyPair.privateKey);
+                await storePrivateKey(profileId as string, keyPair.privateKey);
 
                 // export and upload public key
                 const publicKeyBase64 = await exportPublicKey(keyPair.publicKey);

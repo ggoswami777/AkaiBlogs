@@ -1,14 +1,14 @@
 import { create } from 'zustand';
-import { HomePageGlassCardTypeArray, HomeBlogCardTypeArray } from '@/types';
+import { HomePageGlassCardTypeArray, HomeBlogCardTypeArray, HomeBlogCardType, FeedBlogType } from '@/types';
 
 interface BlogStore {
   stats: HomePageGlassCardTypeArray;
-  blogs: HomeBlogCardTypeArray;
+  blogs: FeedBlogType[];
   isLoadingBlogs: boolean;
-  topBlogs: HomeBlogCardType[];
+  topBlogs: FeedBlogType[];
   currentUser: string | null;
   setStats: (stats: HomePageGlassCardTypeArray) => void;
-  setBlogs: (blogs: HomeBlogCardTypeArray) => void;
+  setBlogs: (blogs: FeedBlogType[]) => void;
   fetchBlogs: () => Promise<void>;
   fetchCurrentUser: () => Promise<void>;
 }

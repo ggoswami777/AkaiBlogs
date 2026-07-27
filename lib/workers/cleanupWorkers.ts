@@ -29,7 +29,7 @@ const cleanupWorker = new Worker<CleanupJobData>(
       );
     }
   },
-  { connection: bullmqConnection },
+  { connection: bullmqConnection as any },
 );
 
 cleanupWorker.on("failed", (job, err) => {

@@ -7,6 +7,9 @@ export type UserProfile = {
   email?: string;
   bio?: string | null;
   publicKey?: string | null;
+  followersCount?: number;
+  followingCount?: number;
+  postsCount?: number;
 };
 
 interface ProfileStore {

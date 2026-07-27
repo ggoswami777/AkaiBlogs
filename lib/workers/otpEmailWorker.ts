@@ -10,7 +10,7 @@ const otpEmailWorker=new Worker<OtpEmailJobData>(
         await sendOtpEmail({email,username,otp,expiryMinutes});
        
     },
-    {connection:redisConnectionInstance}
+    {connection:redisConnectionInstance as any}
 );
 otpEmailWorker.on("failed",(job,err)=>{
     console.error(`OTP email job ${job?.id} failed:`,err.message);

@@ -11,7 +11,11 @@ const HomePageGlassCard = ({ title, data, icon }: HomePageGlassCardType) => {
         <p className="text-4xl font-black text-white">{data}</p>
       </div>
       <div className="text-primary/40 group-hover:text-primary transition-colors">
-        <span className="material-symbols-outlined  ">{icon}</span>
+        {typeof icon === 'string' ? (
+          <span className="material-symbols-outlined">{icon}</span>
+        ) : (
+          icon
+        )}
       </div>
     </div>
   )

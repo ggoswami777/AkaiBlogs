@@ -38,7 +38,7 @@ const notificationWorker = new Worker<NotificationJobData>(
       })
     );
   },
-  { connection: redisConnectionInstance }
+  { connection: redisConnectionInstance as any }
 );
 
 export default notificationWorker;
