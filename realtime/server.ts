@@ -6,7 +6,7 @@ import { createClient } from "redis";
 import { getSocketUser } from "./auth";
 import type { ClientToServerEvents, ServerToClientEvents } from "../types/chat";
 import { prisma } from "@/lib/prisma";
-import z, { safeParse } from "zod";
+import z from "zod";
 
 // zod stuff
 
@@ -30,8 +30,6 @@ const typingEventSchema = z.object({
   receiverId: z.string().min(1),
 });
 const PORT = Number(process.env.SOCKET_PORT || 4000);
-const CLIENT_ORIGIN =
-  process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 
 const httpServer = createServer();

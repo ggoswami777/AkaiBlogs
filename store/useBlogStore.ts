@@ -3,9 +3,9 @@ import { HomePageGlassCardTypeArray, HomeBlogCardTypeArray } from '@/types';
 
 interface BlogStore {
   stats: HomePageGlassCardTypeArray;
-  blogs: any;
+  blogs: HomeBlogCardTypeArray;
   isLoadingBlogs: boolean;
-  topBlogs:any[];
+  topBlogs: HomeBlogCardType[];
   currentUser: string | null;
   setStats: (stats: HomePageGlassCardTypeArray) => void;
   setBlogs: (blogs: HomeBlogCardTypeArray) => void;
@@ -44,7 +44,7 @@ export const useBlogStore = create<BlogStore>((set) => ({
       } else {
         set({ currentUser: "Guest" });
       }
-    } catch (error) {
+    } catch {
       set({ currentUser: "Guest" });
     }
   }

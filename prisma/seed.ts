@@ -19,7 +19,6 @@ async function main() {
   });
 
   // Create demo blogs
-  const categories = ["Technology", "Lifestyle", "Photography", "Travel", "Design"];
   const blogs = [
     {
       title: "The Way of the Code",

@@ -10,7 +10,7 @@ const pool = new Pool({
   connectionString: connectionString,
 
 });
-const adapter = new PrismaPg(pool as any);
+const adapter = new PrismaPg(pool as unknown as ConstructorParameters<typeof PrismaPg>[0]);
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 export const prisma =
   globalForPrisma.prisma ||

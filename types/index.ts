@@ -2,7 +2,7 @@ export type HomePageGlassCardType={
     id:string | number;
     title:string;
     data:string;
-    icon:string | any; 
+    icon:string | unknown; 
 }
 export type HomePageGlassCardTypeArray=HomePageGlassCardType[];
 

@@ -75,5 +75,5 @@ export type ServerToClientEvents = {
 
   "presence:offline": (payload: { userId: string }) => void;
 
-  "notification:new": (notification: any) => void;
+  "notification:new": (notification: unknown) => void;
 };

@@ -3,7 +3,7 @@ import { getSocket } from "@/lib/socket";
 import type { ChatMessage } from "@/types/chat";
 import { toast } from "react-toastify";
 import { userProfileStore } from "./useProfileStore";
-import React, { cache } from "react";
+import React from "react";
 import { getOrDeriveSharedKey } from "@/lib/crypto/keyCache";
 import { decryptMessage, encryptMessage } from "@/lib/crypto/crypto";
 
@@ -52,7 +52,7 @@ async function decryptMsg(
     if (!peerPublicKey && peerUsername) {
       try {
         peerPublicKey = await fetchPeerPublicKey(peerUsername);
-      } catch (e) {}
+      } catch {}
     }
     if (!peerPublicKey) return { ...msg, content: "[Unable to decrypt]" };
 
@@ -67,7 +67,7 @@ async function decryptMsg(
       sharedKey,
     );
     return { ...msg, content: decrypted };
-  } catch (error) {
+  } catch {
     return { ...msg, content: "[Unable to decrypt]" };
   }
 }

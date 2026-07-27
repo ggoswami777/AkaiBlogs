@@ -1,13 +1,22 @@
 import { create } from "zustand";
 
-interface ProfileStore{
-    profile:any,
-    isLoadingProfile:boolean,
-    hasFetched:boolean,
-    fetchProfile:()=>Promise<void>;
+export type UserProfile = {
+  id: string;
+  username: string;
+  avatarUrl: string | null;
+  email?: string;
+  bio?: string | null;
+  publicKey?: string | null;
+};
+
+interface ProfileStore {
+  profile: UserProfile | null;
+  isLoadingProfile: boolean;
+  hasFetched: boolean;
+  fetchProfile: () => Promise<void>;
 }
-export const userProfileStore=create<ProfileStore>((set,get)=>({
-    profile:null,
+export const userProfileStore = create<ProfileStore>((set, get) => ({
+  profile: null,
     isLoadingProfile:false,
     hasFetched:false,
     fetchProfile:async()=>{

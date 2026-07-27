@@ -46,6 +46,22 @@ export default function MessageThread({
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, isTyping]);
 
+  const topElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isFetchingHistory) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          fetchMessages(conversationId, cursors[conversationId] as string);
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [isFetchingHistory, hasMore, conversationId, cursors, fetchMessages]
+  );
+
   if (!otherUser) {
     return (
       <div className="flex flex-1 items-center justify-center text-xs text-white/20">
@@ -53,21 +69,6 @@ export default function MessageThread({
       </div>
     );
   }
-const topElementRef = useCallback(
-  (node: HTMLDivElement | null) => {
-    if (isFetchingHistory) return;
-    if (observer.current) observer.current.disconnect();
-
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasMore) {
-        fetchMessages(conversationId, cursors[conversationId] as string);
-      }
-    });
-
-    if (node) observer.current.observe(node);
-  },
-  [isFetchingHistory, hasMore, conversationId, cursors, fetchMessages]
-);
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">

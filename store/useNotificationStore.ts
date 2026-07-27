@@ -99,14 +99,14 @@ function showNotificationToast(notification: NotificationItem) {
   );
 }
 
-export const useNotificationStore = create<NotificationStore>((set, get) => ({
+export const useNotificationStore = create<NotificationStore>((set) => ({
   notifications: [],
   unreadCount: 0,
   fetchNotifications: async () => {
     const res = await fetch("/api/notifications");
     const data = await res.json();
     if (data.success) {
-      const unread = data.notifications.filter((n: any) => !n.read).length;
+      const unread = data.notifications.filter((n: NotificationItem) => !n.read).length;
       set({ notifications: data.notifications, unreadCount: unread });
     }
   },

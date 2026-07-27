@@ -8,7 +8,7 @@ export async function getCache<T>(key:string):Promise<T | null>{
     }
     try {
         return JSON.parse(cached) as T;
-    } catch (error) {
+    } catch {
         await redis.del(key);
         return null;
     }
