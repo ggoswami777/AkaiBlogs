@@ -18,11 +18,13 @@ export async function sendOtpEmail({
         expiryMinutes,
     });
 
-    await emailTransporter.sendMail({
+    const info = await emailTransporter.sendMail({
         from:emailFrom,
         to:email,
         subject:template.subject,
         text:template.text,
         html:template.html,
     })
+
+    console.log(`OTP email sent to ${email}. Message id: ${info.messageId}`);
 }

@@ -12,11 +12,16 @@ if (!gmailPass) {
 }
 
 export const emailTransporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: gmailUser,
     pass: gmailPass,
   },
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 15000,
 });
 
 export const emailFrom = {
