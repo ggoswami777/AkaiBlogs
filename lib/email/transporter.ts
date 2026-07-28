@@ -19,6 +19,7 @@ export const emailTransporter = nodemailer.createTransport({
     user: gmailUser,
     pass: gmailPass,
   },
+  family: 4,
   connectionTimeout: 15000,
   greetingTimeout: 15000,
   socketTimeout: 15000,
