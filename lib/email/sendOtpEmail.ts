@@ -1,5 +1,5 @@
 import { otpEmailTemplate } from "./templates";
-import { emailFrom, emailTransporter } from "./transporter";
+import { resendFromEmail, sendResendEmail } from "./resend";
 type SendOtpEmailInput={
     email:string;
     username:string;
@@ -18,13 +18,13 @@ export async function sendOtpEmail({
         expiryMinutes,
     });
 
-    const info = await emailTransporter.sendMail({
-        from:emailFrom,
+    const info = await sendResendEmail({
+        from:resendFromEmail,
         to:email,
         subject:template.subject,
         text:template.text,
         html:template.html,
     })
 
-    console.log(`OTP email sent to ${email}. Message id: ${info.messageId}`);
+    console.log(`OTP email sent to ${email}. Resend id: ${info.id}`);
 }
