@@ -29,7 +29,7 @@ const typingEventSchema = z.object({
   conversationId: z.string().min(1),
   receiverId: z.string().min(1),
 });
-const PORT = Number(process.env.SOCKET_PORT || 4000);
+const PORT = Number(process.env.PORT || process.env.SOCKET_PORT || 4000);
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 
 const httpServer = createServer();
