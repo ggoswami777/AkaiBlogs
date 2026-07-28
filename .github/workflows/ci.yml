@@ -36,6 +36,11 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     needs: [lint, typecheck]
+    env:
+      GMAIL_USER: ci dummy
+      GMAIL_APP_PASSWORD: ci dummy
+      DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+      JWT_SECRET: ci_dummy_secret
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
