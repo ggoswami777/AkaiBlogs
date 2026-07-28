@@ -1,5 +1,5 @@
 import { otpEmailTemplate } from "./templates";
-import { emailFrom, emailTransporter } from "./transporter";
+import { emailFrom, sendBrevoEmail } from "./transporter";
 
 type SendOtpEmailInput = {
   email: string;
@@ -16,13 +16,12 @@ export async function sendOtpEmail({
 }: SendOtpEmailInput) {
   const template = otpEmailTemplate({ username, otp, expiryMinutes });
 
-  await emailTransporter.sendMail({
-    from: emailFrom,
+  const info = await sendBrevoEmail({
     to: email,
     subject: template.subject,
     text: template.text,
     html: template.html,
   });
 
-  console.log(`OTP email sent to ${email}`);
+  console.log(`OTP email sent to ${email}. Brevo id: ${(info as any).messageId}`);
 }
