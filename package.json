@@ -13,7 +13,7 @@
     "db:seed": "npx prisma db seed",
     "db:push": "npx prisma db push",
     "db:reset": "npx prisma db push --force-reset",
-    "build": "next build",
+    "build": "npx prisma generate && next build",
     "start": "next start",
     "lint": "eslint"
   },
