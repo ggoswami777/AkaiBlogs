@@ -17,7 +17,7 @@ export function useE2EE() {
         async function init() {
             try {
                 const existingKey = await getPrivateKey(profileId as string);
-                if (existingKey) {
+                if (existingKey && profile?.publicKey) {
                     setIsReady(true);
                     return;
                 }
