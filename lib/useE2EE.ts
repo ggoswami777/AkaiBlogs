@@ -5,6 +5,8 @@ import { exportPublicKey, generateUserKeyPair } from "./crypto/crypto";
 import { getPrivateKey, storePrivateKey } from "./crypto/keyStorage";
 import { userProfileStore } from "@/store/useProfileStore";
  
+const initPromises = new Map<string, Promise<void>>();
+
 export function useE2EE() {
     const [isReady, setIsReady] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -34,6 +36,12 @@ export function useE2EE() {
                 if (!res.ok) {
                     throw new Error("Failed to upload public key to server");
                 }
+                userProfileStore.setState((state) => ({
+                    profile: state.profile
+                        ? { ...state.profile, publicKey: publicKeyBase64 }
+                        : state.profile,
+                    hasFetched: true,
+                }));
                 setIsReady(true);
             } catch (error) {
                 console.error("E2EE init error:", error);
@@ -41,8 +49,11 @@ export function useE2EE() {
                 setIsReady(true);
             }
         }
-        init();
-    }, [profile?.id]);
+        const existingInit = initPromises.get(profileId);
+        const initPromise = existingInit || init().finally(() => initPromises.delete(profileId));
+        initPromises.set(profileId, initPromise);
+        initPromise.finally(() => setIsReady(true));
+    }, [profile?.id, profile?.publicKey]);
 
     return { isReady, error };
 }

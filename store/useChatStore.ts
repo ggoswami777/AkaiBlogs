@@ -21,13 +21,32 @@ type ConversationSummary = {
 
 const peerKeyCache = new Map<string, string>();
 
+async function fetchPeerPublicKeyByUserId(userId: string): Promise<string> {
+  const cacheKey = `id:${userId}`;
+  const cached = peerKeyCache.get(cacheKey);
+  if (cached) return cached;
+
+  const res = await fetch(`/api/profile/public-key?userId=${userId}`);
+  const data = await res.json();
+  if (!data.success) throw new Error("Peer has no encryption key");
+
+  peerKeyCache.set(cacheKey, data.publicKey);
+  if (data.username) {
+    peerKeyCache.set(`username:${data.username}`, data.publicKey);
+  }
+  return data.publicKey;
+}
+
 async function fetchPeerPublicKey(username: string): Promise<string> {
-  const cached = peerKeyCache.get(username);
+  const cached = peerKeyCache.get(`username:${username}`);
   if (cached) return cached;
   const res = await fetch(`/api/profile/${username}/public-key`);
   const data = await res.json();
   if (!data.success) throw new Error("Peer has no encryption key");
-  peerKeyCache.set(username, data.publicKey);
+  peerKeyCache.set(`username:${username}`, data.publicKey);
+  if (data.userId) {
+    peerKeyCache.set(`id:${data.userId}`, data.publicKey);
+  }
   return data.publicKey;
 }
 
@@ -39,20 +58,24 @@ async function decryptMsg(
   try {
     const isMine = msg.senderId === currentUserId;
     const peerUserId = isMine ? msg.receiverId : msg.senderId;
-    let peerUsername = "";
-    if (!isMine && msg.sender?.username) {
-      peerUsername = msg.sender.username;
-    } else {
-      const conversations = useChatStore.getState().conversations;
-      const conv = conversations.find((c) => c.id === msg.conversationId);
-      peerUsername = conv?.otherUser?.username || "";
-    }
+    let peerPublicKey = "";
+    try {
+      peerPublicKey = await fetchPeerPublicKeyByUserId(peerUserId);
+    } catch {
+      let peerUsername = "";
+      if (!isMine && msg.sender?.username) {
+        peerUsername = msg.sender.username;
+      } else {
+        const conversations = useChatStore.getState().conversations;
+        const conv = conversations.find((c) => c.id === msg.conversationId);
+        peerUsername = conv?.otherUser?.username || "";
+      }
 
-    let peerPublicKey = peerKeyCache.get(peerUsername) || "";
-    if (!peerPublicKey && peerUsername) {
-      try {
-        peerPublicKey = await fetchPeerPublicKey(peerUsername);
-      } catch {}
+      if (peerUsername) {
+        try {
+          peerPublicKey = await fetchPeerPublicKey(peerUsername);
+        } catch {}
+      }
     }
     if (!peerPublicKey) return { ...msg, content: "[Unable to decrypt]" };
 
@@ -368,10 +391,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       const currentUserId = userProfileStore.getState().profile?.id;
       if (!currentUserId) throw new Error("Not authenticated");
 
-      const peerUsername = get().conversations.find((c) => c.otherUser?.id === receiverId)
-        ?.otherUser?.username || "";
-
-      const peerPublicKeyBase64 = await fetchPeerPublicKey(peerUsername);
+      const peerPublicKeyBase64 = await fetchPeerPublicKeyByUserId(receiverId);
       const sharedKey = await getOrDeriveSharedKey(
         currentUserId,
         receiverId,
