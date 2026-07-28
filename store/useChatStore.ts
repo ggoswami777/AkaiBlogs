@@ -180,8 +180,18 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     }
   },
 
-  connectSocket: () => {
-    const socket = getSocket();
+  connectSocket: async () => {
+    let token: string | undefined;
+    try {
+      const res = await fetch("/api/auth/socket-token");
+      const data = await res.json();
+      if (data.success) {
+        token = data.token;
+      }
+    } catch (e) {
+      console.error("Failed to fetch socket token", e);
+    }
+    const socket = getSocket(token);
 
     socket.off("message:new");
     socket.off("message:read");

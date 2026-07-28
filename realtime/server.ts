@@ -59,7 +59,11 @@ async function bootstrap() {
   io.adapter(createAdapter(pubClient, subClient));
 
   io.use((socket, next) => {
-    const user = getSocketUser(socket.handshake.headers.cookie);
+    const auth = socket.handshake.auth || {};
+    const query = socket.handshake.query || {};
+    const directToken = (auth.token || query.token) as string | undefined;
+
+    const user = getSocketUser(socket.handshake.headers.cookie, directToken);
     if (!user) {
       next(new Error("Unauthorized"));
       return;

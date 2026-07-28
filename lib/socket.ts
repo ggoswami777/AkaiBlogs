@@ -8,14 +8,19 @@ import type {
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 
-export function getSocket(){
+export function getSocket(token?: string){
     if(!socket){
         const isClient = typeof window !== "undefined";
         const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || (isClient ? `${window.location.protocol}//${window.location.hostname}:4000` : "http://localhost:4000");
         socket=io(socketUrl,{
+            auth: {
+                token
+            },
             withCredentials:true,
             transports:["websocket"],
         }) 
+    } else if (token) {
+        socket.auth = { token };
     }
     return socket;
 }
