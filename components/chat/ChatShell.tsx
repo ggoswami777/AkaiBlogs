@@ -40,7 +40,7 @@ function ChatShellContent() {
   }, [connectSocket, fetchConversations, fetchProfile]);
 
   const userWentBack = useRef(false);
-  const {isReady:e2eeReady}=useE2EE();
+  const {isReady:e2eeReady, error:e2eeError}=useE2EE();
   useEffect(() => {
     if (requestedConversationId) {
       userWentBack.current = false;
@@ -137,6 +137,12 @@ function ChatShellContent() {
             activeConversationId ? "flex" : "hidden md:flex"
           }`}
         >
+          {e2eeError && (
+            <div className="flex items-center gap-2 border-b border-amber-500/20 bg-amber-500/10 px-4 py-2.5 text-[11px] font-medium text-amber-300">
+              <span className="shrink-0">⚠</span>
+              <span>{e2eeError}</span>
+            </div>
+          )}
           {activeConversationId && otherUser && profile?.id ? (
             <MessageThread
               currentUserId={profile.id}

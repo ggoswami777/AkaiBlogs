@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { exportPublicKey, generateUserKeyPair } from "./crypto/crypto";
 import { getPrivateKey, storePrivateKey } from "./crypto/keyStorage";
 import { userProfileStore } from "@/store/useProfileStore";
- 
+
 const initPromises = new Map<string, Promise<void>>();
 
 export function useE2EE() {
@@ -19,14 +19,23 @@ export function useE2EE() {
         async function init() {
             try {
                 const existingKey = await getPrivateKey(profileId as string);
+
                 if (existingKey && profile?.publicKey) {
                     setIsReady(true);
                     return;
                 }
+
+                if (!existingKey && profile?.publicKey) {
+                    setError(
+                        "Encryption key missing on this device. Export your key from your original device and import it here.",
+                    );
+                    setIsReady(true);
+                    return;
+                }
+
                 const keyPair = await generateUserKeyPair();
                 await storePrivateKey(profileId as string, keyPair.privateKey);
 
-                // export and upload public key
                 const publicKeyBase64 = await exportPublicKey(keyPair.publicKey);
                 const res = await fetch("/api/profile/public-key", {
                     method: "POST",
@@ -50,7 +59,9 @@ export function useE2EE() {
             }
         }
         const existingInit = initPromises.get(profileId);
-        const initPromise = existingInit || init().finally(() => initPromises.delete(profileId));
+        const initPromise =
+            existingInit ||
+            init().finally(() => initPromises.delete(profileId));
         initPromises.set(profileId, initPromise);
         initPromise.finally(() => setIsReady(true));
     }, [profile?.id, profile?.publicKey]);
