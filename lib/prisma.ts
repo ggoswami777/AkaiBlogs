@@ -8,15 +8,17 @@ const connectionString = process.env.DATABASE_URL!;
 console.log("DB URL loaded:", !!connectionString);
 const pool = new Pool({
   connectionString: connectionString,
-
+  max: 5,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 5000,
 });
 const adapter = new PrismaPg(pool as unknown as ConstructorParameters<typeof PrismaPg>[0]);
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 export const prisma =
   globalForPrisma.prisma ||
-  new PrismaClient({ 
+  new PrismaClient({
     adapter,
     log: ['query', 'info', 'warn', 'error'],
   });
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+globalForPrisma.prisma = prisma;
