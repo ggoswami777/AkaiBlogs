@@ -387,20 +387,24 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     const { conversationId, receiverId, content, sharedBlogId } = payload;
     let encryptedContent: string | undefined;
     let iv: string | undefined;
-    if (content) {
-      const currentUserId = userProfileStore.getState().profile?.id;
-      if (!currentUserId) throw new Error("Not authenticated");
-
-      const peerPublicKeyBase64 = await fetchPeerPublicKeyByUserId(receiverId);
-      const sharedKey = await getOrDeriveSharedKey(
-        currentUserId,
-        receiverId,
-        peerPublicKeyBase64,
-      );
-      const encrypted = await encryptMessage(content, sharedKey);
-      encryptedContent = encrypted.ciphertext;
-      iv = encrypted.iv;
+   if (content) {
+    try {
+        const currentUserId = userProfileStore.getState().profile?.id;
+        if (!currentUserId) throw new Error("Not authenticated");
+        const peerPublicKeyBase64 = await fetchPeerPublicKeyByUserId(receiverId);
+        const sharedKey = await getOrDeriveSharedKey(
+            currentUserId,
+            receiverId,
+            peerPublicKeyBase64,
+        );
+        const encrypted = await encryptMessage(content, sharedKey);
+        encryptedContent = encrypted.ciphertext;
+        iv = encrypted.iv;
+    } catch {
+        toast.error("Encryption unavailable on this device...");
+        return;
     }
+}
     await new Promise<void>((resolve, reject) => {
       socket.emit(
         "message:send",
