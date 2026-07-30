@@ -1,7 +1,7 @@
 "use client";
 
-import { MessageCircle, PenLine } from "lucide-react";
-import { Suspense, useEffect, useRef } from "react";
+import { Lock, MessageCircle, PenLine } from "lucide-react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useChatStore } from "@/store/useChatStore";
 import { userProfileStore } from "@/store/useProfileStore";
@@ -9,7 +9,6 @@ import ChatUserSearch from "./ChatUserSearch";
 import ConversationList from "./ConversationList";
 import MessageThread from "./MessageThread";
 import { useE2EE } from "@/lib/useE2EE";
-
 function ChatShellContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -32,7 +31,7 @@ function ChatShellContent() {
     startTyping,
     stopTyping,
   } = useChatStore();
-
+  const [e2eeModalDismissed,setE2eeModalDismissed]=useState(false);
   useEffect(() => {
     fetchProfile();
     fetchConversations();
@@ -137,12 +136,7 @@ function ChatShellContent() {
             activeConversationId ? "flex" : "hidden md:flex"
           }`}
         >
-          {e2eeError && (
-            <div className="flex items-center gap-2 border-b border-amber-500/20 bg-amber-500/10 px-4 py-2.5 text-[11px] font-medium text-amber-300">
-              <span className="shrink-0">⚠</span>
-              <span>{e2eeError}</span>
-            </div>
-          )}
+          
           {activeConversationId && otherUser && profile?.id ? (
             <MessageThread
               currentUserId={profile.id}
@@ -180,6 +174,23 @@ function ChatShellContent() {
           )}
         </section>
       </div>
+      {e2eeError && !e2eeModalDismissed && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div className="mx-4 max-w-sm rounded-2xl border border-white/10 bg-[#140a0a] p-6 text-center">
+            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-amber-500/10">
+                <Lock size={22} className="text-amber-400" />
+            </div>
+            <h3 className="text-sm font-bold text-white">Encryption Unavailable</h3>
+            <p className="mt-2 text-xs leading-relaxed text-white/40">{e2eeError}</p>
+            <button
+                onClick={() => setE2eeModalDismissed(true)}
+                className="mt-5 w-full rounded-xl bg-white/5 py-2.5 text-xs font-semibold text-white/70 transition hover:bg-white/10"
+            >
+                OK
+            </button>
+        </div>
+    </div>
+)}
     </main>
   );
 }
