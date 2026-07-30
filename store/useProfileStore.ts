@@ -30,9 +30,12 @@ export const userProfileStore = create<ProfileStore>((set, get) => ({
             const data=await res.json();
             if(data.success){
                 set({profile:data.profile, hasFetched:true,});
+            }else{
+              set({hasFetched:true})
             }
             
         } catch (error) {
+            set({hasFetched:true})
             console.error("Error fetching profile:",error);
 
         }finally{
