@@ -31,7 +31,6 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.577.0",
     "next": "16.1.7",
-
     "pg": "^8.20.0",
     "prisma": "^7.7.0",
     "rate-limit": "^0.1.1",
@@ -46,19 +45,23 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
-
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.5",
     "concurrently": "^10.0.3",
     "eslint": "^9",
     "eslint-config-next": "16.1.7",
+    "jsdom": "^29.1.1",
+    "msw": "^2.15.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   },
   "overrides": {
     "bullmq": {
