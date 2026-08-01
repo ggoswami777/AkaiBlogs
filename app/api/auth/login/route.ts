@@ -25,7 +25,8 @@ export async function POST(request: NextRequest) {
         {
           success:false,
           error:`Too many login attempts. Try again in ${rateLimit.retryAfter} seconds.`
-        }
+        },
+        {status:429}
       )
     }
     const existingUser=await prisma.user.findUnique({
