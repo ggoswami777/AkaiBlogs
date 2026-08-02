@@ -1,27 +1,43 @@
 # AkaiBlogs ⛩️
 
-AkaiBlogs is a high-performance, developer-focused social blogging and real-time messaging platform built using Next.js 16 (App Router), Supabase (PostgreSQL), Redis, and BullMQ. 
+<p align="center">
+  <img src="./public/screenshots/feed_dashboard.png" alt="AkaiBlogs Cover" width="100%" style="border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);" />
+</p>
 
-What makes it stand out is its **zero-trust End-to-End Encryption (E2EE) chat engine** built with the Web Crypto API, a **custom block-based content editor**, a **scalable background worker architecture**, and a **fully containerized local infrastructure** via Docker Compose.
+<p align="center">
+  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16.1-black?style=for-the-badge&logo=next.js" alt="Next.js" /></a>
+  <a href="https://socket.io"><img src="https://img.shields.io/badge/Socket.io-4.8-101010?style=for-the-badge&logo=socket.io" alt="Socket.io" /></a>
+  <a href="https://redis.io"><img src="https://img.shields.io/badge/Redis-7.0-red?style=for-the-badge&logo=redis" alt="Redis" /></a>
+  <a href="https://prisma.io"><img src="https://img.shields.io/badge/Prisma-7.7-2D3748?style=for-the-badge&logo=prisma" alt="Prisma" /></a>
+  <a href="https://bullmq.io"><img src="https://img.shields.io/badge/BullMQ-5.8-orange?style=for-the-badge" alt="BullMQ" /></a>
+</p>
+
+AkaiBlogs is a high-performance, developer-focused blogging and secure collaborative messaging platform. It is engineered with a **zero-trust End-to-End Encryption (E2EE) messaging protocol**, a **custom block-based content editor**, and a **containerized local infrastructure** via Docker Compose.
 
 ---
 
-## 📸 Platform Showcases & Screenshots
-
-> [!TIP]
-> Place your high-quality screenshots inside the designated asset folders (e.g., `/public/screenshots/`) and update the paths below to showcase the application on GitHub.
+## 📸 Platform Showcases
 
 ### 1. Feed & Exploration Dashboard
-*Place a screenshot here showing the main feed, showing trending score banners and categorized blogs.*
-`![Feed Showcase](public/screenshots/feed_dashboard.png)`
+The main feed is backed by a custom, asynchronous personal recommendation scorer. Trending weights and interests decay dynamically based on time and engagement.
+
+<p align="center">
+  <img src="./public/screenshots/feed_dashboard.png" alt="Feed Showcase" width="90%" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" />
+</p>
 
 ### 2. Custom Block-Based Rich Text Editor
-*Place a screenshot showing a blog post being created using your custom text blocks, headings, code highlights, and cover images.*
-`![Custom Editor](public/screenshots/block_editor.png)`
+A custom-built block content engine that serializes nested layout blocks (text, headings, image objects, lists, code) into a single structured JSON schema.
+
+<p align="center">
+  <img src="./public/screenshots/block_editor.png" alt="Custom Editor" width="90%" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" />
+</p>
 
 ### 3. Secure End-to-End Encrypted Chats
-*Place a screenshot showing side-by-side chat screens with typing indicators, online presence, and E2EE badges.*
-`![E2EE Chat](public/screenshots/e2e_chat.png)`
+Secure chat sessions powered by client-side Web Crypto and Socket.IO. Features include real-time typing indicators, read receipts, and user presence tracking.
+
+<p align="center">
+  <img src="./public/screenshots/e2e_chat.png" alt="E2EE Chat" width="90%" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" />
+</p>
 
 ---
 
@@ -36,7 +52,7 @@ flowchart TD
         IDB["IndexedDB (Secure Private Key)"]
     end
 
-    subgraph Containerized_Edge ["Docker Containerized / Edge Layer"]
+    subgraph Containerized_Edge ["Docker Containerized Layer"]
         App["App Container (Next.js App)"]
         Socket["Socket Container (Socket.io Server)"]
         Workers["Workers Container (BullMQ Workers)"]
@@ -73,8 +89,8 @@ flowchart TD
 ## 🚀 Core Technical Features
 
 ### 🔒 Zero-Trust End-to-End Encryption (E2EE)
-* **Asymmetric Key Exchange:** When a user registers, they generate an **ECDH P-256** key pair. The private key stays in the browser's **IndexedDB** and never leaves the device. The public key is uploaded to Supabase.
-* **Shared Secret Derivation:** Before sending a message, the client derives a unique shared secret using their own private key and the peer's public key.
+* **Asymmetric Key Exchange:** During registration, clients generate an **ECDH P-256** key pair. The private key remains stored locally inside **IndexedDB** and never leaves the device. The public key is uploaded to Supabase.
+* **Shared Secret Derivation:** Before transmitting messages, the sender derives a unique shared key using their local private key and the receiver's public key.
 * **Symmetric Encryption:** Plaintext messages are encrypted client-side using **AES-256-GCM** with a cryptographically secure random Initialization Vector (IV). Only ciphertext and the IV are stored on the database.
 * **Auto-Healing:** If the database is wiped or reset, the client dynamically detects the missing public key, regenerates the keypair, updates IndexedDB, and synchronization recovers automatically.
 
