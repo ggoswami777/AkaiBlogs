@@ -479,21 +479,9 @@ export default function CreateBlogPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-4 pb-10 border-t border-white/[0.05]">
-            <button
-              id="preview-btn"
-              className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-white/[0.08] text-slate-400 text-sm font-bold hover:text-white hover:border-white/20 hover:bg-white/[0.03] transition-all duration-300"
-            >
-              <Eye size={16} />
-              Preview
-            </button>
+            
             <div className="flex items-center gap-3">
-              <button
-                id="save-draft-btn"
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-slate-300 text-sm font-bold hover:bg-white/[0.08] hover:text-white transition-all duration-300"
-              >
-                <Save size={16} />
-                Save Draft
-              </button>
+             
               <button
                 id="publish-btn"
                 onClick={handlePublish}

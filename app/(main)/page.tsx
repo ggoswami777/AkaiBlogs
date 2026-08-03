@@ -77,9 +77,7 @@ const Page = () => {
             </button>
             </Link>
             
-            <button className="glass-panel text-white hover:bg-white/10 px-10 py-4 rounded-full text-lg font-extrabold transition-all">
-              View the Archive
-            </button>
+            
           </div>
         </div>
       </section>
@@ -139,14 +137,12 @@ const Page = () => {
               Don&apos;t walk the path alone. Connect with thousands of storytellers, martial artists, and thinkers in the Zolo community.
             </p>
             <div className="pt-6">
-              <button className="bg-primary hover:bg-primary/90 text-white px-12 py-5 rounded-full text-xl font-black transition-all transform hover:scale-105 shadow-2xl shadow-primary/30">
-                Claim Your Title
-              </button>
+             
             </div>
             <div className="flex items-center justify-center gap-4 text-sm text-slate-500 font-bold uppercase tracking-widest">
-              <span>1,204 Ronin Online</span>
+              <span>50+ Ronin Online</span>
               <span className="size-1 rounded-full bg-primary/40"></span>
-              <span>Join 12 Free Clans Today</span>
+              <span>Join Free Community Today</span>
             </div>
           </div>
         </div>

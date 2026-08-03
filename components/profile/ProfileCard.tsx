@@ -64,29 +64,16 @@ const ProfileCard = () => {
               href="#"
             >
               <span className="material-symbols-outlined"><BookOpen/></span>
-              <span className="text-sm">My Scrolls</span>
+              <span className="text-sm">Profile</span>
             </a>
             <a
               className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all"
-              href="#"
-            >
-              <span className="material-symbols-outlined"><Bookmark/></span>
-              <span className="text-sm">Bookmarks</span>
-            </a>
-            <a
-              className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all"
-              href="#"
+              href="/create"
             >
               <span className="material-symbols-outlined"><Landmark/></span>
-              <span className="text-sm">The Dojo</span>
+              <span className="text-sm">Add scroll</span>
             </a>
-            <a
-              className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all"
-              href="#"
-            >
-              <span className="material-symbols-outlined"><Settings/></span>
-              <span className="text-sm">Settings</span>
-            </a>
+           
           </nav>
         </div>
         <div className="glass p-6 rounded-lg border border-white/5 bg-obsidian">
