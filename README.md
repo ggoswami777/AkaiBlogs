@@ -138,7 +138,7 @@ Make sure you have installed:
 
 ### 2. Clone the Repository
 ```bash
-git clone https://github.com/your-username/akaiblogs.git
+git clone https://github.com/ggoswami777/akaiblogs.git
 cd akaiblogs
 ```
 
